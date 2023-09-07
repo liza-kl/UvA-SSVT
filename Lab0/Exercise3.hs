@@ -9,7 +9,6 @@ data Shape = NoTriangle | Equilateral
 triangle :: Integer -> Integer -> Integer -> Shape 
 checkForDuplicates :: (Eq a ) => [a] -> Bool
 
-
 checkForDuplicates [] = False 
 checkForDuplicates [a] = False 
 checkForDuplicates (x:x':xs)
@@ -25,10 +24,10 @@ isRectangular a b c =
      == maximum[a,b,c]^2
 
 triangle a b c 
-    | any (<= 0) [a,b,c] = NoTriangle
-    | a + b <= c || b + c <= a || a + c <= b = NoTriangle
-    | all ((==) a) [b,c] = Equilateral
-    | checkForDuplicates [a,b,c]  = Isosceles
-    | isRectangular a b c = Rectangular
+    | any (<= 0) [a,b,c] = NoTriangle -- If any side of a triangle is negative or zero, it just can't be a triagnle
+    | a + b <= c || b + c <= a || a + c <= b = NoTriangle -- Theorem of Triangle inequality
+    | all ((==) a) [b,c] = Equilateral -- If 3 sides are equal, it is an Equilateral triangle
+    | checkForDuplicates [a,b,c]  = Isosceles -- If 2 sides are equal, it is an isosceles
+    | isRectangular a b c = Rectangular -- "proofed" by using the Pythagorean theorem
     | otherwise = Other 
 
