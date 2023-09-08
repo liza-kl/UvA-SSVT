@@ -1,19 +1,46 @@
-
+module Main where
+-- import  Exercise1
 import Test.QuickCheck
 
--- Time Spent: 20 Minutes (looking up QuickCheck Tutorials and Haskell Syntax)
--- How would you prove that these statements are true?
--- Induction
+{- 
+time spent: two hours; getting used to the syntax
+For the purpose of QuickCheck, we assumed n is a natural number.
+Also, we used integer division `div` to get the integer part. 
+Otherwise,the difference in float number precision would falsify the equality.
+Mathematically, we could prove equality by induction. 
+-}
 
-firstFunction :: Int -> Int
-firstFunction n = sum [x^2 | x <- [1..n]]
+-- first equation
+sumOfNSquares :: Integer -> Integer
+sumOfNSquares' :: Integer -> Integer
 
-secondFunction :: Integer -> Integer
-secondFunction n = sum [x^3 | x <- [1..n]]
+sumOfNSquares n = sum [ k^2 | k <- [1..n]]
+sumOfNSquares' n = n * (n+1) * (2 * n + 1) `div` 6 
 
-firstFunctionProp n =
-    (n >= 0) ==>
-    firstFunction n === n * (n + 1) * (2*n + 1) `div` 6
-secondFunctionProp n =
-    (n >= 0) ==>
-    secondFunction n === (n * ((n + 1) `div` 2))^2
+
+testSumOfNSquares :: Integer -> Bool
+
+testSumOfNSquares n = sumOfNSquares n == sumOfNSquares' n
+
+-- randomization of the input
+genPositiveIntegers:: Gen Integer
+genPositiveIntegers = abs <$> (arbitrary :: Gen Integer) `suchThat` (>0)
+
+
+--second equation
+sumOfNCubes :: Integer -> Integer
+sumOfNCubes' :: Integer -> Integer
+
+sumOfNCubes n = sum [ k^3 | k <- [1..n]]
+sumOfNCubes' n = (n * (n+1) `div` 2)^2
+
+testSumOfNCubes :: Integer -> Bool
+
+testSumOfNCubes n = sumOfNCubes n == sumOfNCubes' n
+
+-- output
+main :: IO Result
+main = do
+        quickCheckResult $ forAll genPositiveIntegers testSumOfNSquares
+        quickCheckResult $ forAll genPositiveIntegers testSumOfNCubes
+    
