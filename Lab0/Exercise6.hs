@@ -25,7 +25,7 @@ import Data.List
 
 smallestPrimeNum :: Integer -> IO Integer
 smallestPrimeNum x = do
-    let y = [x..100000000]
+    let y = [x..]
 
     -- find all primes
     let primeNumbers = filter isPrime y

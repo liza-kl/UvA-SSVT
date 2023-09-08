@@ -1,13 +1,12 @@
 module Main where
--- import  Exercise1
+
 import Test.QuickCheck
 
 {- 
-time spent: two hours; getting used to the syntax
-For the purpose of QuickCheck, we assumed n is a natural number.
-Also, we used integer division `div` to get the integer part. 
-Otherwise,the difference in float number precision would falsify the equality.
-Mathematically, we could prove equality by induction. 
+    Time spent: Two hours; getting used to the syntax
+    Also, we used integer division `div` to get the integer part. 
+    Otherwise, the difference in float number precision would falsify the equality.
+    Mathematically, we could prove equality by induction. See below.
 -}
 
 {-
@@ -34,9 +33,10 @@ Mathematically, we could prove equality by induction.
             -> (n^4 + 6n^3 + 13n^2 + 12n + 4) / 4
             -> (n + 1)^2 (n + 2)^2 / 4
             -> ((n+1) ((n+1) + 1) / 2)^2
+            -> Statement is true.
 -}
 
--- first equation
+-- First equation
 sumOfNSquares :: Integer -> Integer
 sumOfNSquares' :: Integer -> Integer
 
@@ -48,12 +48,12 @@ testSumOfNSquares :: Integer -> Bool
 
 testSumOfNSquares n = sumOfNSquares n == sumOfNSquares' n
 
--- randomization of the input
+-- Randomization of the input for the QuickCheck test
 genPositiveIntegers:: Gen Integer
 genPositiveIntegers = abs <$> (arbitrary :: Gen Integer) `suchThat` (>0)
 
 
---second equation
+-- Second equation
 sumOfNCubes :: Integer -> Integer
 sumOfNCubes' :: Integer -> Integer
 
@@ -64,7 +64,7 @@ testSumOfNCubes :: Integer -> Bool
 
 testSumOfNCubes n = sumOfNCubes n == sumOfNCubes' n
 
--- output
+-- Output with QuickCheck tests
 main :: IO Result
 main = do
         quickCheckResult $ forAll genPositiveIntegers testSumOfNSquares

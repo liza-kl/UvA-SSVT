@@ -42,6 +42,7 @@ checkDistribution [] = True
 checkDistribution randomList = isQuartileInBound randomList 0.0 && isQuartileInBound randomList 1.0 && isQuartileInBound randomList 2.0 && isQuartileInBound randomList 3.0
 
 -- QuickCheck test if the distribution of the given RNG generates the correct distribution.
+-- If this succeeds then the clain that the RNG generates numbers randomly up to a certain level of tolerance.
 main :: IO ()
 main = do
     quickCheck (checkDistribution (genProbs 10000))

@@ -41,7 +41,6 @@ rot13Single c
   | isAsciiUpper c = rotateUpperCase c
   | otherwise      = c
 
-
 -- QuickCheck property checks
 
 prop_rot13_identity:: [Char] -> Bool
@@ -71,6 +70,7 @@ prop_rot13_rollover:: [Char] -> Bool
 prop_rot13_rollover chars = isInLowerAlphabetHalf (rot13 (filterTopAlphabetHalf chars))
 
 -- QuickCheck tests to check for each of the provided specification elements.
+-- Since we are checking for all specifications, if every check is successful then it can be deemed correct.
 main :: IO ()
 main = do
     quickCheck prop_rot13_identity

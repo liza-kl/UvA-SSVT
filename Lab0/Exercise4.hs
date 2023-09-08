@@ -3,18 +3,19 @@ import System.IO
 import Test.QuickCheck
 
 {- 
-  time spent: ~ 2 hours mostly due to lack of syntax knowledge
-  the input space for all 4 property tests is the actual list result of the program, 
+  Time spent: ~ 2 hours mostly due to lack of syntax knowledge
+  The input space for all 4 property tests is the actual list result of the program, 
   since that is what we care about. 
-  besides, with a random list the tests would probably fail, since these properties are usually not true for any list.
-  all 4 tests handle the edge case of an empty list input, returning True.
-  there are no other edge cases, since the properties are pretty straight-forward.
+  Besides, with a random list the tests would probably fail, since these properties are usually not true for any list.
+  All 4 tests handle the edge case of an empty list input, returning True.
+  There are no other edge cases, since the properties are pretty straight-forward.
   other properties of the final list are:
     1. there are no one-digit primes in it, since that would be useless information
     2. if we reversed all the elems in the list, we would still get the same list, in a different order
     3. the length of the list is less than 10K
     4. all numbers are positive, as primes
     etc
+  Thus it can be deemed that the correctness of the chosen properties is given.
 -}
 
 reversibleStream :: [Integer] 
