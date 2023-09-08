@@ -23,32 +23,37 @@ import Data.List
 -- first element from the current list and taking 
 -- second element from the list as our new start prime number
 
--- The function for (1)
-isPrime :: Integer -> Bool 
-isPrime v = let maxDiv = floor(sqrt (fromIntegral v))
-            in all (\x -> (v `rem` x) /= 0) [2..maxDiv]
+smallestPrimeNum :: Integer -> IO Integer
+smallestPrimeNum x = do
+    let y = [x..100000000]
 
--- The function for (2) with the sieve of eratosthenes
-primes x = sieve [x..]
-  where
-    sieve (p:xs) = p : sieve [x|x <- xs, x `mod` p > 0]
+    -- find all primes
+    let primeNumbers = filter isPrime y
 
--- The function for (3) which takes a start prime
--- and takes 101 numbers from the creates "infinite" list 
+    -- get first 101 primes
+    let first101Primes = take 101 primeNumbers
 
-getPrimes :: Integer -> [Integer]
-getPrimes startPrime = take 101 $ primes startPrime
+    -- mapM_ print first101Primes
 
--- The function for 4 
+    -- get sum of 101 primes
+    let sumOf101Primes = sum first101Primes
 
-getPrimeSum :: Integer -> Integer
-getPrimeSum startPrime = sum (getPrimes startPrime)
+    -- print sumOf101Primes
 
-getSmallestPrime :: Integer -> [Integer]
-getSmallestPrime x 
-    | isPrime (getPrimeSum x) = getPrimes x
-    | otherwise = getSmallestPrime (head (tail (getPrimes x)))
-    
-consecutive101Prime :: Integer
+    -- check if the sum is a prime number
+    let isSumPrime = isPrime sumOf101Primes :: Bool
 
-consecutive101Prime = sum ( getSmallestPrime 2 ) -- output 24151
+    -- if so, return
+    if isSumPrime
+        then return sumOf101Primes
+    -- otherwise search again starting from the next prime, recursively
+        else smallestPrimeNum(x + 1)
+
+isPrime :: Integer -> Bool
+isPrime n = all (\ x -> rem n x /= 0) xs
+    where xs = takeWhile (\ y -> y^2 <= n) [2..]
+
+main :: IO ()
+main = do
+    sumOf101Primes <- smallestPrimeNum 2
+    putStrLn (show sumOf101Primes)
