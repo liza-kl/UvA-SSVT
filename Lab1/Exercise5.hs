@@ -1,5 +1,3 @@
-{-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
-{-# HLINT ignore "Move brackets to avoid $" #-}
 data Boy = Matthew | Peter | Jack | Arnold | Carl
             deriving (Eq,Show)
 
