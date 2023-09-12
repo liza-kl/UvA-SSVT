@@ -1,3 +1,5 @@
+{-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
+{-# HLINT ignore "Move brackets to avoid $" #-}
 data Boy = Matthew | Peter | Jack | Arnold | Carl
             deriving (Eq,Show)
 
@@ -24,15 +26,15 @@ accuses Peter otherBoy
     | otherBoy == Jack = True
     | otherwise = False
 
--- Jack says that the accusements of Matthew and peter are wrong
+-- Jack says that the accusements of Matthew and Peter are wrong
 accuses Jack otherBoy
     | accuses Matthew otherBoy = False
     | accuses Peter otherBoy = False
     | otherwise = True
 
-
 -- Arnold is accusing either the same persons as Matthew or Peter is accusing
-accuses Arnold otherBoy = accuses Matthew otherBoy || accuses Peter otherBoy
+accuses Arnold someBoy = (accuses Matthew someBoy || accuses Peter someBoy)
+                        && not (accuses Matthew someBoy) && accuses Peter someBoy
 
 -- Carl does not accuse the boys Arnold is accusing
 accuses Carl otherBoy = not (accuses Arnold otherBoy)
@@ -40,6 +42,7 @@ accuses Carl otherBoy = not (accuses Arnold otherBoy)
 -- Take every boy out of the list and check if they are accusing the input boy 
 accusers accusedBoy = [ accuserBoy | accuserBoy <- boys, accuses accuserBoy accusedBoy ]
 
-guilty = [Jack]
-honest = []
+-- We have the information from the headmistress, that 3 boys always lie. 
+guilty = [ guiltyBoy | guiltyBoy <- boys, 3 == length (accusers guiltyBoy)]
 
+honest = [ honestBoy | honestBoy <- boys, accuses honestBoy (head guilty)]
