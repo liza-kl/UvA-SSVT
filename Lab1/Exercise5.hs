@@ -2,13 +2,13 @@ data Boy = Matthew | Peter | Jack | Arnold | Carl
             deriving (Eq,Show)
 
 -- 3 tell the truth, 2 are lying
--- Matthew: Carl didn't do it, and neither did I. 
--- Peter: It was Matthew or it was Jack.
--- Jack: Matthew and Peter are both lying.
--- Arnold: Matthew or Peter is speaking the truth, but not both.
--- Carl: What Arnold says is not true
+-- Matthew: Carl didn't do it, and neither did I. This leaves us with Peter, Jack, Arnold
+-- Peter: It was Matthew or it was Jack.  Accused Matthew, Jack
+-- Jack: Matthew and Peter are both lying. Matthew or Peter is guilty. 
+-- Arnold: Matthew or Peter is speaking the truth, but not both. Arnold supports Peters version
+-- Carl: What Arnold says is not true 
 
-boys = [Matthew, Peter, Jack, Arnold, Carl]
+boys = [Matthew, Peter, Jack, Arnold, Carl] 
 accuses :: Boy -> Boy -> Bool -- Does the input boy accuse the 2nd boy 
 accusers :: Boy -> [Boy] -- This boy is accused by XY 
 guilty, honest :: [Boy]
@@ -40,7 +40,8 @@ accuses Carl otherBoy = not (accuses Arnold otherBoy)
 -- Take every boy out of the list and check if they are accusing the input boy 
 accusers accusedBoy = [ accuserBoy | accuserBoy <- boys, accuses accuserBoy accusedBoy ]
 
--- We have the information from the headmistress, that 3 boys always lie. 
+-- 3 boys are always telling the truth, so find a boy which is accused by 3 others
 guilty = [ guiltyBoy | guiltyBoy <- boys, 3 == length (accusers guiltyBoy)]
 
+-- Guilty should be a list of only one boy but for the function signature you need a Boy, so take head.
 honest = [ honestBoy | honestBoy <- boys, accuses honestBoy (head guilty)]
