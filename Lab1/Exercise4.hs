@@ -33,3 +33,9 @@ of all derangements of the list  [0..n-1]
 
 deran :: Int -> [[Int]]
 deran num =  filter (isDerangement [0..num - 1]) $ permutations [0 .. num - 1]
+
+{-- Properties --}
+
+numOfDerangmentsLessThanPerms :: Int -> Bool
+numOfDerangmentsLessThanPerms num = length ( deran num ) < length ( permutations [0 .. num - 1])
+
