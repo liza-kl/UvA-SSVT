@@ -1,4 +1,5 @@
 import Data.List
+import Data.Maybe
 {--
 class Eq where
     (==) :: a -> a -> Bool
@@ -34,8 +35,26 @@ of all derangements of the list  [0..n-1]
 deran :: Int -> [[Int]]
 deran num =  filter (isDerangement [0..num - 1]) $ permutations [0 .. num - 1]
 
-{-- Properties --}
+{-- Properties 2 or ideally 3,
+well chosen ist is about "edge cases"
 
-numOfDerangmentsLessThanPerms :: Int -> Bool
-numOfDerangmentsLessThanPerms num = length ( deran num ) < length ( permutations [0 .. num - 1])
+In combinatorial mathematics, a derangement is a permutation of the elements of a set in which no element
+appears in its original position. In other words, a derangement is a permutation that has no fixed points.
+--}
+
+factorial num
+    | num < 0 = error "Negative numbers are not possible"
+    | num == 1 = 1
+    | num == 0 = 1
+    | otherwise = num * factorial (num - 1)
+
+
+prop_numOf0PermutationsIsOne :: Bool
+prop_numOf0PermutationsIsOne = length ( deran 0 ) == 1
+
+prop_numOf1PermutationsIsOne :: Bool
+prop_numOf1PermutationsIsOne = length ( deran 1 ) == 1;
+
+prop_numOfDerangmentsLessEqThanPerms :: Int -> Bool
+prop_numOfDerangmentsLessEqThanPerms num = length ( deran num ) <= length ( permutations [0 .. num - 1]) where types = num:: Int
 

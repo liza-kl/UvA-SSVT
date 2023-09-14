@@ -4,7 +4,7 @@ data Boy = Matthew | Peter | Jack | Arnold | Carl
 -- 3 tell the truth, 2 are lying
 -- Matthew: Carl didn't do it, and neither did I. This leaves us with Peter, Jack, Arnold
 -- Peter: It was Matthew or it was Jack.  Accused Matthew, Jack
--- Jack: Matthew and Peter are both lying. Matthew or Peter is guilty. 
+-- Jack: Matthew and Peter are both lying.
 -- Arnold: Matthew or Peter is speaking the truth, but not both. Arnold supports Peters version
 -- Carl: What Arnold says is not true 
 
@@ -19,10 +19,15 @@ accuses Matthew otherBoy
     | otherBoy == Matthew = False
     | otherwise = True
 
-accuses Peter otherBoy
-    | otherBoy == Matthew = True
+-- accuses Peter Matthew = True <- write is this way to make it cleaner
+--     -- | otherBoy ==  = True
+--     -- | otherBoy == Jack = True
+--     -- | otherwise = False
+accuses Peter otherBoy 
+    | otherBoy ==  Matthew = True
     | otherBoy == Jack = True
     | otherwise = False
+
 
 -- Jack says that the accusements of Matthew and Peter are wrong
 accuses Jack otherBoy
