@@ -39,8 +39,6 @@ Example for [1,2,3]
 --}
 concatInts :: [Integer] -> Integer
 concatInts = foldl (\acc x -> acc * 10 + x) 0
-concatInts' :: [Integer] -> Integer
-concatInts' = foldr (\x acc-> acc * 10 + x) 0
 
 problem_41 :: Integer
 problem_41 = concatInts (maximum [ x | x <- permutations [1..4] ++ permutations [1..7], isPrime (concatInts x) ])
