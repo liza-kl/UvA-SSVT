@@ -1,4 +1,5 @@
 import Data.List
+import Test.QuickCheck
 import Data.Maybe
 {--
 class Eq where
@@ -48,13 +49,29 @@ factorial num
     | num == 0 = 1
     | otherwise = num * factorial (num - 1)
 
+derangement :: Int -> Int
+derangement 0 = 1
+derangement 1 = 0
+derangement n = (n - 1) * (derangement (n - 1) + derangement (n - 2))
+
+{-- TODO Check properties --}
 
 prop_numOf0PermutationsIsOne :: Bool
 prop_numOf0PermutationsIsOne = length ( deran 0 ) == 1
 
 prop_numOf1PermutationsIsOne :: Bool
-prop_numOf1PermutationsIsOne = length ( deran 1 ) == 1;
+prop_numOf1PermutationsIsOne = length ( deran 0) == 1;
 
 prop_numOfDerangmentsLessEqThanPerms :: Int -> Bool
 prop_numOfDerangmentsLessEqThanPerms num = length ( deran num ) <= length ( permutations [0 .. num - 1]) where types = num:: Int
+
+prop_numOfDerangements :: Int -> Bool
+prop_numOfDerangements num = length (deran num) == derangement num
+
+main :: IO()
+main = do
+   quickCheck prop_numOf0PermutationsIsOne
+   quickCheck prop_numOf1PermutationsIsOne
+   quickCheck $ prop_numOfDerangmentsLessEqThanPerms 3
+   quickCheck $ prop_numOfDerangements 3
 
