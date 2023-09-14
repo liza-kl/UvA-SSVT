@@ -31,7 +31,13 @@ isPrime n = all (\ x -> rem n x /= 0) xs
 -- We are creating permutations for 1..4 and 1...7 and
 -- find the number which isPrime and the maximum one
 
-concatenateIntegers :: [Integer] -> Integer
-concatenateIntegers = foldl (\acc x -> acc * 10 + x) 0
+{-- 
+Example for [1,2,3]
+0 * 10 + 1 = 1
+1 * 10 + 2 = 12
+12 * 10 + 3 = 123 
+--}
+concatInts :: [Integer] -> Integer
+concatInts = foldl (\acc x -> acc * 10 + x) 0
 
-problem_41 = concatenateIntegers (maximum [ x | x <- permutations [1..4] ++ permutations [1..7], isPrime (concatenateIntegers x) ])
+problem_41 = concatInts (maximum [ x | x <- permutations [1..4] ++ permutations [1..7], isPrime (concatInts x) ])
