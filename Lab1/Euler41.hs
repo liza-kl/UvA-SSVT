@@ -13,17 +13,25 @@ What is the largest n
 import Data.Char (intToDigit)
 import Data.List
 
+
 isPrime :: Integer -> Bool -- Taken from previous Euler problems 
 isPrime n = all (\ x -> rem n x /= 0) xs
     where xs = takeWhile (\ y -> y^2 <= n) [2..]
 
--- We only need to consider numbers with at _least_ 3 digits, because no 1-digit nummber is prime 
--- it could only be "1" and 1 is not prime
--- No two-digit number is prime because you can only have 12 (can be divided 6,2) or 21 (can be divided by 3, 7)
--- so both are not pandigital, becase not prime 
--- 3 digit numbers: 
-problem_41 = maximum [ n' | d <- [4,7], n <- permute ['1'..intToDigit d],
-                            let n' = read n, isPrime n']
-    where
-        permute "" = [""]
-        permute str = [x:xs| x <- str, xs <- permute (delete x str)]
+-- By some rules of division, we can already filter some numbers out:
+-- n =1, so the number would be "1" – 1 ist not prime 
+-- n = 2, the possible combinations would be "12" or "21" – both can be divided by 3 – no prime
+-- n = 3, the sum of the digits 1 + 2 + 3 is 6, divisible by 3, so every combination is (rules of division)
+-- n = 5, the sum of the digits 1..5 is 15, divisible by 3, again rules of division every of those numbers is not prime
+-- n = 6, the sum of the digits 1..6 is 21, divisible by 3, any 6 digit pandigital is divisible by 3
+-- n = 8, the sum of the digits 1..8 is 36, divisible by 3, any 8 digit pandigital is divisible by 3
+-- n = 9, the sum of the digits 1..9 is 45, divisible by 3, any 9 digit pandigital is divisible by 3
+
+-- So we only need to consider 4 or 7 digit numbers for the problem
+-- We are creating permutations for 1..4 and 1...7 and
+-- find the number which isPrime and the maximum one
+
+concatenateIntegers :: [Integer] -> Integer
+concatenateIntegers = foldl (\acc x -> acc * 10 + x) 0
+
+problem_41 = concatenateIntegers (maximum [ x | x <- permutations [1..4] ++ permutations [1..7], isPrime (concatenateIntegers x) ])
