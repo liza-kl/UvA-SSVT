@@ -1,3 +1,5 @@
+module Exercise8 where
+
 import Data.List 
 
 -- Exercise 8

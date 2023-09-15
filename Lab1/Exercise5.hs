@@ -1,3 +1,5 @@
+module Exercise5 where
+
 data Boy = Matthew | Peter | Jack | Arnold | Carl
             deriving (Eq,Show)
 

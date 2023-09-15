@@ -1,3 +1,5 @@
+module Euler55 where
+
 import Data.List
 
 -- TODO : explain how it could be tested

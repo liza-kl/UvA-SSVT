@@ -10,6 +10,8 @@ What is the largest n
 -digit pandigital prime that exists?
 --}
 
+module Euler41 where
+
 import Data.Char (intToDigit)
 import Data.List
 

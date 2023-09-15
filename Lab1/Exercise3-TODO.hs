@@ -1,3 +1,5 @@
+module Exercise3 where
+
 {-- TODO --}
 
 import Data.List
