@@ -25,8 +25,8 @@ genSubsequences:: [a] -> [[a]]
 genSubsequences [] = [[]]
 genSubsequences (x:xs) = genSubsequences xs ++ map (x :) (genSubsequences xs)
 
-checkBaseDef:: Integer -> Bool
-checkBaseDef n = length( genSubsequences [1..n]) == 2^n
+prop_checkBaseDef:: Integer -> Bool
+prop_checkBaseDef n = length( genSubsequences [1..n]) == 2^n
 
 -- Randomization of the input for the QuickCheck test
 genPositiveIntegersOverOne:: Gen Integer
@@ -35,7 +35,7 @@ genPositiveIntegersOverOne = abs <$> (arbitrary :: Gen Integer) `suchThat` (>1)
 -- Output with QuickCheck tests
 main :: IO Result
 main = do
-        quickCheckResult $ forAll genPositiveIntegersOverOne checkBaseDef
+        quickCheckResult $ forAll genPositiveIntegersOverOne prop_checkBaseDef
 
 {-
 
