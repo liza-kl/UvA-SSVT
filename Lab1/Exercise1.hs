@@ -3,15 +3,14 @@ import Test.QuickCheck
 
 -- Time spent: 30 minutes, lack of knowledge about Haskell Syntax 
 
-
 factorial :: Integer -> Integer
 -- For any positive integer (n! / n) = (n - 1)!
-factorialOfAnyPosInteger :: Integer -> Bool
-factorialOfAnyPosInteger num = (factorial num `div` num) == factorial (num - 1)
+prop_factorialOfAnyPosInteger :: Integer -> Bool
+prop_factorialOfAnyPosInteger num = (factorial num `div` num) == factorial (num - 1)
 
 -- Factorial is always > 0
-factorialIsAlwaysGreater0 :: Integer -> Bool
-factorialIsAlwaysGreater0 num = factorial num > 0
+prop_factorialIsAlwaysGreater0 :: Integer -> Bool
+prop_factorialIsAlwaysGreater0 num = factorial num > 0
 
 genPositiveInts :: Gen Integer
 genPositiveInts = abs `fmap` (arbitrary :: Gen Integer) `suchThat` (> 0)
@@ -27,5 +26,5 @@ factorial num
 
 main :: IO()
 main = do
-   quickCheck $ forAll genPositiveInts factorialOfAnyPosInteger
-   quickCheck $ forAll genNonNegativeInts factorialIsAlwaysGreater0
+   quickCheck $ forAll genPositiveInts prop_factorialOfAnyPosInteger
+   quickCheck $ forAll genNonNegativeInts prop_factorialIsAlwaysGreater0
