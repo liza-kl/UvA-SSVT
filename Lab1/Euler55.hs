@@ -2,7 +2,7 @@ module Euler55 where
 
 import Data.List
 
--- TODO : explain how it could be tested
+-- TODO : explain how it could be tested, indication of time spent.
 
 lychrelNumbers :: IO Int
 lychrelNumbers = do
