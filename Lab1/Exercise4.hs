@@ -11,6 +11,8 @@ example of a derangement: permutation and not 1,2,3
 
 --}
 
+-- TODO Indication of time spent missing
+
 ourContains:: Eq a => [a] -> a -> Bool
 ourContains [] _ = False
 ourContains (x:xs) elemToCheck
@@ -56,7 +58,7 @@ derangement 0 = 1
 derangement 1 = 0
 derangement n = (n - 1) * (derangement (n - 1) + derangement (n - 2))
 
-{-- TODO Check properties --}
+-- QuickCheck properties
 
 prop_numOf0PermutationsIsOne :: Bool
 prop_numOf0PermutationsIsOne = length ( deran 0 ) == 1

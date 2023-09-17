@@ -1,6 +1,8 @@
 module Exercise9 where
 import Test.QuickCheck
 
+-- TODO Add indication of time spent.
+
 {-- 
 
     A permutation of a finite list is another finite list with the same elements,

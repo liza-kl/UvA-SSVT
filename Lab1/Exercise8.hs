@@ -22,7 +22,7 @@ multiplyAdd1 :: [Integer] -> Integer
 multiplyAdd1 list1 = product list1 + 1
 
 isPrime :: Integer -> Bool
--- Somehow it gets stuck on certain prime numbers...
+-- Somehow it gets stuck on certain prime numbers... TODO find out why this happens...
 -- isPrime 7858321551080267055879091 = False
 isPrime n = all (\ x -> rem n x /= 0) xs
     where xs = takeWhile (\ y -> y^2 <= n) [2..]

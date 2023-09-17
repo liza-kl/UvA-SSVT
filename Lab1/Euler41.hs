@@ -10,6 +10,11 @@ What is the largest n
 -digit pandigital prime that exists?
 --}
 
+{- 
+    Missing stuff...
+    - Indication for time spent.
+-}
+
 module Euler41 where
 
 import Data.Char (intToDigit)
@@ -19,6 +24,8 @@ import Data.List
 isPrime :: Integer -> Bool -- Taken from previous Euler problems 
 isPrime n = all (\ x -> rem n x /= 0) xs
     where xs = takeWhile (\ y -> y^2 <= n) [2..]
+
+-- Testing approach? Is this the description of how you test it?
 
 -- By some rules of division, we can already filter some numbers out:
 -- n =1, so the number would be "1" – 1 ist not prime 

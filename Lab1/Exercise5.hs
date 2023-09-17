@@ -3,6 +3,8 @@ module Exercise5 where
 data Boy = Matthew | Peter | Jack | Arnold | Carl
             deriving (Eq,Show)
 
+-- TODO Indication of Time Spent missing
+
 -- 3 tell the truth, 2 are lying
 -- Matthew: Carl didn't do it, and neither did I. This leaves us with Peter, Jack, Arnold
 -- Peter: It was Matthew or it was Jack.  Accused Matthew, Jack
@@ -21,6 +23,7 @@ accuses Matthew otherBoy
     | otherBoy == Matthew = False
     | otherwise = True
 
+-- TODO is this comment necessary?
 -- accuses Peter Matthew = True <- write is this way to make it cleaner
 --     -- | otherBoy ==  = True
 --     -- | otherBoy == Jack = True
