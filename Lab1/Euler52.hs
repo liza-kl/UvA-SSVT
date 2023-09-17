@@ -2,7 +2,12 @@ module Euler52 where
 
 import Data.List
 
--- TODO : explain how it could be tested, indication of time spent.
+-- To test that this function works as expected I would run property tests
+-- Some properties could be:
+-- The result should be a positive number and >= 10, so that it makes sense
+-- If i run the function with this number as argument, i will again get the same result
+-- If i run the function with this number + 1 as argument, i will not get the same result
+-- And obviously, i could check that x, 2x, 3x, 4x, 5x, 6x are consisted of the same numbers
 
 smallestPermutedMultiples :: Integer -> IO Integer
 smallestPermutedMultiples x = do
