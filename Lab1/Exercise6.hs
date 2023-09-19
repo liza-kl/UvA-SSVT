@@ -39,17 +39,17 @@ cnf (Dsj p)               = Dsj (map cnf p)                                     
 cnf p                     = p                                                            -- other
 
 
-instance Show Form where
-    show (Prop name) = "Prop " ++ show name
-    show (Neg form) = "Neg (" ++ show form ++ ")"
-    show (Cnj forms) = "Cnj " ++ show forms
-    show (Dsj forms) = "Dsj " ++ show forms
-    show (Impl p q) = "Impl (" ++ show p ++ ") (" ++ show q ++ ")"
-    show (Equiv p q) = "Equiv (" ++ show p ++ ") (" ++ show q ++ ")"
+-- instance Show Form where
+--     show (Prop name) = "Prop " ++ show name
+--     show (Neg form) = "Neg (" ++ show form ++ ")"
+--     show (Cnj forms) = "Cnj " ++ show forms
+--     show (Dsj forms) = "Dsj " ++ show forms
+--     show (Impl p q) = "Impl (" ++ show p ++ ") (" ++ show q ++ ")"
+--     show (Equiv p q) = "Equiv (" ++ show p ++ ") (" ++ show q ++ ")"
 
 
-main :: IO ()
-main = do
-    let booleanFormula = Dsj [Cnj [Prop 1, Prop 0], Impl (Prop 0) (Prop 1)] 
-    putStrLn ("Boolean Formula: " ++ show booleanFormula)
-    putStrLn ("CNF Formula: " ++ show (cnf booleanFormula))
+-- main :: IO ()
+-- main = do
+--     let booleanFormula = Dsj [Cnj [Prop 1, Prop 0], Impl (Prop 0) (Prop 1)] 
+--     putStrLn ("Boolean Formula: " ++ show booleanFormula)
+--     putStrLn ("CNF Formula: " ++ show (cnf booleanFormula))
