@@ -6,15 +6,12 @@ import Data.List
 
 -- Conversion method https://en.wikipedia.org/wiki/Conjunctive_normal_form
 {-
-
     Procedure: 
         1) Remove implications and equivalences.
             I.E: Replace (P Impl Q) with Neg(P or Q)
             And replace (P Equiv Q) with (P or (Neg Q)) and ((Neg P) or Q)
         2) Move Neg's as much inside as possible using De Morgan's laws.
-        3) Unsure if this applies here. Don't think so. Drop universal Quantifiers. (∀)
-        4) Distribute ORs inwards over ANDs by replacing... (P or (Q and R)) with ((P or Q) and (P or R))
-
+        3) Distribute ORs inwards over ANDs by replacing... (P or (Q and R)) with ((P or Q) and (P or R))
 -}
 
 
@@ -33,8 +30,8 @@ cnf (Impl p q)            = cnf (Dsj [Neg (cnf p), cnf q])                      
 cnf (Equiv p q)           = Cnj [Dsj [cnf p, Neg (cnf q)], Dsj [Neg (cnf p), cnf q]]     -- replace P ↔ Q with (P∨¬Q)∧(¬P∨Q)
 cnf (Neg (Dsj [p, q]))    = Cnj [cnf (Neg (cnf p)), cnf(Neg (cnf q))]                    -- replace ¬(P∨Q) with (¬P)∧(¬Q)
 cnf (Neg (Cnj [p, q]))    = Dsj [cnf (Neg (cnf p)), cnf(Neg (cnf q))]                    -- replace ¬(P∧Q) with (¬P)∨(¬Q)
-cnf (Dsj [p, Cnj [q, r]]) = Cnj [Dsj [cnf p, cnf q], Dsj [cnf p, cnf r]]                 -- replace P∨(Q∧R) with (P∨Q)∧(P∨R)
-cnf (Dsj [Cnj [p, q], r]) = Cnj [Dsj [cnf p, cnf r], Dsj [cnf q, cnf r]]                 -- replace P∨(Q∧R) with (P∨Q)∧(P∨R)
+cnf (Dsj [p, Cnj [q, r]]) = Cnj [cnf (Dsj [cnf p, cnf q]), cnf (Dsj [cnf p, cnf r])]     -- replace P∨(Q∧R) with (P∨Q)∧(P∨R)
+cnf (Dsj [Cnj [p, q], r]) = Cnj [cnf (Dsj [cnf p, cnf r]), cnf (Dsj [cnf q, cnf r])]     -- replace P∨(Q∧R) with (P∨Q)∧(P∨R)
 cnf (Dsj [p, Dsj [q, r]]) = Dsj [cnf p, cnf q, cnf r]                                    -- remove inner disjunction
 cnf (Dsj [Dsj [q, r], p]) = Dsj [cnf p, cnf q, cnf r]                                    -- remove inner disjunction
 cnf (Cnj p)               = Cnj (map cnf p)                                              -- cnf conjunction
@@ -42,17 +39,17 @@ cnf (Dsj p)               = Dsj (map cnf p)                                     
 cnf p                     = p                                                            -- other
 
 
--- instance Show Form where
---     show (Prop name) = "Prop " ++ show name
---     show (Neg form) = "Neg (" ++ show form ++ ")"
---     show (Cnj forms) = "Cnj " ++ show forms
---     show (Dsj forms) = "Dsj " ++ show forms
---     show (Impl p q) = "Impl (" ++ show p ++ ") (" ++ show q ++ ")"
---     show (Equiv p q) = "Equiv (" ++ show p ++ ") (" ++ show q ++ ")"
+instance Show Form where
+    show (Prop name) = "Prop " ++ show name
+    show (Neg form) = "Neg (" ++ show form ++ ")"
+    show (Cnj forms) = "Cnj " ++ show forms
+    show (Dsj forms) = "Dsj " ++ show forms
+    show (Impl p q) = "Impl (" ++ show p ++ ") (" ++ show q ++ ")"
+    show (Equiv p q) = "Equiv (" ++ show p ++ ") (" ++ show q ++ ")"
 
 
--- main :: IO ()
--- main = do
---     let booleanFormula = Dsj [Cnj [Prop 1, Prop 0], Impl (Prop 0) (Prop 1)] 
---     putStrLn ("Boolean Formula: " ++ show booleanFormula)
---     putStrLn ("CNF Formula: " ++ show (cnf booleanFormula))
+main :: IO ()
+main = do
+    let booleanFormula = Dsj [Cnj [Prop 1, Prop 0], Impl (Prop 0) (Prop 1)] 
+    putStrLn ("Boolean Formula: " ++ show booleanFormula)
+    putStrLn ("CNF Formula: " ++ show (cnf booleanFormula))
