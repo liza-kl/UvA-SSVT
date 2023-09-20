@@ -53,7 +53,7 @@ ccount (Dsj [f1,f2]) = 1+ ccount f1 + ccount f2
 ccount (Neg f) = 1+ ccount f
 
 acount :: Form -> Int
-acount (Prop n) = 01
+acount (Prop n) = 1
 acount (Cnj [f1,f2]) = acount f1 + acount f2
 acount (Dsj [f1,f2]) = acount f1 + acount f2
 acount (Neg f) = acount f
