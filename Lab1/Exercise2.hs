@@ -26,8 +26,8 @@ subsequences:: [a] -> [[a]]
 subsequences [] = [[]]
 subsequences (x:xs) = subsequences xs ++ map (x :) (subsequences xs)
 
-prop_checkBaseDef:: Integer -> Bool
-prop_checkBaseDef n = length( subsequences [1..n]) == 2^n
+prop_checkBaseDef:: Integer -> Property
+prop_checkBaseDef n = property (length( subsequences [1..n]) == 2^n)
 
 -- Randomization of the input for the QuickCheck test
 genPositiveIntegersOverOne:: Gen Integer
