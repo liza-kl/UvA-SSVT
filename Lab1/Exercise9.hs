@@ -1,8 +1,6 @@
 module Exercise9 where
 import Test.QuickCheck
 
--- TODO Add indication of time spent.
-
 {-- 
 
     A permutation of a finite list is another finite list with the same elements,
@@ -16,6 +14,8 @@ import Test.QuickCheck
     and use a number of well-chosen lists to test isPermutation .
     You may assume that your input lists do not contain duplicates.
     What does this mean for your testing procedure?
+
+    Time spent: 90 minutes
 
 --}
 
