@@ -5,7 +5,6 @@ import Test.QuickCheck
 import System.Random
 import Lecture2
 import System.IO.Unsafe
-import Test.QuickCheck (Arbitrary(arbitrary))
 
 type Name = Int
 
@@ -29,9 +28,9 @@ instance Arbitrary Form where
     arbitrary = do
         f1 <- arbitrary
         f2 <- arbitrary
-        rndNum <- choose(1,15)
+        rndNum <- choose (1,15)
         elements [ Prop f1
-                , Prop rndNum 
+                , Prop rndNum
                  , Neg (Prop f1)
                  , Cnj [Prop f1, Prop f2]
                  , Dsj [Prop f1, Prop f2]
@@ -43,4 +42,21 @@ instance Arbitrary Form where
 
 {-- nsub :: Form -> Int 
 
- 7.1 a) --}
+ 7.1 a) You can test it with the inclusive / exclusive principle 
+ 
+ --}
+
+ccount :: Form -> Int
+ccount (Prop n) = 0
+ccount (Cnj [f1,f2]) = 1+ ccount f1 + ccount f2
+ccount (Dsj [f1,f2]) = 1+ ccount f1 + ccount f2
+ccount (Neg f) = 1+ ccount f
+
+acount :: Form -> Int
+acount (Prop n) = 01
+acount (Cnj [f1,f2]) = acount f1 + acount f2
+acount (Dsj [f1,f2]) = acount f1 + acount f2
+acount (Neg f) = acount f
+
+nsub :: Form -> Int
+nsub form = (ccount form) + (acount form)
