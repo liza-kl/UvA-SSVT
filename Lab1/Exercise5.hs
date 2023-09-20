@@ -1,16 +1,18 @@
+-- Time Spent: 90 Minutes
+
 module Exercise5 where
 
 data Boy = Matthew | Peter | Jack | Arnold | Carl
             deriving (Eq,Show)
 
--- TODO Indication of Time Spent missing
 
 -- 3 tell the truth, 2 are lying
--- Matthew: Carl didn't do it, and neither did I. This leaves us with Peter, Jack, Arnold
--- Peter: It was Matthew or it was Jack.  Accused Matthew, Jack
--- Jack: Matthew and Peter are both lying.
--- Arnold: Matthew or Peter is speaking the truth, but not both. Arnold supports Peters version
--- Carl: What Arnold says is not true 
+-- Matthew: Carl didn't do it, and neither did I. He's accusing Peter, Jack, Arnold
+-- Peter: It was Matthew or it was Jack.  He's accusing Matthew, Jack
+-- Jack: Matthew and Peter are both lying. Negation of the accusements of Peter and Matthew
+-- Arnold: Matthew or Peter is speaking the truth, but not both. Accusing the same people as Matthew or Peter, 
+-- but Matthew accuses Arnold, so Arnold is probably supporting Peter (?)
+-- Carl: What Arnold says is not true. Negation of Arnolds accusements
 
 boys = [Matthew, Peter, Jack, Arnold, Carl] 
 accuses :: Boy -> Boy -> Bool -- Does the input boy accuse the 2nd boy 
@@ -18,26 +20,23 @@ accusers :: Boy -> [Boy] -- This boy is accused by XY
 guilty, honest :: [Boy]
 
 -- accuses, determine if a boy is accusing another boy 
-accuses Matthew otherBoy
-    | otherBoy == Carl = False
-    | otherBoy == Matthew = False
-    | otherwise = True
 
--- TODO is this comment necessary?
--- accuses Peter Matthew = True <- write is this way to make it cleaner
---     -- | otherBoy ==  = True
---     -- | otherBoy == Jack = True
---     -- | otherwise = False
-accuses Peter otherBoy 
-    | otherBoy ==  Matthew = True
-    | otherBoy == Jack = True
-    | otherwise = False
+{-- Just converting the text statements into code,
+wildcard is used for the not mentioned cases in text--}
+accuses Matthew Carl = False
+accuses Matthew Matthew = False
+accuses Matthew _ = True
 
+{-- same here --}
+accuses Peter Matthew = True
+accuses Peter Jack = True
+accuses Peter _ = False
 
--- Jack says that the accusements of Matthew and Peter are wrong
-accuses Jack otherBoy
-    | accuses Matthew otherBoy = False
-    | accuses Peter otherBoy = False
+-- Jack says that the accusements of Matthew and Peter are wrong,
+-- so he is not accusing the boys Peter and Matthew are accusing and vice versa.
+accuses Jack otherBoy 
+    | accuses Matthew otherBoy = False -- if Matthew accuses another boy, Jack is not accusing him
+    | accuses Peter otherBoy = False -- if Peter accuses another boy, Jack is not accusing him
     | otherwise = True
 
 -- Arnold is accusing either the same persons as Matthew or Peter is accusing
