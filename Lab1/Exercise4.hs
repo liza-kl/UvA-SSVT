@@ -71,11 +71,13 @@ prop_numOf1PermutationsIsZero = property( length ( deran 1 ) == 0 )
 prop_numOfDerangmentsLessEqThanPerms :: Int -> Property
 prop_numOfDerangmentsLessEqThanPerms num = property( length ( deran num ) <= length ( permutations [0 .. num - 1]) )
 
--- use properties...
+-- Checks if the reverse of a list with an even number of elements is a derangement of a given list.
 prop_reverseEvenNumberSizedList :: Eq a => [a] -> Property
-prop_reverseEvenNumberSizedList list = length list > 1 && length (nub list) == length list ==> even (length list) == isDerangement list (reverse as)
+prop_reverseEvenNumberSizedList list = length list > 1 && length (nub list) == length list ==> even (length list) == isDerangement list (reverse list)
 
--- TODO ADD CHECK THAT REVERSE OF DERANGEMENT IS NOT A DERANGEMENT
+-- Checks if the reverse list of a derangement from a given list is not a derangement.
+prop_evenNonReversibleDerangement :: Eq a => [a] -> Property
+prop_evenNonReversibleDerangement list = length list > 1 && length (nub list) == length list ==> not (isDerangement getList (reverse getList)) where getList = take 1 (deran (length list))
 
 -- Checking if the number of calculated derangements lines up with the length of the list for the generated derangements.
 prop_numOfDerangements :: Int -> Property
@@ -88,6 +90,7 @@ main = do
    quickCheck $ prop_numOfDerangmentsLessEqThanPerms 3
    quickCheck $ prop_numOfDerangements 3
    quickCheck $ prop_reverseEvenNumberSizedList [1..5]
+   quickCheck $ prop_evenNonReversibleDerangement [1..5]
 
 {- 
 
