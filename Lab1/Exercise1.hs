@@ -2,26 +2,26 @@
 
 module Exercise1 where
 import Test.QuickCheck
-    ( suchThat, forAll, quickCheck, Arbitrary(arbitrary), Gen )
+    ( suchThat, forAll, quickCheck, Arbitrary(arbitrary), Gen, Property, property )
 
 
 factorial :: Integer -> Integer
 
 -- Factorial of 0 = 1
-prop_factorialOfZeroIsOne :: Bool
-prop_factorialOfZeroIsOne = factorial 0 == 1
+prop_factorialOfZeroIsOne :: Property
+prop_factorialOfZeroIsOne = property (factorial 0 == 1)
 
 -- For any positive integer (n! / n) = (n - 1)!
-prop_factorialOfAnyPosInteger :: Integer -> Bool
-prop_factorialOfAnyPosInteger num = (factorial num `div` num) == factorial (num - 1)
+prop_factorialOfAnyPosInteger :: Integer -> Property
+prop_factorialOfAnyPosInteger num = property ((factorial num `div` num) == factorial (num - 1))
 
 -- Factorial is always > 0
-prop_factorialIsAlwaysGreater0 :: Integer -> Bool
-prop_factorialIsAlwaysGreater0 num = factorial num > 0
+prop_factorialIsAlwaysGreater0 :: Integer -> Property
+prop_factorialIsAlwaysGreater0 num = property ( factorial num > 0)
 
 -- Divison Rule in Factorial : x! / ( x - 1 )! = x | x >= 1 
-prop_factorialDivisionRule :: Integer -> Bool
-prop_factorialDivisionRule num = (factorial num `div` factorial (num - 1)) == num
+prop_factorialDivisionRule :: Integer -> Property
+prop_factorialDivisionRule num = property ((factorial num `div` factorial (num - 1)) == num)
 
 
 genNonNegativeIntsGe1 :: Gen Integer
