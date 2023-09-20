@@ -1,16 +1,9 @@
+{-- Time Spent: 90 Minutes, figuring out a workaround how to print it in Haskell --}
 module Exercise3 where
 
-{-- TODO --}
-{-# LANGUAGE DerivingVia #-}
 
 import Data.List
-import Data.Char
-import Data.Maybe
-import Test.QuickCheck
 import Data.Ord (comparing)
-import Debug.Trace
-import Text.Printf
-import GHC (Name)
 
 infix 1 -->
 (-->) :: Bool -> Bool -> Bool
@@ -26,21 +19,23 @@ data NameableFunction = NameableFunction {
     name:: String,
     propertyFunc:: Int -> Bool
 }
-
+{-- Exercise 3.1 --}
 one, two, three, four, five :: (Int -> Bool)
+
 one x = even x && x > 3
 two x = even x || x > 3
 three x = (even x && x > 3) || even x
-four x = (even x && x > 3) || even x
+four x =  (even x && x > 3)|| even x
 five = even
 
 funcsToSort :: [NameableFunction]
 funcsToSort = [
     (NameableFunction {name = "one", propertyFunc = one}),
     (NameableFunction {name = "two", propertyFunc = two}),
-    (NameableFunction {name = "two", propertyFunc = three}),
+    (NameableFunction {name = "three", propertyFunc = three}),
     (NameableFunction {name = "four", propertyFunc = four}),
-    (NameableFunction {name = "five", propertyFunc = five})]
+    (NameableFunction {name = "five", propertyFunc = five})
+    ]
 
 compareByDomain :: NameableFunction -> NameableFunction -> Ordering
 compareByDomain condition1 condition2
@@ -54,7 +49,16 @@ getName (NameableFunction s _) = s
 getFunc:: NameableFunction -> (Int -> Bool)
 getFunc (NameableFunction _ func) = func
 
-sortedConditions :: [NameableFunction]
-sortedConditions = sortBy compareByDomain funcsToSort
+{-- Exercise 3.2 --}
 
-main = print [getName x | x <- sortedConditions]
+{-- Strength in descending order for a domain from [(-10)..10] --}
+{--1. "one" – has the smallest set for which the function returns true [4,6,8,10], therefore it is the strongest
+    2. "three" - [-10,-8,-6,-4,-2,0,2,4,6,8,10]
+    3. "four"  - [-10,-8,-6,-4,-2,0,2,4,6,8,10] 
+    4. "five" [-10,-8,-6,-4,-2,0,2,4,6,8,10] three, four, five  are equivalent in strength, because the cardinality is the same.
+    5. "two"  - is the weakest property because it applies to the largest set of the dmoain  [-10,-8,-6,-4,-2,0,2,4,5,6,7,8,10] --}
+
+sortedDescConditions :: [NameableFunction]
+sortedDescConditions = sortBy (flip compareByDomain) funcsToSort -- using a flip to reverse the list
+
+main = print [getName x | x <- sortedDescConditions]
