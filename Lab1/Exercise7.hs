@@ -64,3 +64,16 @@ acount (Neg f) = acount f
 
 nsub :: Form -> Int
 nsub form = (ccount form) + (acount form)
+
+-- QuickCheck Properties
+
+propSingleAtom :: Int -> Property
+propSingleAtom x = property (sub (Prop x) == Set [Prop x])
+
+propSingleAtomAmount :: Int -> Property
+propSingleAtomAmount x = property( nsub (Prop x) == 1)
+
+main :: IO ()
+main = do
+    quickCheck propSingleAtom
+    quickCheck propSingleAtomAmount
