@@ -15,14 +15,14 @@ ourContains (x:xs) elemToCheck
 isPermutation :: Eq a => [a] -> [a] -> Bool
 isPermutation list1 = ourContains (permutations list1)
 
-isDerangementH :: Eq a => [a] -> [a] -> Bool
-isDerangementH [] [] = True
-isDerangementH (x:xs) (y:ys)
+isDerangement' :: Eq a => [a] -> [a] -> Bool
+isDerangement' [] [] = True
+isDerangement' (x:xs) (y:ys)
     | x == y = False
-    | otherwise = isDerangementH xs ys
+    | otherwise = isDerangement' xs ys
 
 isDerangement :: Eq a => [a] -> [a] -> Bool
-isDerangement list1 list2 = isPermutation list1 list2 && isDerangementH list1 list2
+isDerangement list1 list2 = isPermutation list1 list2 && isDerangement' list1 list2
 
 
 {-- 
@@ -35,7 +35,8 @@ isDerangement list1 list2 = isPermutation list1 list2 && isDerangementH list1 li
 deran :: Int -> [[Int]]
 deran num =  filter (isDerangement [0..num - 1]) $ permutations [0 .. num - 1]
 
-{-- Properties 2 or ideally 3,
+{-- 
+    Properties 2 or ideally 3,
     Well chosen list is about "edge cases"
 
     In combinatorial mathematics, a derangement is a permutation of the elements of a set in which no element
@@ -55,11 +56,14 @@ derangement n = (n - 1) * (derangement (n - 1) + derangement (n - 2))
 
 -- QuickCheck properties
 
+isListAllDerangement :: [[Int]] -> [Int] -> Bool
+isListAllDerangement xs base = foldr ((&&) . isDerangement base) True xs
+
 -- The number of permutations for an empty set equals to the factorial of 0 which is 1. 
 -- Since no element (of the empty set) can be found that retains its original position this means that this permutation is also a derangement. 
 -- That is why the number of derangements for an empty set is one.
 prop_numOf0PermutationsIsOne :: Property
-prop_numOf0PermutationsIsOne = property( length ( deran 0 ) == 1 )
+prop_numOf0PermutationsIsOne = property ( length ( deran 0 ) == 1 )
 
 -- Since the list contains a single integer there isn't really a way to move that single integer around or even making any derangements out of that. 
 -- Example: A "permutation" of [1] would always result in [1] which isn't a derangement thus having 0 derangements.
@@ -69,7 +73,7 @@ prop_numOf1PermutationsIsZero = property( length ( deran 1 ) == 0 )
 -- The list of all permutations is also always including the entire list of all derangements. 
 -- Some permutations are no derangements though so the amount of derangements must be always smaller or equal the amount of permutations though.
 prop_numOfDerangmentsLessEqThanPerms :: Int -> Property
-prop_numOfDerangmentsLessEqThanPerms num = property( length ( deran num ) <= length ( permutations [0 .. num - 1]) )
+prop_numOfDerangmentsLessEqThanPerms num = property ( length ( deran num ) <= length ( permutations [0 .. num - 1]) )
 
 -- Checks if the reverse of a list with an even number of elements is a derangement of a given list.
 prop_reverseEvenNumberSizedList :: Eq a => [a] -> Property
@@ -81,8 +85,17 @@ prop_evenNonReversibleDerangement list = length list > 1 && length (nub list) ==
 
 -- Checking if the number of calculated derangements lines up with the length of the list for the generated derangements.
 prop_numOfDerangements :: Int -> Property
-prop_numOfDerangements num = property( length (deran num) == derangement num )
+prop_numOfDerangements num = property ( length (deran num) == derangement num )
 
+-- Checks if the "isDerangement" method is working. "Deran" calculates all derangements of the list [0..(n-1)].
+-- We use a helper function to check if every generated derangement is actually a derangement with the checker function.
+-- We only consider deran 1 or higher since negative numbers shouldn't be possible and 0 can't be possible since the list would then go from 0 to -1. 
+prop_isBasicDerangement :: Int -> Property
+prop_isBasicDerangement num = num > 0 ==> isListAllDerangement getList [0..(num - 1)] where getList = deran num
+
+-- Values and value sets could be non-restrictive in theory.
+-- But due to factorial time complexity test execution would need a veeeeeeeeery long amount of time.
+-- I think you got better stuff to do than to wait for that. :D
 main :: IO()
 main = do
    quickCheck prop_numOf0PermutationsIsOne
@@ -91,6 +104,7 @@ main = do
    quickCheck $ prop_numOfDerangements 3
    quickCheck $ prop_reverseEvenNumberSizedList [1..5]
    quickCheck $ prop_evenNonReversibleDerangement [1..5]
+   verboseCheck $ prop_isBasicDerangement 5
 
 {- 
 
@@ -99,7 +113,7 @@ main = do
     Property 1 and 2 have equal strength and are stronger than the rest of the properties.
     This is due to them only checking for a singular value which corresponds an edge case.
 
-    Property 3 and 4 also have equal strength but are weaker than 1/2 because they apply for the entire set of integer values.
+    Property 3, 4  and 5 also have equal strength but are weaker than 1/2 because they apply for the entire set of integer values.
     That makes them automatically weaker than property 1/2.
 
 
@@ -107,5 +121,7 @@ main = do
 
     This test can be automatically tested (via QuickCheck) but only a small subset of the possible parameters can be checked. 
     This is due to factorial (time) complexity and infinitely large number of positive integer numbers.
+    In theory we could let it run without any restrictions to certain values or value sets but then we would quickly run into problems
+    regarding calculation complexity. That is why we restrict the values here to have viable test execution times.
 
 -}
