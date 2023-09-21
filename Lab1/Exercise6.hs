@@ -40,14 +40,14 @@ cnf (Cnj p)               = Cnj (map cnf p)                                     
 cnf (Dsj p)               = Dsj (map cnf p)                                              -- cnf disjunction
 cnf p                     = p                                                            -- other
 
-
+-- for printing forms - debugging
 instance Show Form where
     show (Prop name) = "Prop " ++ show name
     show (Neg form) = "Neg (" ++ show form ++ ")"
     show (Cnj forms) = "Cnj " ++ show forms
     show (Dsj forms) = "Dsj " ++ show forms
-    show (Impl p q) = "Impl (" ++ show p ++ ") (" ++ show q ++ ")"
-    show (Equiv p q) = "Equiv (" ++ show p ++ ") (" ++ show q ++ ")"
+    show (Impl form1 form2) = "Impl (" ++ show form1 ++ ") (" ++ show form2 ++ ")"
+    show (Equiv form1 form2) = "Equiv (" ++ show form1 ++ ") (" ++ show form2 ++ ")"
 
 
 main :: IO ()

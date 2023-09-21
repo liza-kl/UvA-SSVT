@@ -2,6 +2,7 @@ module Euler55 where
 
 import Data.List
 
+-- Time spent: 30 minutes
 -- To test that this function works as expected I would run property tests
 -- Some properties could be:
 -- I could check isPalindrome and reversal with QuickCheck
@@ -11,17 +12,18 @@ import Data.List
 
 lychrelNumbers :: IO Int
 lychrelNumbers = do
-    lychrelNums <- isLychrel 10 1 [] 10 
+    lychrelNums <- isLychrel 1 1 [] 1 
     -- putStrLn (show lychrelNums)
     return (length lychrelNums)
 
 isLychrel :: Integer -> Integer -> [Integer] -> Integer -> IO [Integer]
--- x is the number i initially started working on, now im recursively looking into its sum etc 
+-- x is the number i initially started working on, now i might be recursively looking into its sum or the sum of the sum etc 
 -- i the iteration, 
 -- lychrelNumbers is the list with the lychrel numbers,
 -- y is the number im working on
+-- for example x=349, y=349+943=1292
 isLychrel x i lychrelNumbers y
-    -- reached 50 iterations, go to next numbers
+    -- reached 50 iterations, go to next number
     | i == 50 = do
         isLychrel (x + 1) 1 (x : lychrelNumbers) (x + 1)
     -- reached 10000 numbers, stop search
@@ -39,9 +41,11 @@ isLychrel x i lychrelNumbers y
     addReverse = reverseNum + y
     condition = isPalindrome addReverse
 
+-- convert number to string, and compare it to its reversal, then it's a palindrome
 isPalindrome :: Integer -> Bool
 isPalindrome x = (show x) == reverse (show x)
 
+-- convert a number to string and reverse it
 reversal :: Integer -> Integer
 reversal = read . reverse . show
 
