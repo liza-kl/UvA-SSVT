@@ -2,7 +2,6 @@ module Exercise2 where
 
 import qualified Data.List (subsequences)
 
-import System.Random
 import Test.QuickCheck
 
 -- Time Spent ~ 1h20 
