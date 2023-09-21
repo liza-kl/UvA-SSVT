@@ -5,30 +5,43 @@ import Data.List
 -- Exercise 8
 -- Time needed 2,5h due to trying to optimize list generation and other issues related to that.
 
+-- Generate an infinite list of prime numbers.
 listOfPrimes:: [Integer]
 listOfPrimes = filter isPrime [2..]
 
-shrinkPrimes:: [a] -> [[a]] -> [[a]]
-shrinkPrimes [] _ = []
-shrinkPrimes xs acc = sublist : shrinkPrimes remaining (acc ++ [sublist])
+{-
+  Generates an infinitely sized list of lists with prime numbers which get consecutively larger for the next element.
+  Example: [[2], [2, 3], [2,3,5], (...)]
+-}
+getConsecutivelyLargerPrimesList:: [a] -> [[a]] -> [[a]]
+getConsecutivelyLargerPrimesList [] _ = []
+getConsecutivelyLargerPrimesList xs acc = sublist : getConsecutivelyLargerPrimesList remaining (acc ++ [sublist])
   where
     sublist = take (length acc + 1) xs
     remaining = xs ++ drop (length acc + 1) xs
 
-getShrinkingPrimes:: [[Integer]]
-getShrinkingPrimes = shrinkPrimes listOfPrimes []
+getConsecutivelyLargerPrimes:: [[Integer]]
+getConsecutivelyLargerPrimes = getConsecutivelyLargerPrimesList listOfPrimes []
 
+-- Multiplies every element of an integer list together and add one to the final result.
 multiplyAdd1 :: [Integer] -> Integer
 multiplyAdd1 list1 = product list1 + 1
 
 isPrime :: Integer -> Bool
--- Somehow it gets stuck on certain prime numbers... TODO find out why this happens...
--- isPrime 7858321551080267055879091 = False
+{- Test report:
+  It works but it gets stuck on certain prime numbers and we don't know why. 
+  If we were to manually assign those weird numbers to their corresponding prime number status
+  it would run indefinitely. Otherwise it will get stuck.
+  isPrime 7858321551080267055879091 = False
+-}
 isPrime n = all (\ x -> rem n x /= 0) xs
     where xs = takeWhile (\ y -> y^2 <= n) [2..]
 
+-- Generates an element where we have the prime number calculation result with the corresponding prime number list.
+-- Exists to to easier counter example visualization.
 mapListStructure:: [Integer] -> ([Integer], Integer)
 mapListStructure primes = (primes, multiplyAdd1 primes)
 
+-- Generates the counterexamples to this conjecture.
 counterexamples :: [([Integer], Integer)]
-counterexamples = filter (\(subs, p) -> not(isPrime p)) ( map mapListStructure getShrinkingPrimes)
+counterexamples = filter (\(subs, p) -> not(isPrime p)) ( map mapListStructure getConsecutivelyLargerPrimes)
