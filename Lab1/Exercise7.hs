@@ -1,4 +1,5 @@
--- Time Spent: 5.1 60 Minutes 5.2. 60 Minutes 
+-- Time Spent: 5.1 60 Minutes 5.2. 60 Minutes,
+-- was the last and hardest exercise for us.
 
 
 module Exercise7 where
