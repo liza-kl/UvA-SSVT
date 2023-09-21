@@ -34,8 +34,8 @@ instance Arbitrary Form where
                  , Neg (Prop f1)
                  , Cnj [Prop f1, Prop f2]
                  , Dsj [Prop f1, Prop f2]
-                 , Impl (Prop f1) (Prop f2)
-                 , Equiv (Prop f1) (Prop f2)
+                ,Impl (Prop f1) (Prop f2)
+                ,Equiv (Prop f1) (Prop f2)
                  ]
 
 {-- 
@@ -71,8 +71,15 @@ nsub form = ccount form + acount form
 
 -- QuickCheck Properties
 
+getLengthOfSet :: Set a -> Int
+getLengthOfSet (Set []) = 0
+getLengthOfSet (Set (x:xs)) = 1 + getLengthOfSet (Set xs)
+
 formsGenerator :: Gen Form
 formsGenerator = arbitrary :: Gen Form
+
+prop_lengthOfSet :: Form -> Bool 
+prop_lengthOfSet form = nsub form == getLengthOfSet (sub form)
 
 prop_formIsInSubForm :: Form -> Bool
 prop_formIsInSubForm form = inSet form (sub form)
@@ -88,3 +95,5 @@ main = do
     quickCheck prop_SingleAtom
     quickCheck prop_SingleAtomAmount
     quickCheckResult $ forAll formsGenerator prop_formIsInSubForm
+    quickCheckResult $ forAll formsGenerator prop_lengthOfSet
+
