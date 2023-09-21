@@ -9,10 +9,13 @@ import Data.List
 
 {-
     Procedure: 
-        1) Remove implications and equivalences.
-            I.E: Replace (P Impl Q) with Neg(P or Q)
-            And replace (P Equiv Q) with (P or (Neg Q)) and ((Neg P) or Q)
-        2) Move Neg's as much inside as possible using De Morgan's laws.
+        1) Remove implications and equivalences:
+            - Replace (P Impl Q) with Neg(P) or Q
+            - Replace (P Equiv Q) with (P or (Neg Q)) and ((Neg P) or Q)
+        2) Move Neg's as much inside as possible using De Morgan's laws:
+            - Replace Neg(P or Q) with Neg(P) and Neg(Q)
+            - Replace Neg(P and Q) with Neg(P) or Neg(Q)
+            - Replace Neg(Neg(P)) with P
         3) Distribute ORs inwards over ANDs by replacing... (P or (Q and R)) with ((P or Q) and (P or R))
 -}
 
