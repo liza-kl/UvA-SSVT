@@ -26,17 +26,20 @@ subsequences:: [a] -> [[a]]
 subsequences [] = [[]]
 subsequences (x:xs) = subsequences xs ++ map (x :) (subsequences xs)
 
+-- Checks if the amount of subsequences aligns with the proven amount of subsequences by induction. (Amount of subsequences = 2^n)
 prop_checkBaseDef:: Integer -> Property
 prop_checkBaseDef n = property (length( subsequences [1..n]) == 2^n)
 
 -- Randomization of the input for the QuickCheck test
-genPositiveIntegersOverOne:: Gen Integer
-genPositiveIntegersOverOne = abs <$> (arbitrary :: Gen Integer) `suchThat` (>1)
+-- It is given that the smallest input possible is one since the list has the property for integer lists of the form [1..n].
+-- That means that zero won't be considered inside this QuickCheck test even though it should be valid (see induction proof).
+genPositiveIntegers:: Gen Integer
+genPositiveIntegers = abs <$> (arbitrary :: Gen Integer) `suchThat` (>0)
 
--- Output with QuickCheck tests
+-- Output with QuickCheck test, which looks if the amount of generated subsequences aligns with the formula proven by induction.
 main :: IO Result
 main = do
-        quickCheckResult $ forAll genPositiveIntegersOverOne prop_checkBaseDef
+        quickCheckResult $ forAll genPositiveIntegers prop_checkBaseDef
 
 {--
 
@@ -50,4 +53,6 @@ main = do
         I am not really testing a mathematical fact but rather just a small set where we can actually calculate the subsequences for.
         We can't be completely sure using this method that this is completely correct, just the part of the specification which we could account for.
         
+        If we were to let this run infinitely for all positive integer values, which would take an infinite amount of time then the check will be sufficient though.
+
 --}
