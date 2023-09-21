@@ -113,7 +113,7 @@ main = do
     Property 1 and 2 have equal strength and are stronger than the rest of the properties.
     This is due to them only checking for a singular value which corresponds an edge case.
 
-    Property 3, 4  and 5 also have equal strength but are weaker than 1/2 because they apply for the entire set of integer values.
+    Property 3, 4 and 5 also have equal strength but are weaker than 1/2 because they apply for the entire set of integer values.
     That makes them automatically weaker than property 1/2.
 
 
