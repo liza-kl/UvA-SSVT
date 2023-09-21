@@ -30,7 +30,7 @@ instance Arbitrary Form where
         f2 <- arbitrary
         rndNum <- choose (1,15)
         elements [ Prop f1
-                , Prop rndNum
+                 , Prop rndNum
                  , Neg (Prop f1)
                  , Cnj [Prop f1, Prop f2]
                  , Dsj [Prop f1, Prop f2]
@@ -48,14 +48,18 @@ instance Arbitrary Form where
 
 ccount :: Form -> Int
 ccount (Prop n) = 0
-ccount (Cnj [f1,f2]) = 1+ ccount f1 + ccount f2
-ccount (Dsj [f1,f2]) = 1+ ccount f1 + ccount f2
-ccount (Neg f) = 1+ ccount f
+ccount (Cnj [f1,f2]) = 1 + ccount f1 + ccount f2
+ccount (Dsj [f1,f2]) = 1 + ccount f1 + ccount f2
+ccount (Impl f1 f2) = 1 + ccount f1 + ccount f2
+ccount (Equiv f1 f2) = 1 + ccount f1 + ccount f2
+ccount (Neg f) = 1 + ccount f
 
 acount :: Form -> Int
 acount (Prop n) = 1
 acount (Cnj [f1,f2]) = acount f1 + acount f2
 acount (Dsj [f1,f2]) = acount f1 + acount f2
+acount (Impl f1 f2) = acount f1 + acount f2
+acount (Equiv f1 f2) = acount f1 + acount f2
 acount (Neg f) = acount f
 
 nsub :: Form -> Int
