@@ -44,15 +44,19 @@ instance Arbitrary Form where
  
  --}
 
-{-- Code was taken and modified from Chapter 7.7 in the Haskel Road to Logic book --}
-{-- This function counts the conjunctions --}
+{-- 
+    Code was taken and modified from Chapter 7.7 in the Haskel Road to Logic book
+    This function counts the conjunctions
+    If Atoms inside conjunctions are the same there is one less subformula when they are different.
+    This is due to not including the simplest subformula for f2 since that is equivalent to the simplest subformula of f1.
+--}
 ccount :: Form -> Int
 ccount (Prop n) = 0 -- a single property is atomic, so the length is zero
-ccount (Cnj [f1,f2]) = 1 + ccount f1 + ccount f2 -- With the following yo
+ccount (Cnj [f1,f2]) = if f1 == f2 then ccount f1 + ccount f2 else 1 + ccount f1 + ccount f2 -- With the following yo
 --  are counting the subformulas, the + 1 is the final conjunction that also needs to be added
-ccount (Dsj [f1,f2]) = 1 + ccount f1 + ccount f2 -- "see above"
-ccount (Impl f1 f2) = 1 + ccount f1 + ccount f2 -- "see above"
-ccount (Equiv f1 f2) = 1 + ccount f1 + ccount f2 -- "see above"
+ccount (Dsj [f1,f2]) = if f1 == f2 then ccount f1 + ccount f2 else 1 + ccount f1 + ccount f2 -- "see above"
+ccount (Impl f1 f2) = if f1 == f2 then ccount f1 + ccount f2 else 1 + ccount f1 + ccount f2 -- "see above"
+ccount (Equiv f1 f2) = if f1 == f2 then ccount f1 + ccount f2 else 1 + ccount f1 + ccount f2 -- "see above"
 ccount (Neg f) = 1 + ccount f -- "see above"
 
 acount :: Form -> Int
@@ -96,4 +100,3 @@ main = do
     quickCheck prop_SingleAtomAmount
     quickCheckResult $ forAll formsGenerator prop_formIsInSubForm
     quickCheckResult $ forAll formsGenerator prop_lengthOfSet
-
