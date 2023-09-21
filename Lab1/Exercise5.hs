@@ -16,9 +16,6 @@ data Boy = Matthew | Peter | Jack | Arnold | Carl
 
 boys = [Matthew, Peter, Jack, Arnold, Carl] 
 accuses :: Boy -> Boy -> Bool -- Does the input boy accuse the 2nd boy 
-accusers :: Boy -> [Boy] -- This boy is accused by XY 
-guilty, honest :: [Boy]
-
 -- accuses, determine if a boy is accusing another boy 
 
 {-- Just converting the text statements into code,
@@ -40,6 +37,7 @@ accuses Jack otherBoy
     | otherwise = True
 
 -- Arnold is accusing either the same persons as Matthew or Peter is accusing
+-- but Matthew accuses Arnold, so Arnold is probably supporting Peter (?)
 accuses Arnold someBoy = (accuses Matthew someBoy || accuses Peter someBoy)
                         && not (accuses Matthew someBoy) && accuses Peter someBoy
 
@@ -47,9 +45,12 @@ accuses Arnold someBoy = (accuses Matthew someBoy || accuses Peter someBoy)
 accuses Carl otherBoy = not (accuses Arnold otherBoy)
 
 -- Take every boy out of the list and check if they are accusing the input boy 
+accusers :: Boy -> [Boy] -- This boy is accused by XY 
 accusers accusedBoy = [ accuserBoy | accuserBoy <- boys, accuses accuserBoy accusedBoy ]
 
 -- 3 boys are always telling the truth, so find a boy which is accused by 3 others
+
+guilty, honest :: [Boy]
 guilty = [ guiltyBoy | guiltyBoy <- boys, 3 == length (accusers guiltyBoy)]
 
 -- Guilty should be a list of only one boy but for the function signature you need a Boy, so take head.
