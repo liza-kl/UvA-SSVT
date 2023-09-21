@@ -93,28 +93,33 @@ prop_numOfDerangements num = property ( length (deran num) == derangement num )
 prop_isBasicDerangement :: Int -> Property
 prop_isBasicDerangement num = num > 0 ==> isListAllDerangement getList [0..(num - 1)] where getList = deran num
 
+-- Test Report. 
 -- Values and value sets could be non-restrictive in theory.
 -- But due to factorial time complexity test execution would need a veeeeeeeeery long amount of time.
 -- I think you got better stuff to do than to wait for that. :D
+-- Besides that restriction this would be true for all checked properties.
 main :: IO()
 main = do
    quickCheck prop_numOf0PermutationsIsOne
    quickCheck prop_numOf1PermutationsIsZero
-   quickCheck $ prop_numOfDerangmentsLessEqThanPerms 3
-   quickCheck $ prop_numOfDerangements 3
+   quickCheck $ prop_numOfDerangmentsLessEqThanPerms 5
+   quickCheck $ prop_numOfDerangements 5
    quickCheck $ prop_reverseEvenNumberSizedList [1..5]
    quickCheck $ prop_evenNonReversibleDerangement [1..5]
-   verboseCheck $ prop_isBasicDerangement 5
+   quickCheck $ prop_isBasicDerangement 5
 
 {- 
 
     Question 4.4 
 
-    Property 1 and 2 have equal strength and are stronger than the rest of the properties.
+    Property prop_numOf0PermutationsIsOne and prop_numOf1PermutationsIsZero have equal strength and are stronger than the rest of the properties.
     This is due to them only checking for a singular value which corresponds an edge case.
 
-    Property 3, 4 and 5 also have equal strength but are weaker than 1/2 because they apply for the entire set of integer values.
-    That makes them automatically weaker than property 1/2.
+    Property prop_reverseEvenNumberSizedList is weaker than the above properties but stronger than the rest of them,
+    since we check only evenly sized lists for this property and not every considerable combination.
+
+    The rest of the properties have equal strength but are weaker than the above because they apply for the entire set of integer values.
+    That makes them automatically weaker than the rest.
 
 
     Question 4.5 
