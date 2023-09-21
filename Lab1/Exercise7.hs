@@ -5,6 +5,8 @@ import Test.QuickCheck
 import System.Random
 import Lecture2
 
+-- Indication of time: ~90 Mins
+
 type Name = Int
 
 data Form = Prop Name
