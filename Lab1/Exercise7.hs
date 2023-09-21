@@ -111,20 +111,20 @@ prop_formIsInSubForm :: Form -> Bool
 prop_formIsInSubForm form = inSet form (sub form)
 
 -- Code for 3.) property
-prop_SingleAtom :: Int -> Property
-prop_SingleAtom x = property (sub (Prop x) == Set [Prop x])
+prop_singleAtom :: Int -> Property
+prop_singleAtom x = property (sub (Prop x) == Set [Prop x])
 
 {-- Properties for 7.2
 1.) Testing the property for a single atom that it is one
 Otherwise it is proven by induction.
 --}
 
-prop_SingleAtomAmount :: Int -> Property
-prop_SingleAtomAmount x = property ( nsub (Prop x) == 1)
+prop_singleAtomAmount :: Int -> Property
+prop_singleAtomAmount x = property ( nsub (Prop x) == 1)
 
 main :: IO Result
 main = do
-    quickCheck prop_SingleAtom
-    quickCheck prop_SingleAtomAmount
+    quickCheck prop_singleAtom
+    quickCheck prop_singleAtomAmount
     quickCheckResult $ forAll formsGenerator prop_formIsInSubForm
     quickCheckResult $ forAll formsGenerator prop_lengthOfSet
