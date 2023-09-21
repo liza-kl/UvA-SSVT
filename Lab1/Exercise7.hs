@@ -4,7 +4,6 @@ import SetOrd
 import Test.QuickCheck
 import System.Random
 import Lecture2
-import System.IO.Unsafe
 
 type Name = Int
 
@@ -24,6 +23,7 @@ sub f@(Dsj [f1,f2]) = unionSet ( unionSet (Set [f]) (sub f1)) (sub f2)
 sub f@(Impl f1 f2) = unionSet ( unionSet (Set [f]) (sub f1)) (sub f2)
 sub f@(Equiv f1 f2) = unionSet ( unionSet (Set [f]) (sub f1)) (sub f2)
 
+{-- Generator which generates random Forms --}
 instance Arbitrary Form where
     arbitrary = do
         f1 <- arbitrary
@@ -37,8 +37,6 @@ instance Arbitrary Form where
                  , Impl (Prop f1) (Prop f2)
                  , Equiv (Prop f1) (Prop f2)
                  ]
-
-
 
 {-- 
 
@@ -69,17 +67,24 @@ acount (Neg f) = acount f
 this can be proven by induction. Chapter 7.7 in the Haskel Road to Logic 
 --}
 nsub :: Form -> Int
-nsub form = (ccount form) + (acount form)
+nsub form = ccount form + acount form
 
 -- QuickCheck Properties
 
-propSingleAtom :: Int -> Property
-propSingleAtom x = property (sub (Prop x) == Set [Prop x])
+formsGenerator :: Gen Form
+formsGenerator = arbitrary :: Gen Form
 
-propSingleAtomAmount :: Int -> Property
-propSingleAtomAmount x = property( nsub (Prop x) == 1)
+prop_formIsInSubForm :: Form -> Bool
+prop_formIsInSubForm form = inSet form (sub form)
 
-main :: IO ()
+prop_SingleAtom :: Int -> Property
+prop_SingleAtom x = property (sub (Prop x) == Set [Prop x])
+
+prop_SingleAtomAmount :: Int -> Property
+prop_SingleAtomAmount x = property ( nsub (Prop x) == 1)
+
+main :: IO Result
 main = do
-    quickCheck propSingleAtom
-    quickCheck propSingleAtomAmount
+    quickCheck prop_SingleAtom
+    quickCheck prop_SingleAtomAmount
+    quickCheckResult $ forAll formsGenerator prop_formIsInSubForm
