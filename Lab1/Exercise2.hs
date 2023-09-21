@@ -1,11 +1,12 @@
+-- Time Spent ~ 1h20 
+-- Due to conceptualizing and Haskell issues...
+
 module Exercise2 where
 
 import qualified Data.List (subsequences)
 
 import Test.QuickCheck
 
--- Time Spent ~ 1h20 
--- Due to conceptualizing and Haskell issues...
 
 {- 
 
@@ -52,6 +53,11 @@ main = do
         I am not really testing a mathematical fact but rather just a small set where we can actually calculate the subsequences for.
         We can't be completely sure using this method that this is completely correct, just the part of the specification which we could account for.
         
-        If we were to let this run infinitely for all positive integer values, which would take an infinite amount of time then the check will be sufficient though.
+        Test Report
+
+        If we were to let this run infinitely for all positive integer values,
+        which would take an infinite amount of time then the check will be sufficient though.
+        So we can't prove with this code 100% that is working for all numbers due to computational limits.
+        But it is provable with induction (see above)
 
 --}
