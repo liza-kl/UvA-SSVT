@@ -21,30 +21,32 @@ import Test.QuickCheck
 
 import Data.List 
 
+{-- A helper function to check if an element is in our list--}
 ourContains:: Eq a => [a] -> a -> Bool
 ourContains [] _ = False 
-ourContains (x:xs) elemToCheck
+ourContains (x:xs) elemToCheck 
     | x == elemToCheck = True
     | otherwise = ourContains xs elemToCheck
-
-isPermutation:: Eq a => [a] -> [a] -> Bool
-isPermutation list1 list2 = ourContains (permutations list1) list2 && length list1 == length list2 
 
 {-- a permutation is a rearrangement of a collection of items --}
 -- Repetitions are not allowed in permutations
 -- The nPr formula is, P(n, r) = n! / (n−r)!.
+isPermutation:: Eq a => [a] -> [a] -> Bool
+isPermutation list1 list2 = ourContains (permutations list1) list2 && length list1 == length list2 
 
+fact :: (Num a, Enum a) => a -> a
 fact n = product [1..n] 
-permutationProperty n r = fact n `div` fact (n - r)
 
-
--- Properties of permutations
-
+-- QuickCheck Properties 
 -- To see if a complete inversion/derangement is accounted for.
+
+permutationProperty :: Integral a => a -> a -> a
+permutationProperty n r = fact n `div` fact (n - r)
 
 isEmptyPermutation :: [Integer] -> Bool
 isEmptyPermutation = isPermutation []
 
+-- If you reverse a permutation list, it is still a permutation (but not necessary a derangement)
 prop_invertability:: [Int] -> Bool
 prop_invertability list = isPermutation list (reverse list)
 
@@ -57,15 +59,29 @@ prop_associativity (x:xs) = isPermutation (x:xs) (xs ++ [x])
 prop_identity:: [Int] -> Bool
 prop_identity list = isPermutation list list
 
--- Adding another element to the checked list, which shouldn't be a permutation of the original list.
+-- Adding another element to the checked list, which shouldn't be a permutation
+-- of the original list.
 prop_noPermutation:: [Int] -> Bool
+-- An empty set can't be a permutation of itself
 prop_noPermutation [] = not (isPermutation [] [1]) && not (isPermutation [1] [])
+-- A set with one element in it can't be a permutation of itself
 prop_noPermutation [a] = not (isPermutation [a] [a, 1])
 prop_noPermutation (x:xs) = not (isPermutation (x:xs) ((x:xs) ++ [x]))
 
--- Generates random lists of unique Integers. We have to keep a reasonable size though, so test execution doesn't take too long.
+-- Generates random lists of unique Integers. We have to keep a reasonable size 
+-- though, so test execution doesn't take too long.
 uniqueIntList :: Gen [Int]
 uniqueIntList = listOf arbitrary `suchThat` (\xs -> xs == nub xs && length xs < 10)
+
+
+{-- Test Report
+- All tests are passing, we can automate the test process (we are using QuickCheck for that). Basically
+a permutation is given if all the necessary properties are satisfied.
+- If the list does not contain duplicates, we can assume that all given lists 
+can create permutations (as repetitions are not allowed in permutations)
+-- We weren't sure about the well chosen integer lists but it's probably covered by the provided edge cases
+in prop_noPermutation
+--}
 
 main :: IO ()
 main = do
