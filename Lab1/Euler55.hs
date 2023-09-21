@@ -1,4 +1,4 @@
-module Main where
+module Euler55 where
 
 import Data.List
 
