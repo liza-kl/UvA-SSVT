@@ -1,4 +1,4 @@
-module Euler55 where
+module Main where
 
 import Data.List
 
@@ -12,7 +12,7 @@ import Data.List
 
 lychrelNumbers :: IO Int
 lychrelNumbers = do
-    lychrelNums <- isLychrel 1 1 [] 1 
+    lychrelNums <- isLychrel 1 0 [] 1 
     -- putStrLn (show lychrelNums)
     return (length lychrelNums)
 
