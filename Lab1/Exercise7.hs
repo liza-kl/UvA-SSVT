@@ -40,28 +40,34 @@ instance Arbitrary Form where
 
 
 
-{-- nsub :: Form -> Int 
+{-- 
 
  7.1 a) You can test it with the inclusive / exclusive principle 
  
  --}
 
+{-- Code was taken and modified from Chapter 7.7 in the Haskel Road to Logic book --}
+{-- This function counts the conjunctions --}
 ccount :: Form -> Int
-ccount (Prop n) = 0
-ccount (Cnj [f1,f2]) = 1 + ccount f1 + ccount f2
-ccount (Dsj [f1,f2]) = 1 + ccount f1 + ccount f2
-ccount (Impl f1 f2) = 1 + ccount f1 + ccount f2
-ccount (Equiv f1 f2) = 1 + ccount f1 + ccount f2
-ccount (Neg f) = 1 + ccount f
+ccount (Prop n) = 0 -- a single property is atomic, so the length is zero
+ccount (Cnj [f1,f2]) = 1 + ccount f1 + ccount f2 -- With the following yo
+--  are counting the subformulas, the + 1 is the final conjunction that also needs to be added
+ccount (Dsj [f1,f2]) = 1 + ccount f1 + ccount f2 -- "see above"
+ccount (Impl f1 f2) = 1 + ccount f1 + ccount f2 -- "see above"
+ccount (Equiv f1 f2) = 1 + ccount f1 + ccount f2 -- "see above"
+ccount (Neg f) = 1 + ccount f -- "see above"
 
 acount :: Form -> Int
-acount (Prop n) = 1
+acount (Prop n) = 1 -- "when the base case of atomic value is reached, add 1"
 acount (Cnj [f1,f2]) = acount f1 + acount f2
 acount (Dsj [f1,f2]) = acount f1 + acount f2
 acount (Impl f1 f2) = acount f1 + acount f2
 acount (Equiv f1 f2) = acount f1 + acount f2
 acount (Neg f) = acount f
 
+{-- The length of subformulas is the sum of atomic properties and the number of conjuctions,
+this can be proven by induction. Chapter 7.7 in the Haskel Road to Logic 
+--}
 nsub :: Form -> Int
 nsub form = (ccount form) + (acount form)
 
