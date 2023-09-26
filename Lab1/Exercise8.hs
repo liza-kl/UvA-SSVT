@@ -28,12 +28,10 @@ multiplyAdd1 :: [Integer] -> Integer
 multiplyAdd1 list1 = product list1 + 1
 
 isPrime :: Integer -> Bool
-{- Test report:
-  It works but it gets stuck on certain prime numbers and we don't know why. 
-  If we were to manually assign those weird numbers to their corresponding prime number status
-  it would run indefinitely. Otherwise it will get stuck.
-  isPrime 7858321551080267055879091 = False
--}
+-- Test Report
+-- It gets stuck on certain prime numbers, but if you would insert a number which is bigger than the one
+-- it gets stuck, the tests continue (?) 
+-- isPrime 7858321551080267055879091 = False
 isPrime n = all (\ x -> rem n x /= 0) xs
     where xs = takeWhile (\ y -> y^2 <= n) [2..]
 
