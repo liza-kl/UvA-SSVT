@@ -1,6 +1,6 @@
 module Exercise2 where
 import LTS
-import Test.QuickCheck 
+import Test.QuickCheck
 {-- 
 Random IOLTS generator(s), QuickCheck tests for validateLts, indication of
 time spent
@@ -27,28 +27,26 @@ the labels?
 
 
 {-- Redudant code expressions are for readibility as we are no pros in Haskell </3 --}
-ltsGenState :: Gen State
+ltsGenState :: Gen [State] -- A generator for a list of states 
 ltsGenState = do
-                rndNum <- oneof [0..]
-                return rndNum
+                elements [0..10]
 
-ltsGenLabel :: Gen Label
+ltsGenLabel :: Gen [Label] -- A generator for a list of labels
 ltsGenLabel = do
-                rndLabel <- oneof [return "lbla",return "labla"] -- Why do we need to use return?
-                return rndLabel
+                elements [return x | x <- ["a","b","c","d"]] -- Why do we need to use return?
 
-ltsGenLabeledTransition ::  Gen [State] -> Gen [Label] -> Gen LabeledTransition
-ltsGenLabeledTransition possibleStates possibleLabels = do 
+ltsGenLabeledTransition ::  Gen [State] -> Gen [Label] -> Gen [LabeledTransition]
+ltsGenLabeledTransition possibleStates possibleLabels = do
                 firstState <- oneof possibleStates
                 transition <- oneof possibleLabels
                 lastState <- oneof possibleStates
                 return (firstState, transition, lastState)
 
-ltsGen :: Gen IOLTS 
-ltsGen = do 
-            setOfPossibleStates :: [State] <- listOf (ltsGenState)
-            setOfPossibleInputs :: [Label] <- listOf (ltsGenLabel)
-            setOfPossibleOutputs :: [Label] <- listOf(ltsGenLabel)
-            setOfPossibleLabeledTransitions <- ltsGenLabeledTransition (setOfPossibleStates,setOfPossibleInputs)
-            initialState :: [State] <- oneof (setOfPossibleStates)
+ltsGen :: Gen IOLTS
+ltsGen = do
+            let setOfPossibleStates =  ltsGenState
+            setOfPossibleInputs  <-  ltsGenLabel
+            setOfPossibleOutputs <-  ltsGenLabel
+            setOfPossibleLabeledTransitions <- ltsGenLabeledTransition (ltsGenState, ltsGenLabel)
+            let initialState = oneof setOfPossibleStates
             return  (setOfPossibleStates,setOfPossibleInputs,setOfPossibleOutputs,setOfPossibleLabeledTransitions,initialState)
