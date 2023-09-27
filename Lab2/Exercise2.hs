@@ -5,6 +5,7 @@ import Data.List
 {-- 
 Random IOLTS generator(s), QuickCheck tests for validateLts, indication of
 time spent
+
 --}
 
 {-- Thinking process before implementing the Generator
@@ -29,10 +30,10 @@ the labels?
 
 {-- Redudant code expressions are for readibility as we are no pros in Haskell </3 --}
 ltsGenState :: Gen State -- A generator for a single state
-ltsGenState = elements [0..10]
+ltsGenState = elements [0..2]
 
 ltsGenLabel :: Gen Label -- A generator for a single label
-ltsGenLabel = elements ["one", "two", "three", "four"]
+ltsGenLabel = elements ["a","b","c"]
 
 ltsGenLabeledTransition :: Gen State -> Gen Label -> Gen LabeledTransition
 ltsGenLabeledTransition possibleStateGen possibleLabelGen = do
@@ -47,7 +48,7 @@ ltsGen = do
     setOfPossibleStates <- nub <$> listOf ltsGenState -- using "nub" to get a unique list
     setOfPossibleInputs <- nub <$> listOf ltsGenLabel
     setOfPossibleOutputs <- nub <$> listOf ltsGenLabel
-    setOfPossibleLabeledTransitions <- listOf (ltsGenLabeledTransition (elements setOfPossibleStates) (elements setOfPossibleInputs))
+    setOfPossibleLabeledTransitions <- nub <$> listOf (ltsGenLabeledTransition (elements setOfPossibleStates) (elements setOfPossibleInputs))
     return (setOfPossibleStates, setOfPossibleInputs, setOfPossibleOutputs, setOfPossibleLabeledTransitions, initialState)
 
 main :: IO ()
