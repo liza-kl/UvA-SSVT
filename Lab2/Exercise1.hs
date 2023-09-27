@@ -18,7 +18,7 @@ List of Factors that make an IOLTS invalid:
 - #5 Factor q0 (inital state) ist not an element of Q 
 - #6 Factor tau is in the L_i set
 - #7 Factor Transition T is not a subset of the cartesian does not satisfy the transition relation 
-- (not sure: 8. delta needs to be a valid input)
+- #8 Factor Delta Transitions are not returning the previous state (-> not "looping")
 --}
 
 createCartesian :: [State] -> [Label] -> [(State, Label, State)]
@@ -54,7 +54,15 @@ prop_initialStateInStateSet (stateSet, _,_,_,initialValue) = initialValue `elem`
 -- Every transition tuple must conform the transition definition TODO: Dunno why this property always giving false but validiting before?!
 prop_cartesianRelationInTransition :: IOLTS -> Bool
 prop_cartesianRelationInTransition (stateSet, inputValues, _,labeledTransitions,_) =
-   all (`elem` createCartesian stateSet (inputValues ++ [tau])) labeledTransitions
+   all (`elem` createCartesian stateSet (inputValues ++ [tau] ++ [delta])) labeledTransitions -- Adding delta for the idle state
+
+-- #8 Factor
+prop_deltaBehavior :: IOLTS -> Bool
+prop_deltaBehavior (_,_,_,[],_) = True
+prop_deltaBehavior (_,[],_,_,_) = True
+prop_deltaBehavior (_,_,[],_,_) = True
+prop_deltaBehavior (_, _, _,[(pre,trans,post)],_) = if trans == delta then (pre == post) else True
+prop_deltaBehavior _ = False
 
 {-- 
 Concise Test Report
