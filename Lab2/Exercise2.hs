@@ -1,6 +1,7 @@
 module Exercise2 where
 import LTS
 import Test.QuickCheck
+import Data.List
 {-- 
 Random IOLTS generator(s), QuickCheck tests for validateLts, indication of
 time spent
@@ -28,12 +29,10 @@ the labels?
 
 {-- Redudant code expressions are for readibility as we are no pros in Haskell </3 --}
 ltsGenState :: Gen State -- A generator for a single state
-ltsGenState = do
-    elements [0..3]
+ltsGenState = elements [0..10]
 
 ltsGenLabel :: Gen Label -- A generator for a single label
-ltsGenLabel = do
-    elements ["OneState", "SecondState", "ThirdState", "FourthState"]
+ltsGenLabel = elements ["one", "two", "three", "four"]
 
 ltsGenLabeledTransition :: Gen State -> Gen Label -> Gen LabeledTransition
 ltsGenLabeledTransition possibleStateGen possibleLabelGen = do
@@ -45,13 +44,13 @@ ltsGenLabeledTransition possibleStateGen possibleLabelGen = do
 ltsGen :: Gen IOLTS
 ltsGen = do
     initialState <- ltsGenState
-    setOfPossibleStates <- listOf ltsGenState
-    setOfPossibleInputs <- listOf ltsGenLabel
-    setOfPossibleOutputs <- listOf ltsGenLabel
+    setOfPossibleStates <- nub <$> listOf ltsGenState -- using "nub" to get a unique list
+    setOfPossibleInputs <- nub <$> listOf ltsGenLabel
+    setOfPossibleOutputs <- nub <$> listOf ltsGenLabel
     setOfPossibleLabeledTransitions <- listOf (ltsGenLabeledTransition (elements setOfPossibleStates) (elements setOfPossibleInputs))
     return (setOfPossibleStates, setOfPossibleInputs, setOfPossibleOutputs, setOfPossibleLabeledTransitions, initialState)
 
-main :: IO () 
-main = do 
+main :: IO ()
+main = do
     someStuff <- generate ltsGen
     print someStuff
