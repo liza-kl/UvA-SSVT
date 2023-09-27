@@ -2,29 +2,77 @@
 module Exercise1 where
 import LTS
 import Data.List
+import Test.QuickCheck
 
 {-- 
-list of factors, implementation, concise test report, indication of time spent.
+Time Spent: 30 Minutes, mainly documentation
 --}
 
 {-- 
-include tau from lts but not epsilon 
-List of Factors:
-- 1. The tuple needs to have 5 values (checked bei the iolts type)
-- 2. The joint of L_i and L_o must be an empty set (intersection)
-- 3. L_i and L_o must be countable (?)
-- 4. The initial Q state must not be empty
-- 5. The initial q0 state must be in the set of the initial values 
-- 6. tau must be in the L_i set
-- 7. delta must be a valid input (?) dunno if to include -> ask 
+List of Factors that make an IOLTS invalid: 
 
+- #1 Factor The IOLTS tuple doesn't have 5 values -- Checked by compiler
+- #2 Factor The joint of L_i (input set) and L_o (output set) is not an empty set 
+- #3 Factor L_i and L_o are not countable -- Dunno how to implement
+- #4 Factor Q (the set of states) is an empty set 
+- #5 Factor q0 (inital state) ist not an element of Q 
+- #6 Factor tau is in the L_i set
+- #7 Factor Transition T is not a subset of the cartesian does not satisfy the transition relation 
+- (not sure: 8. delta needs to be a valid input)
 --}
+
+createCartesian :: [State] -> [Label] -> [(State, Label, State)]
+createCartesian setState inputValues =  [(preState, transitionLabel, afterState) | preState <- setState, transitionLabel <- inputValues ,afterState <- setState ]
+
 
 validateLTS :: IOLTS -> Bool
-validateLTS ([], _, _, _, _) = False -- if your initial set is empty, it is not an LTS / IOLTS 
-validateLTS (setState, inputValues, outputValues, labeledTransitions, initialState) 
-    | intersect inputValues outputValues == [] = True 
-    | tau `elem` inputValues = True 
-    | initialState `elem` setState = True 
-    | otherwise = True 
+validateLTS ([], _, _, _, _) = False -- if your initial set is empty, it is not an LTS / IOLTS , but not checking for empty inputs as this can be the case according to definition
+validateLTS (setState, inputValues, outputValues, labeledTransitions, initialState)
+    | null (inputValues `intersect` outputValues) = True -- Check if list is empty
+    | tau `elem` inputValues = False
+    | initialState `elem` setState = True
+    | all (`elem` createCartesian setState (inputValues ++ [tau])) labeledTransitions = True
+    | otherwise = True
 
+-- #2 Factor
+prop_interSectionOfInputOutputIsEmpty :: IOLTS -> Bool
+prop_interSectionOfInputOutputIsEmpty (_, inputValues, outputValues,_,_) = null (inputValues `intersect` outputValues)
+
+-- #4 Factor
+prop_initialSetNotEmpty :: IOLTS -> Bool
+prop_initialSetNotEmpty (setOfStates, _,_,_,_) = not (null setOfStates)
+
+-- #6 Factor
+prop_tauNotInInputSet :: IOLTS -> Bool
+prop_tauNotInInputSet (_, inputValues,_,_,_) = tau `notElem` inputValues
+
+-- #5 Factor
+prop_initialStateInStateSet :: IOLTS -> Bool
+prop_initialStateInStateSet (stateSet, _,_,_,initialValue) = initialValue `elem` stateSet
+
+-- #7 Factor
+-- Every transition tuple must conform the transition definition TODO: Dunno why this property always giving false but validiting before?!
+prop_cartesianRelationInTransition :: IOLTS -> Bool
+prop_cartesianRelationInTransition (stateSet, inputValues, _,labeledTransitions,_) =
+   all (`elem` createCartesian stateSet (inputValues ++ [tau])) labeledTransitions
+
+{-- 
+Concise Test Report
+Validated agains the coffee examples in the LTS module as no QuickCheck tests are asked for.
+First, we didn't udnerstand why the prop_cartesianRelationInTransition returns false but validates correctly?
+--}
+main :: IO ()
+main =  do
+        let ltsImplementations = [
+                                counterImpl,counterModel,
+                                coffeeImpl1, coffeeModel1,
+                                coffeeImpl2, coffeeModel2,
+                                coffeeImpl3,coffeeModel3,
+                                coffeeImpl4,coffeeModel4,
+                                coffeeImpl5,coffeeModel5,
+                                coffeeImpl6,coffeeModel6,
+                                tretmanK2,tretmanK3,
+                                tretmanI1,tretmanI2,tretmanI3,tretmanI4,
+                                tretmanS1,tretmanS2,tretmanS3,tretmanS4,
+                                tretmanR1,tretmanR2]
+        print (all validateLTS ltsImplementations)
