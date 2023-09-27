@@ -27,26 +27,31 @@ the labels?
 
 
 {-- Redudant code expressions are for readibility as we are no pros in Haskell </3 --}
-ltsGenState :: Gen [State] -- A generator for a list of states 
+ltsGenState :: Gen State -- A generator for a single state
 ltsGenState = do
-                elements [0..10]
+    elements [0..3]
 
-ltsGenLabel :: Gen [Label] -- A generator for a list of labels
+ltsGenLabel :: Gen Label -- A generator for a single label
 ltsGenLabel = do
-                elements [return x | x <- ["a","b","c","d"]] -- Why do we need to use return?
+    elements ["OneState", "SecondState", "ThirdState", "FourthState"]
 
-ltsGenLabeledTransition ::  Gen [State] -> Gen [Label] -> Gen [LabeledTransition]
-ltsGenLabeledTransition possibleStates possibleLabels = do
-                firstState <- oneof possibleStates
-                transition <- oneof possibleLabels
-                lastState <- oneof possibleStates
-                return (firstState, transition, lastState)
+ltsGenLabeledTransition :: Gen State -> Gen Label -> Gen LabeledTransition
+ltsGenLabeledTransition possibleStateGen possibleLabelGen = do
+    firstState <- possibleStateGen
+    transitionLabel <- possibleLabelGen
+    lastState <- possibleStateGen
+    return (firstState, transitionLabel, lastState)
 
 ltsGen :: Gen IOLTS
 ltsGen = do
-            let setOfPossibleStates =  ltsGenState
-            setOfPossibleInputs  <-  ltsGenLabel
-            setOfPossibleOutputs <-  ltsGenLabel
-            setOfPossibleLabeledTransitions <- ltsGenLabeledTransition (ltsGenState, ltsGenLabel)
-            let initialState = oneof setOfPossibleStates
-            return  (setOfPossibleStates,setOfPossibleInputs,setOfPossibleOutputs,setOfPossibleLabeledTransitions,initialState)
+    initialState <- ltsGenState
+    setOfPossibleStates <- listOf ltsGenState
+    setOfPossibleInputs <- listOf ltsGenLabel
+    setOfPossibleOutputs <- listOf ltsGenLabel
+    setOfPossibleLabeledTransitions <- listOf (ltsGenLabeledTransition (elements setOfPossibleStates) (elements setOfPossibleInputs))
+    return (setOfPossibleStates, setOfPossibleInputs, setOfPossibleOutputs, setOfPossibleLabeledTransitions, initialState)
+
+main :: IO () 
+main = do 
+    someStuff <-  generate (arbitrary::Gen IOLTS) 
+    print someStuff
