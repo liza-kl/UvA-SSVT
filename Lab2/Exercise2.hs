@@ -1,5 +1,6 @@
 module Exercise2 where
 import LTS
+import Exercise1
 import Test.QuickCheck
 import Data.List
 {-- 
@@ -28,9 +29,8 @@ the labels?
  --}
 
 
-{-- Redudant code expressions are for readibility as we are no pros in Haskell </3 --}
 ltsGenState :: Gen State -- A generator for a single state
-ltsGenState = elements [0..2]
+ltsGenState = elements [0..3]
 
 ltsGenLabel :: Gen Label -- A generator for a single label
 ltsGenLabel = elements ["a","b","c"]
@@ -44,15 +44,19 @@ ltsGenLabeledTransition possibleStateGen possibleLabelGen = do
 
 ltsGen :: Gen IOLTS
 ltsGen = do
-    initialState <- ltsGenState
-    setOfPossibleStates <- nub <$> listOf ltsGenState -- using "nub" to get a unique list
+    setOfPossibleStates <- listOf ltsGenState `suchThat` (\list -> length (nub list) > 0)
+    initialStateIndex <- choose (0, length setOfPossibleStates - 1)
+    let initialState = setOfPossibleStates !! initialStateIndex
     setOfPossibleInputs <- nub <$> listOf ltsGenLabel
-    setOfPossibleOutputs <- nub <$> listOf ltsGenLabel
+    setOfPossibleOutputs <- filter (`notElem` setOfPossibleInputs) . nub <$> listOf ltsGenLabel
     setOfPossibleLabeledTransitions <- nub <$> listOf (ltsGenLabeledTransition (elements setOfPossibleStates) (elements (setOfPossibleInputs ++ [tau])))
     -- Recording to the Definition we need to include tau in the inputs
-    return (setOfPossibleStates, setOfPossibleInputs ++ [tau], setOfPossibleOutputs, setOfPossibleLabeledTransitions, initialState)
+    return (setOfPossibleStates, setOfPossibleInputs, setOfPossibleOutputs, setOfPossibleLabeledTransitions, initialState)
 
-main :: IO ()
+main :: IO()
 main = do
-    someStuff <- generate ltsGen
-    print someStuff
+   quickCheck $ forAll ltsGen prop_initialSetNotEmpty
+   quickCheck $ forAll ltsGen prop_interSectionOfInputOutputIsEmpty
+   quickCheck $ forAll ltsGen prop_tauNotInInputSet
+   quickCheck $ forAll ltsGen prop_initialStateInStateSet
+   quickCheck $ forAll ltsGen prop_cartesianRelationInTransition
