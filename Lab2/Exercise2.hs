@@ -48,8 +48,9 @@ ltsGen = do
     setOfPossibleStates <- nub <$> listOf ltsGenState -- using "nub" to get a unique list
     setOfPossibleInputs <- nub <$> listOf ltsGenLabel
     setOfPossibleOutputs <- nub <$> listOf ltsGenLabel
-    setOfPossibleLabeledTransitions <- nub <$> listOf (ltsGenLabeledTransition (elements setOfPossibleStates) (elements setOfPossibleInputs))
-    return (setOfPossibleStates, setOfPossibleInputs, setOfPossibleOutputs, setOfPossibleLabeledTransitions, initialState)
+    setOfPossibleLabeledTransitions <- nub <$> listOf (ltsGenLabeledTransition (elements setOfPossibleStates) (elements (setOfPossibleInputs ++ [tau])))
+    -- Recording to the Definition we need to include tau in the inputs
+    return (setOfPossibleStates, setOfPossibleInputs ++ [tau], setOfPossibleOutputs, setOfPossibleLabeledTransitions, initialState)
 
 main :: IO ()
 main = do
