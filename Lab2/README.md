@@ -7,3 +7,7 @@ Tretmans.
 - Look at the models and datatypes defined in the LTS.hs file.
 
 - Make a list of questions on specific points that cause difficulty of understanding.
+
+- Why not just state machine
+1. What is the difference between a normal automat and a labelled transition system? 
+2. What is a strongly converging and image finite system?
