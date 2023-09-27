@@ -4,9 +4,7 @@ import Exercise1
 import Test.QuickCheck
 import Data.List
 {-- 
-Random IOLTS generator(s), QuickCheck tests for validateLts, indication of
-time spent
-
+Time spent: 60 Minutes
 --}
 
 {-- Thinking process before implementing the Generator
@@ -30,10 +28,10 @@ the labels?
 
 
 ltsGenState :: Gen State -- A generator for a single state
-ltsGenState = elements [0..3]
+ltsGenState = elements [0..15]
 
 ltsGenLabel :: Gen Label -- A generator for a single label
-ltsGenLabel = elements ["a","b","c"]
+ltsGenLabel = elements [ return x | x <- ['a'..'z']]
 
 ltsGenLabeledTransition :: Gen State -> Gen Label -> Gen LabeledTransition
 ltsGenLabeledTransition possibleStateGen possibleLabelGen = do
@@ -44,7 +42,7 @@ ltsGenLabeledTransition possibleStateGen possibleLabelGen = do
 
 ltsGen :: Gen IOLTS
 ltsGen = do
-    setOfPossibleStates <- listOf ltsGenState `suchThat` (\list -> length (nub list) > 0)
+    setOfPossibleStates <- listOf ltsGenState `suchThat` (not . null . nub)
     initialStateIndex <- choose (0, length setOfPossibleStates - 1)
     let initialState = setOfPossibleStates !! initialStateIndex
     setOfPossibleInputs <- nub <$> listOf ltsGenLabel
@@ -53,10 +51,15 @@ ltsGen = do
     -- Recording to the Definition we need to include tau in the inputs
     return (setOfPossibleStates, setOfPossibleInputs, setOfPossibleOutputs, setOfPossibleLabeledTransitions, initialState)
 
+
+{-- QuickCheck tests with properties from Exercise1 --}
 main :: IO()
 main = do
+   -- Tests for ltsGen 
    quickCheck $ forAll ltsGen prop_initialSetNotEmpty
    quickCheck $ forAll ltsGen prop_interSectionOfInputOutputIsEmpty
    quickCheck $ forAll ltsGen prop_tauNotInInputSet
    quickCheck $ forAll ltsGen prop_initialStateInStateSet
    quickCheck $ forAll ltsGen prop_cartesianRelationInTransition
+
+
