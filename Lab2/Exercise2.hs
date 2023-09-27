@@ -53,5 +53,5 @@ ltsGen = do
 
 main :: IO () 
 main = do 
-    someStuff <-  generate (arbitrary::Gen IOLTS) 
+    someStuff <- generate ltsGen
     print someStuff
