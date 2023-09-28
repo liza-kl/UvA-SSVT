@@ -1,18 +1,18 @@
 module Exercise5 where
-
+import Data.List
+import Exercise4 
 import LTS
 {-- Haskell program, description of each bug, indication of time spent. --}
 
 -- Taking the door 1 implementation as a basis for the IOLTS 
 -- We need to implement the output function in order to check other stuff
 -- Definition found in presentation slides 
+
 out :: IOLTS -> [State] -> [Label]
 -- case for when the state list is empty, where we return the delta LTS datatype
 out  (states,inputs,outputs,transitions,state) [] = [delta]
-out (_, _, _, transitions, _) states =
-    map (\s -> nextTransitions' transitions s) states
-
-
+out (_, _, outputs, transitions, _) states =
+    filter (`elem` outputs) (nub $ concatMap (map snd . nextTransitions' transitions) states)
 
 
 -- 
