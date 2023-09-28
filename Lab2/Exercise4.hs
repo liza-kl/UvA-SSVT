@@ -23,6 +23,12 @@ after (_, _, _, [], _) _ = []  -- No labeled transitions, return an empty list
 after (_, _, _, transitions, initialState) trace =
     findFollowingStates initialState trace transitions
 
+removePrefixChar :: Char -> String -> String
+removePrefixChar prefixChar str =
+    case stripPrefix [prefixChar] str of
+        Just rest -> rest
+        Nothing -> str
+        
 -- Function to find following states based on the trace
 findFollowingStates :: State -> Trace -> [LabeledTransition] -> [State]
 -- if no transition is made, the iolts remains in the current state 
@@ -31,19 +37,10 @@ findFollowingStates currentState [] _ = [currentState]
 findFollowingStates currentState (input:rest) transitions = 
     -- check for the ? in the inputs, and only consider the ones which have
     -- the corresponding input which is asked for
-    let matchingTransitions = filter (\(_, l, _) -> (l == input) || (l == "?" ++ input)) transitions
+    let matchingTransitions = filter (\(_, l, _) -> (l == input) || (l == (removePrefixChar '?' input))) transitions
     -- look at the current transition tuple, return the next state 
         nextStates = map (\(_, _, nextState) -> nextState) matchingTransitions 
     in
         -- map over next states, recurse, concat the maps for all the states.
         concatMap (\nextState -> findFollowingStates nextState rest transitions) nextStates
 
-main :: IO ()
-main = do
-    let iolts = ([1, 2, 3, 4], ["a", "b", "c"], ["x", "y", "z"], [(1, "a", 2), (1,"a",3), (2, "b", 3), (3, "c", 4)], 1)
-    let trace = ["a"]
-    
-    let followingStates = iolts `after` trace
-    
-    putStrLn "Following States:"
-    print followingStates
