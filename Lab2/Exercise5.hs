@@ -14,8 +14,8 @@ out  (states,inputs,outputs,transitions,state) [] = [delta]
 out (_, _, outputs, transitions, _) states =
     filter (`elem` outputs) (nub $ concatMap (map snd . nextTransitions' transitions) states)
 
-
--- 
+ioltstraces :: IOLTS -> [Trace] -- [[Label]]
+ioltstraces (q, i, o, lt, q0) = nub $ map snd (traces' lt [([q0],[])])
 
 
 {-- 
@@ -26,7 +26,6 @@ doorImpl1 1 "lock" = (2, "locked")
 doorImpl1 2 "unlock" = (1, "unlocked")
 doorImpl1 _ _ = error "Invalid command and/or state!"
 --}
-
 {-- The correctness of the implementation can be tests with ioco against the other door implementations --}
 
 correctDoorModel :: IOLTS
@@ -37,6 +36,16 @@ correctDoorModel = createIOLTS [
                 (2, "?unlock", 1), (2,"!unlocked",1)]
 
 -- testLTSAgainstSUT :: IOLTS -> (State -> Label -> (State, Label)) -> Bool
+
+-- Define ioco Function to get the outputs.
+-- Definition of ioco is for all (s)traces of the model must confirm: out ( implementation after trace ) is a subset
+-- of out (model after trace)
+
+ioco :: IOLTS -> IOLTS -> Bool 
+ioco implementation model =  
+    let modelTraces = ioltstraces model
+        implTraces = ioltstraces implementation 
+    in all (\implTrace -> all (\label -> label `elem` out (model `after` implTrace)) (out (implementation `after` implTrace))) implTraces
 
 -- In the end you need to print smt like doorImplX ioco correctDoorModel
 main :: IO ()
