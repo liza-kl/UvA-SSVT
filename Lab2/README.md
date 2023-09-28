@@ -11,3 +11,10 @@ Tretmans.
 - Why not just state machine
 1. What is the difference between a normal automat and a labelled transition system? 
 2. What is a strongly converging and image finite system?
+
+
+--- Lab Questions 
+#1 
+- Why is the prop test returning false
+#2
+#3 
