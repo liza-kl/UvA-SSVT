@@ -1,0 +1,209 @@
+# Set the default timeout for responses (in seconds)
+timeout 0.5
+
+# Define an external channel
+external 'door'
+
+# Define a process describing the behavior of the coffee machine.
+process('door') {
+
+  # Define stimuli (input) and responses (output) the process can perform on
+  # this channel.
+  channel('door') {
+    stimulus 'open'
+    stimulus 'close'
+    stimulus 'lock', "passcode" => :integer
+    stimulus 'unlock', "passcode" => :integer
+
+    response 'opened'
+    response 'closed'
+    response 'locked'
+    response 'unlocked'
+    response 'invalid_command'
+    response 'invalid_passcode'
+    response 'incorrect_passcode'
+    response 'shut_off'
+  }
+
+  var '_opened', :boolean, false
+  var '_locked', :boolean, false
+  var '_passcode', :integer, 0000
+  var '_recieved_passcode', :integer, 0000
+  var '_invalid_passcode_attempts', :integer, 0
+
+  @config = {
+  vendor: 'XYZ'
+  }
+
+  state 'start'
+  choice {
+    o {
+        receive 'open', constraint: "_opened == false && _locked == false"
+        send 'opened', update: '_opened = true'; goto "opened"
+    }
+    o {
+        receive 'close', constraint: "_opened == true"
+        send 'closed', update: "_opened = false"; goto "closed"
+    }
+    o {
+        receive 'lock', constraint: "_locked == false && _opened == false && passcode <= 9999 && passcode >= 0000", update: "_passcode = passcode;"
+        send 'locked', update: "_locked = false;"; goto "locked"
+    }
+    o {
+        receive 'unlock', constraint: "_locked == true && _opened == false  && passcode <= 9999 && passcode >= 0000"
+        send 'unlocked', update: "_locked = false"; goto "unlocked"
+    }
+  }
+
+
+  state 'opened'
+  choice {
+    o {
+        receive 'open'
+        send 'invalid_command', constraint: "_invalid_passcode_attempts < 2"; goto "opened"
+    }
+    o {
+        receive 'close'
+        send 'closed', update: "_opened = false", constraint: "_invalid_passcode_attempts < 2"; goto "closed"
+    }
+    o {
+        receive 'lock', constraint: "passcode <= 9999 && passcode >= 0000"
+        send 'invalid_command', constraint: "_invalid_passcode_attempts < 2"; goto "opened"
+    }
+    o {
+        receive 'unlock', constraint: "passcode <= 9999 && passcode >= 0000"
+        send 'invalid_command', constraint: "_invalid_passcode_attempts < 2"; goto "opened"
+    }
+  }
+
+  state 'closed'
+  choice {
+    o {
+        receive 'open'
+        choice {
+          o {
+            send 'opened', constraint: "_locked == false && _invalid_passcode_attempts < 2", update: '_opened = true'; goto "opened"
+          }
+          o {
+            send 'invalid_command', constraint: "_locked == true && _invalid_passcode_attempts < 2"; goto "closed"
+          }
+        }
+    }
+    o {
+        receive 'close'
+        send 'invalid_command', constraint: "_invalid_passcode_attempts < 2"; goto "closed"
+    }
+    o {
+        receive 'lock', constraint: "passcode <= 9999 && passcode >= 0000", update: "_passcode = passcode;"
+        choice {
+          o {
+            send 'locked', constraint: "_locked == false && _invalid_passcode_attempts < 2", update: "_locked = true"; goto "locked"
+          }
+          o {
+            send 'invalid_command', constraint: "_locked == true && _invalid_passcode_attempts < 2"; goto "closed"
+          }
+        }
+    }
+    o {
+        receive 'unlock', constraint: "passcode <= 9999 && passcode >= 0000", update: "_recieved_passcode = passcode"
+        choice {
+          o {
+            choice{
+              o {
+                send 'unlocked', constraint: "_locked == true && _recieved_passcode == _passcode && _invalid_passcode_attempts < 2", update: "_locked = false"; goto "unlocked"
+              }
+              o {
+                send 'incorrect_passcode', update: "_invalid_passcode_attempts = _invalid_passcode_attempts + 1";
+                send 'shut_off', constraint: "_invalid_passcode_attempts >= 2";
+                goto "closed"
+              }
+            }
+          }
+          o {
+            send 'invalid_passcode', constraint: "_recieved_passcode > 9999 || _recieved_passcode < 0000"; goto "locked"
+          }
+           o {
+            send 'invalid_command', constraint: "_locked == false && _invalid_passcode_attempts < 2"; goto "closed"
+           }
+      }
+    }
+  }
+
+  state 'locked'
+  choice {
+    o {
+        receive 'open'
+        send 'invalid_command', constraint: "_invalid_passcode_attempts < 2"; goto "locked"
+    }
+    o {
+        receive 'close'
+        send 'invalid_command', constraint: "_invalid_passcode_attempts < 2"; goto "locked"
+    }
+    o {
+        receive 'lock', constraint: "(passcode <= 9999 && passcode >= 0000 && _invalid_passcode_attempts < 2)"
+        send 'invalid_command'; goto "locked"
+    }
+    o {
+        receive 'unlock', constraint: "passcode <= 9999 && passcode >= 0000", update: "_recieved_passcode = passcode"
+        choice {
+          o {
+            choice{
+              o {
+                send 'unlocked', constraint: "_opened == false && _recieved_passcode == _passcode && _invalid_passcode_attempts < 2", update: "_locked = false"; goto "unlocked"
+              }
+              o {
+                send 'shut_off', constraint: "_opened == false && _recieved_passcode == _passcode && _invalid_passcode_attempts >= 2";
+                goto "locked"
+              }
+              o {
+                send 'incorrect_passcode', constraint: "_invalid_passcode_attempts < 2", update: "_invalid_passcode_attempts = _invalid_passcode_attempts + 1";
+                send 'shut_off', constraint: "_invalid_passcode_attempts >= 2";
+                goto "locked"
+              }
+          }
+          }
+          o {
+            send 'invalid_passcode', constraint: "_recieved_passcode > 9999 || _recieved_passcode < 0000"; goto "locked"
+          }
+          o {
+            send 'invalid_command', constraint: "_opened == true && _invalid_passcode_attempts < 2"; goto "locked"
+          }
+        }
+    }
+  }
+
+  state 'unlocked'
+  choice {
+    o {
+        receive 'open'
+        choice {
+          o {
+            send 'opened', constraint: "_opened == false && _invalid_passcode_attempts < 2", update: '_opened = true'; goto "opened"
+          }
+          o {
+            send 'invalid_command', constraint: "_opened == true && _invalid_passcode_attempts < 2"; goto "unlocked"
+          }
+        }
+    }
+    o {
+        receive 'close'
+         choice {
+          o {
+            send 'closed', constraint: "_opened == true && _invalid_passcode_attempts < 2", update: "_opened = false"; goto "closed"
+          }
+          o {
+            send 'invalid_command', constraint: "_opened == false && _invalid_passcode_attempts < 2"; goto "unlocked"
+          }
+         }
+    }
+    o {
+        receive 'lock', constraint: "passcode <= 9999 && passcode >= 0000 && _invalid_passcode_attempts < 2"
+        send 'locked', update: "_locked = true"; goto "locked"
+    }
+    o {
+        receive 'unlock', constraint: "passcode <= 9999 && passcode >= 0000 && _invalid_passcode_attempts < 2"
+        send 'invalid_command'; goto "unlocked"
+    }
+  }
+
+}
