@@ -28,10 +28,10 @@ the labels?
 
 {-- For sake of ease, transitioned labels need to have at least one elem.--}
 ltsGenState :: Gen State -- A generator for a single state
-ltsGenState = elements [0..15]
+ltsGenState = elements [0..5]
 
 ltsGenLabel :: Gen Label -- A generator for a single label
-ltsGenLabel = elements [ return x | x <- ['a'..'z']] 
+ltsGenLabel = elements [ return x | x <- ['a'..'e']] 
 
 ltsGenLabeledTransition :: Gen State -> Gen Label -> Gen LabeledTransition
 ltsGenLabeledTransition possibleStateGen possibleLabelGen = do
@@ -53,7 +53,7 @@ ltsGen = do
 
 ltsGenDelta :: Gen IOLTS
 ltsGenDelta = do
-    setOfPossibleStates <- listOf ltsGenState `suchThat` (not . null )
+    setOfPossibleStates <- listOf ltsGenState `suchThat` (not . null . nub)
     initialStateIndex <- choose (0, length setOfPossibleStates - 1)
     let initialState = setOfPossibleStates !! initialStateIndex
     setOfPossibleInputs <- nub <$> listOf ltsGenLabel
