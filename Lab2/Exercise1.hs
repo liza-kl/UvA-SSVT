@@ -28,10 +28,10 @@ createCartesian setState inputValues =  [(preState, transitionLabel, afterState)
 validateLTS :: IOLTS -> Bool
 validateLTS ([], _, _, _, _) = False -- if your initial set is empty, it is not an LTS / IOLTS , but not checking for empty inputs as this can be the case according to definition
 validateLTS (setState, inputValues, outputValues, labeledTransitions, initialState)
-    | null (inputValues `intersect` outputValues) = True -- Check if list is empty
     | tau `elem` inputValues = False
-    | initialState `elem` setState = True
-    | all (`elem` createCartesian setState (inputValues ++ [tau])) labeledTransitions = True
+    | not (null (inputValues `intersect` outputValues)) = False -- Check if list is empty
+    | initialState `notElem` setState = False
+    | not (all (`elem` createCartesian setState (inputValues ++ [tau] ++ outputValues)) labeledTransitions) = False
     | otherwise = True
 
 -- #2 Factor
@@ -51,17 +51,18 @@ prop_initialStateInStateSet :: IOLTS -> Bool
 prop_initialStateInStateSet (stateSet, _,_,_,initialValue) = initialValue `elem` stateSet
 
 -- #7 Factor
--- Every transition tuple must conform the transition definition TODO: Dunno why this property always giving false but validiting before?!
+-- Every transition tuple must conform the transition definitio
+
 prop_cartesianRelationInTransition :: IOLTS -> Bool
-prop_cartesianRelationInTransition (stateSet, inputValues, _,labeledTransitions,_) =
-   all (`elem` createCartesian stateSet (inputValues ++ [tau] ++ [delta])) labeledTransitions -- Adding delta for the idle state
+prop_cartesianRelationInTransition (stateSet, inputValues, outputValues,labeledTransitions,_) =
+   all (`elem` createCartesian stateSet (inputValues ++ [tau] ++ [delta] ++ outputValues)) labeledTransitions -- Adding delta for the idle state
 
 -- #8 Factor
 prop_deltaBehavior :: IOLTS -> Bool
 prop_deltaBehavior (_,_,_,[],_) = True
 prop_deltaBehavior (_,[],_,_,_) = True
 prop_deltaBehavior (_,_,[],_,_) = True
-prop_deltaBehavior (_, _, _,[(pre,trans,post)],_) = if trans == delta then (pre == post) else True
+prop_deltaBehavior (_, _, _,[(pre,trans,post)],_) = (trans /= delta) || (pre == post)
 prop_deltaBehavior _ = False
 
 {-- 
