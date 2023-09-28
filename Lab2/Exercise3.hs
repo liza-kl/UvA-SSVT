@@ -5,7 +5,7 @@ import Data.List
 import Test.QuickCheck
 import LTS
 
-{-- TODO THIS CODE IS NOT WORKING! --}
+{-- TODO THIS CODE IS NOT WORKING! FEEL FREE TO DELETE --}
 {-- 
 Haskell program, QuickCheck Tests, random traces generator, indication of
 time spent.
