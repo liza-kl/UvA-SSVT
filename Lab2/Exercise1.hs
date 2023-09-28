@@ -43,8 +43,11 @@ prop_interSectionOfInputOutputIsEmpty :: IOLTS -> Bool
 prop_interSectionOfInputOutputIsEmpty (_, inputValues, outputValues,_,_) = null (inputValues `intersect` outputValues)
 
 -- #3 Factor
-prop_InputAndOutputIsCountable :: [Label] -> Bool
-prop_InputAndOutputIsCountable xs = True
+prop_InputAndOutputIsCountable :: IOLTS -> Bool
+prop_InputAndOutputIsCountable (_, inputValues, outputValues,_,_) 
+    | isCountable inputValues = True
+    | isCountable outputValues = True
+    | otherwise = False
 
 -- #4 Factor
 prop_initialSetNotEmpty :: IOLTS -> Bool

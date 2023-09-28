@@ -73,7 +73,7 @@ main = do
    quickCheck $ forAll ltsGen prop_initialStateInStateSet
    quickCheck $ forAll ltsGen prop_cartesianRelationInTransition
    quickCheck $ forAll ltsGen prop_deltaBehavior
-
+   quickCheck $ forAll ltsGen prop_InputAndOutputIsCountable
 
    -- Tests for ltsGenDelta
    quickCheck $ forAll ltsGenDelta prop_initialSetNotEmpty
@@ -82,6 +82,4 @@ main = do
    quickCheck $ forAll ltsGenDelta prop_initialStateInStateSet
    quickCheck $ forAll ltsGenDelta prop_cartesianRelationInTransition
    quickCheck $ forAll ltsGenDelta prop_deltaBehavior
-
-
-
+   quickCheck $ forAll ltsGenDelta prop_InputAndOutputIsCountable
