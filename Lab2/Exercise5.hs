@@ -6,7 +6,20 @@ import LTS
 import Debug.Trace (trace)
 import Control.Exception (catch, SomeException)
 
-{-- Haskell program, description of each bug, indication of time spent. --}
+-- ## Deliverables ##
+-- Haskell program, description of each bug, indication of time spent.
+-- Time spent: 180 min without success
+
+-- ## List of Bugs ##
+
+    -- - doorImpl1: correct
+    -- - doorImpl2: when it closes, it goes to an opened state
+    -- - doorImpl3: when it unlocks, it transitions to the wrong state (2)
+    -- - doorImpl4: When you are in State (1) and "unlock" the door, it's locked and in state (2), when you are in state (2) and lock the door , its unlocked and in state (1) 
+    -- - doorImpl5: runs infinetely, so prob ioco
+    -- - doorImpl6: After the trace ["closed","open"], the door is { locked }, but the model is {closed }, and it says the door is stuck
+    -- - doorImpl7:  runs infinetely, but if looking at the impl, it says something like "wrong keycode"
+    -- - doorImpl8: After the trace ["closed"], doorImpl8 returns { closed }, but the model is {locked, opened} 
 
 -- Taking the door 1 implementation as a basis for the IOLTS 
 -- We need to implement the output function in order to check other stuff
@@ -21,14 +34,7 @@ out (_, _, outputs, transitions, _) states =
 ioltstraces :: IOLTS -> [Trace] -- [[Label]]
 ioltstraces (q, i, o, lt, q0) = nub $ map snd (traces' lt [([q0],[])])
 
-{-- 
-doorImpl1 :: State -> Label -> (State, Label)
-doorImpl1 0 "close" = (1, "closed")
-doorImpl1 1 "open" = (0, "opened")
-doorImpl1 1 "lock" = (2, "locked")
-doorImpl1 2 "unlock" = (1, "unlocked")
-doorImpl1 _ _ = error "Invalid command and/or state!"
---}
+
 {-- The correctness of the implementation can be tests with ioco against the other door implementations --}
 
 correctDoorModel :: IOLTS
@@ -159,18 +165,6 @@ main = do
     print (testLTSsAgainstSUT getDoorLTSs doorImpl1)
 --    print (testLTSAgainstSUT correctDoorModel doorImpl2)
 
-{-- Test Report
-
-    - doorImpl1: correct
-    - doorImpl2: when it closes, it goes to an opened state
-    - doorImpl3: when it unlocks, it transitions to the wrong state (2)
-    - doorImpl4: When you are in State (1) and "unlock" the door, it's locked and in state (2), when you are in state (2) and lock the door , its unlocked and in state (1) 
-    - doorImpl5: runs infinetely, so prob ioco
-    - doorImpl6: After the trace ["closed","open"], the door is { locked }, but the model is {closed }, and it says the door is stuck
-    - doorImpl7:  runs infinetely, but if looking at the impl, it says something like "wrong keycode"
-    - doorImpl8: After the trace ["closed"], doorImpl8 returns { closed }, but the model is {locked, opened} 
 
 
 
-
---}
