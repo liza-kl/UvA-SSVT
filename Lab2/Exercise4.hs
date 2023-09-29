@@ -46,8 +46,20 @@ findNextStates current (input:rest) transitions =
         nub (concatMap (\nextState -> findNextStates nextState rest transitions) nextStates)
 
 {-- Tests --}
--- Check where you are after a trace
--- use the state 
+-- Implementation inspired by another team
+-- All the states which are in the set of `after` need to be in the IOLTS list of states 
+prop_statesExistInTheSet:: IOLTS -> [Label] -> Bool
+prop_statesExistInTheSet (states, inputs, outputs, transitions, initialState) labels = recurseThroughStates resultAfter states
+    where iolts = (states, inputs, outputs, transitions, initialState) 
+          resultAfter = after iolts labels
+
+recurseThroughStates:: [State] -> [State]-> Bool
+recurseThroughStates [] _ = True
+recurseThroughStates (s1:afterList) ioltsList 
+    | s1 `elem` ioltsList = recurseThroughStates afterList ioltsList 
+    | otherwise = False
+    
+{-- Testing with examples from paper--}
 main :: IO()
 main =
     do
