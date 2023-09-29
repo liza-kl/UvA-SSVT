@@ -14,8 +14,15 @@ import Control.Monad
 import System.Random
 
 -- 3rd library used named https://haskell-graphite.readthedocs.io/en/latest/
--- ## Create generators without QuickCheck (but basically the code from Exercise 2) ## --
+-- ## Indication of time spent: 90 Minutes ##
 
+-- ## Thoughts ## 
+-- At first we wanted to print in the terminal somehow, but since our skills aren't that good
+-- we decided to look into 3rd part libraries and think of IOLTS as somehow of directed graphs
+-- We managed to use our custom lts generator, but the png is buggy and we didn't have an idea why.
+-- So this is our buggy visualizer, but at least we learnt how to download and import 3rd party libraries in Haskell
+
+-- ## Create generators without QuickCheck (but basically the code from Exercise 2) ## --
 -- A separate generator for the state, just numbers. Could have a bigger range
 ltsGenState :: IO State
 ltsGenState = randomRIO (0, 5)
@@ -59,18 +66,22 @@ ltsGen = do
     return (nub setOfPossibleStates, setOfPossibleInputs, setOfPossibleOutputs, setOfPossibleLabeledTransitions, initialState)
 
 
--- Really not beautiful, but running out of time 
+-- Really not the way to go, but we hadn't got other ideas.
 normalIolts :: IO IOLTS -> IOLTS
 normalIolts = unsafePerformIO
 
+-- Helper function to transfer the incoming labeled transitions to the required type
+-- Inspiration was "someDirectedGraph" from https://haskell-graphite.readthedocs.io/en/latest/basic/
 visualizeLTS' :: [LabeledTransition] -> DGraph Integer Label
 visualizeLTS' transitions = insertEdgeTriples (map (\(pre, trans, post) -> (pre,post,trans)) transitions) empty
 
-visualizeLTS :: IOLTS -> DGraph Integer Label
-visualizeLTS (_,_,_,transitions,_) = visualizeLTS' transitions
+-- Actual function which takes an LTS 
+visualizeLTS (_,_,_,transitions,_) =
+    let adaptedData = visualizeLTS' transitions
+    in plotDGraphPng adaptedData "./tmp/visualizedIOLTS" -- maybe it would be better to have a dynamic name
 
--- Visualize and store the buggy png in a temp folder
+-- main function which calls it with our generator.
 main =
     do
     randomLTS <- ltsGen
-    plotDGraphPng (visualizeLTS (normalIolts ltsGen)) "./tmp/visualizedIOLTS"
+    visualizeLTS (normalIolts ltsGen)
