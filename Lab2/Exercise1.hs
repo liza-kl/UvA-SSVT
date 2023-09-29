@@ -5,7 +5,7 @@ import Data.List
 import Test.QuickCheck
 
 {-- 
-Time Spent: 30 Minutes, mainly documentation
+Time Spent: 60 Minutes, mainly documentation
 --}
 
 {-- 

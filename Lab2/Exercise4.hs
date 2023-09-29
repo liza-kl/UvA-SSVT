@@ -2,20 +2,18 @@ module Exercise4 where
 
 import LTS
 import Data.List
+import Test.QuickCheck 
+import Exercise2
 {-- 
 Haskell program, tests, short test report, indication of time spent
-Indication of time spent: 60 Minutes
+Indication of time spent: 90 Minutes
 
 --}
 
--- out is the output with the ! mark 
-
-
--- quescient state in after should be the same state as before
+-- ## Thoughts ##
 -- Definition number 5 in Tretman 
--- encountering tao you are in both states
--- encountering delta you are looping and staying in same state 
--- after is the state in which you remain 
+-- Encountering tao you are in both states -> kind of "merging"
+-- Encountering delta you are looping and staying in same state (Quescience)
 
 -- Define the "after" function
 after :: IOLTS -> Trace -> [State]
@@ -25,6 +23,7 @@ after (_, _, _, transitions, initialState) trace =
 
 -- Function to remove the ?, ! from the input, output
 removePrefixChar :: String -> String
+removePrefixChar [] = ""
 removePrefixChar (x:xs)
     | head (x:xs) == '?' || head (x:xs) == '!' = xs
     | otherwise = x:xs
@@ -60,7 +59,8 @@ recurseThroughStates (s1:afterList) ioltsList
     | s1 `elem` ioltsList = recurseThroughStates afterList ioltsList
     | otherwise = False
 
-    
+
+
 {-- Testing with examples from paper--}
 main :: IO()
 main =
@@ -70,6 +70,16 @@ main =
         print (tretmanS1 `after` ["?a"])
         print (tretmanI3 `after` ["?a", "?a"])
 
+        print "QuickCheck Tests"
+        quickCheck $ prop_statesExistInTheSet tretmanR2 
+        quickCheck $ prop_statesExistInTheSet coffeeImpl1 
+        quickCheck $ forAll ltsGen prop_statesExistInTheSet
+        quickCheck $ forAll ltsGenDelta prop_statesExistInTheSet
+
+
+
+
 
 {-- Short Test Report --}
 {-- While testing, bug was found that the state sets are not unique. So we added nub at the end --}
+{-- Tau and Delta are probably not considered well --}
