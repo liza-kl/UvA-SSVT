@@ -13,7 +13,9 @@ import Data.List
 import Control.Monad
 import System.Random
 
--- 3rd library used named https://haskell-graphite.readthedocs.io/en/latest/
+-- 3rd library used named graphite 
+-- https://hackage.haskell.org/package/graphite
+-- https://haskell-graphite.readthedocs.io/en/latest/
 -- ## Indication of time spent: 90 Minutes ##
 
 -- ## Thoughts ## 
