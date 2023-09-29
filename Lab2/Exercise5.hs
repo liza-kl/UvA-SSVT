@@ -3,6 +3,7 @@ import Data.List
 import Exercise4 
 import LTS
 import Debug.Trace (trace)
+import Control.Exception (catch, SomeException)
 
 {-- Haskell program, description of each bug, indication of time spent. --}
 
@@ -43,12 +44,26 @@ wrongDoorModel = createIOLTS [
                 (1,"?open", 0),(1,"!closed",0),
                 (1, "?lock", 2), (1,"!locked",2),
                 (2, "?unlock", 1), (2,"!unlocked",1)]
--- testLTSAgainstSUT :: IOLTS -> (State -> Label -> (State, Label)) -> Bool
+
+
+{-- This function receives the model and the implementation
+    First of all, another function should be created that will convert the implementation to an IOLTS
+        - will call the implementation function with 0 and any of these labels = ["open", "close", "lock", "unlock"]
+        - and the repeat for states we get
+        - then (state, label) tuples can be created and added to a list
+        - catch any exceptions occured
+        - call createIOLTS with this list
+    Then, testLTSAgainstSUT will just call ioco with the two IOLTS's and return the result
+--}
+
+testLTSAgainstSUT :: IOLTS -> (State -> Label -> (State, Label)) -> Bool
+testLTSAgainstSUT model impl = 
+    trace ("ioco: " ++ show (ioco wrongDoorModel correctDoorModel)) $
+    ioco wrongDoorModel correctDoorModel
 
 -- Define ioco Function to get the outputs.
 -- Definition of ioco is for all (s)traces of the model must confirm: out ( implementation after trace ) is a subset
 -- of out (model after trace)
-
 ioco :: IOLTS -> IOLTS -> Bool 
 ioco implementation model = and
     [ trace ("Traces: " ++ show traces) $
@@ -61,5 +76,5 @@ ioco implementation model = and
 
 -- In the end you need to print smt like doorImplX ioco correctDoorModel
 main :: IO ()
-main = 
-    print (ioco wrongDoorModel correctDoorModel)
+main = do
+    print (testLTSAgainstSUT correctDoorModel doorImpl2)
