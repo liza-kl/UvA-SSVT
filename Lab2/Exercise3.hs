@@ -15,12 +15,18 @@ import LTS
 -- since suspension traces can lead to loops (so you'll get something like delta,delta,delta...).
 -- According to Tretman, a suspension trace is one which includes a suspension label (in this case delta)
 -- Maybe after first encountering delta, stop the trace generation at this point and go to the next trace -- but this is impossible (see hasThreeConsecutiveDeltas)
+
+-- Due to the fact that IOLTS are a sub group of non determinisic automata, you could maybe also convert it to a
+-- determinstic one and count the traces from there. 
+
 -- So in order to get this traces, we probably should have searched for traces _before_ the quiescence state 
 -- (which leads to this looping).
--- We could possible achieve that with a breadth first seach and then traversing the tree, looking for the possible
+-- We could possible achieve that with a breadth first search and then traversing the tree, looking for the possible
 -- traces. 
 -- Furthermore, tau states need to be considered to "merge" the states together
 
+-- To do a BFS, we probably need to extract the states from the transition labels. We need some kind of a helper 
+-- function for that
 
 -- ## Non working code ##
 
