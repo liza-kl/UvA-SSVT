@@ -38,13 +38,20 @@ correctDoorModel = createIOLTS [
                 (2, "?unlock", 1), (2,"!unlocked",1)]
 
 
-wrongDoorModel :: IOLTS
-wrongDoorModel = createIOLTS [
+doorImpl2ToIOLTS :: IOLTS
+doorImpl2ToIOLTS = createIOLTS [
                 (0,"?close", 1),(0,"!opened",1),
                 (1,"?open", 0),(1,"!closed",0),
                 (1, "?lock", 2), (1,"!locked",2),
                 (2, "?unlock", 1), (2,"!unlocked",1)]
 
+
+-- doorImpl3ToIOLTS :: IOLTS
+-- doorImpl3ToIOLTS = createIOLTS [
+--                 (0,"?close", 1),(0,"!closed",1),
+--                 (1,"?open", 0),(1,"!opened",0),
+--                 (1, "?lock", 2), (1,"!locked",2),
+--                 (2, "?unlock", 2), (2,"!unlocked",2)]
 
 {-- This function receives the model and the implementation
     First of all, another function should be created that will convert the implementation to an IOLTS
@@ -58,8 +65,9 @@ wrongDoorModel = createIOLTS [
 
 testLTSAgainstSUT :: IOLTS -> (State -> Label -> (State, Label)) -> Bool
 testLTSAgainstSUT model impl = 
-    trace ("ioco: " ++ show (ioco wrongDoorModel model)) $
-    ioco wrongDoorModel model
+    trace ("ioco: " ++ show (ioco doorImpl2ToIOLTS model)) $
+    ioco doorImpl2ToIOLTS model
+    -- ioco doorImpl3ToIOLTS model
 
 -- Define ioco Function to get the outputs.
 -- Definition of ioco is for all (s)traces of the model must confirm: out ( implementation after trace ) is a subset
