@@ -72,7 +72,7 @@ prop_deltaBehavior :: IOLTS -> Bool
 prop_deltaBehavior (_,_,_,[],_) = True
 prop_deltaBehavior (_,[],_,_,_) = True
 prop_deltaBehavior (_,_,[],_,_) = True
-prop_deltaBehavior (_, _, _,transactions,_) = all (\(pre, trans, post) -> (trans /= delta) || (pre == post)) transactions 
+prop_deltaBehavior (_, _, _,transitions,_) = all (\(pre, trans, post) -> (trans /= delta) || (pre == post)) transitions 
 
 {-- 
 Concise Test Report

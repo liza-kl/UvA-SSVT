@@ -2,6 +2,8 @@ module Exercise5 where
 import Data.List
 import Exercise4 
 import LTS
+import Debug.Trace (trace)
+
 {-- Haskell program, description of each bug, indication of time spent. --}
 
 -- Taking the door 1 implementation as a basis for the IOLTS 
@@ -10,13 +12,12 @@ import LTS
 
 out :: IOLTS -> [State] -> [Label]
 -- case for when the state list is empty, where we return the delta LTS datatype
-out  (states,inputs,outputs,transitions,state) [] = [delta]
+out  (states, inputs, outputs, transitions, state) [] = [delta]
 out (_, _, outputs, transitions, _) states =
     filter (`elem` outputs) (nub $ concatMap (map snd . nextTransitions' transitions) states)
 
 ioltstraces :: IOLTS -> [Trace] -- [[Label]]
 ioltstraces (q, i, o, lt, q0) = nub $ map snd (traces' lt [([q0],[])])
-
 
 {-- 
 doorImpl1 :: State -> Label -> (State, Label)
@@ -35,6 +36,13 @@ correctDoorModel = createIOLTS [
                 (1, "?lock", 2), (1,"!locked",2),
                 (2, "?unlock", 1), (2,"!unlocked",1)]
 
+
+wrongDoorModel :: IOLTS
+wrongDoorModel = createIOLTS [
+                (0,"?close", 1),(0,"!opened",1),
+                (1,"?open", 0),(1,"!closed",0),
+                (1, "?lock", 2), (1,"!locked",2),
+                (2, "?unlock", 1), (2,"!unlocked",1)]
 -- testLTSAgainstSUT :: IOLTS -> (State -> Label -> (State, Label)) -> Bool
 
 -- Define ioco Function to get the outputs.
@@ -42,12 +50,16 @@ correctDoorModel = createIOLTS [
 -- of out (model after trace)
 
 ioco :: IOLTS -> IOLTS -> Bool 
-ioco implementation model =  
-    let modelTraces = ioltstraces model
-        implTraces = ioltstraces implementation 
-    in all (\implTrace -> all (\label -> label `elem` out (model `after` implTrace)) (out (implementation `after` implTrace))) implTraces
+ioco implementation model = and
+    [ trace ("Traces: " ++ show traces) $
+      trace ("i: " ++ show i) $
+      trace ("m: " ++ show (out model (model `after` traces))) $
+      i `elem` (out model (model `after` traces))
+    | traces <- ioltstraces model
+    , i     <- out implementation (implementation `after` traces)
+    ]
 
 -- In the end you need to print smt like doorImplX ioco correctDoorModel
 main :: IO ()
-main =
-    print "a door"
+main = 
+    print (ioco wrongDoorModel correctDoorModel)

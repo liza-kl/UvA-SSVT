@@ -23,7 +23,7 @@ Indication of time spent: 60 Minutes
 after :: IOLTS -> Trace -> [State]
 after (_, _, _, [], _) _ = []  -- No labeled transitions, return an empty list
 after (_, _, _, transitions, initialState) trace =
-    findFollowingStates initialState trace transitions
+    nextStates initialState trace transitions
 
 removePrefixChar :: String -> String
 removePrefixChar (x:xs)
@@ -31,20 +31,20 @@ removePrefixChar (x:xs)
     | otherwise = x:xs
 
 -- Function to find following states based on the trace
-findFollowingStates :: State -> Trace -> [LabeledTransition] -> [State]
+nextStates :: State -> Trace -> [LabeledTransition] -> [State]
 -- if no transition is made, the iolts remains in the current state 
-findFollowingStates currentState [] _ = [currentState]
+nextStates current [] _ = [current]
 -- the input label is important to filter afterwards  
-findFollowingStates currentState (input:rest) transitions =
+nextStates current (input:rest) trans =
     -- check for the ? in the inputs, and only consider the ones which have
     -- the corresponding input which is asked for
-    let matchingTransitions = filter (\(_, l, _) -> l == input || l == removePrefixChar input) transitions
+    let matchingTransitions = filter (\(_, l, _) -> l == input || l == removePrefixChar input) trans
     -- look at the current transition tuple, return the next state 
         nextStates = map (\(_, _, nextState) -> nextState) matchingTransitions
     in
         -- map over next states, recurse, concat the maps for all the states.
         -- using nub to have individual results.
-        nub (concatMap (\nextState -> findFollowingStates nextState rest transitions) nextStates)
+        nub (concatMap (\nextState -> nextStates nextState rest trans) nextStates)
 
 {-- Tests --}
 -- Check where you are after a trace
