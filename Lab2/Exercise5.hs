@@ -12,13 +12,13 @@ import Control.Exception (catch, SomeException)
 
 -- ## List of Bugs ##
 
-    -- - doorImpl1: correct
+    -- - doorImpl1: Correct by definition
     -- - doorImpl2: when it closes, it goes to an opened state
     -- - doorImpl3: when it unlocks, it transitions to the wrong state (2)
-    -- - doorImpl4: When you are in State (1) and "unlock" the door, it's locked and in state (2), when you are in state (2) and lock the door , its unlocked and in state (1) 
-    -- - doorImpl5: runs infinetely, so prob ioco
+    -- - doorImpl4: When you are in State (1) and "unlock" the door, it's locked and in state (2), when you are in state (2) and lock the door, its unlocked and in state (1) 
+    -- - doorImpl5: Runs infinitely, but the code is the same as the door implementation 1. Therefore it should be ioco true
     -- - doorImpl6: After the trace ["closed","open"], the door is { locked }, but the model is {closed }, and it says the door is stuck
-    -- - doorImpl7:  runs infinetely, but if looking at the impl, it says something like "wrong keycode"
+    -- - doorImpl7: Runs infinitely, but if looking at the implementation, it says something like "wrong keycode". The implementation is different though but we can't confirm or deny ioco since it gets stuck in an infinite loop. Probably not ioco though.
     -- - doorImpl8: After the trace ["closed"], doorImpl8 returns { closed }, but the model is {locked, opened} 
 
 -- Taking the door 1 implementation as a basis for the IOLTS 
@@ -34,9 +34,26 @@ out (_, _, outputs, transitions, _) states =
 ioltstraces :: IOLTS -> [Trace] -- [[Label]]
 ioltstraces (q, i, o, lt, q0) = nub $ map snd (traces' lt [([q0],[])])
 
-
 {-- The correctness of the implementation can be tests with ioco against the other door implementations --}
 
+-- We added the pre-existing door implementations manually as an IOLTS.
+{-- 
+    We couldn't figure out how to generate these IOLTS dynamically
+    since that would require analysing the pattern-matched parameters
+    as well as their results of each implementation.
+    If we were to generate this, we would take those and generate
+    those tuples based on the corresponding parameters of the given implementations.
+    
+    This function receives the model and the implementation
+    First of all, another function should be created that will convert the implementation to an IOLTS
+        - will call the implementation function with 0 and any of these labels = ["open", "close", "lock", "unlock"]
+        - and the repeat for states we get
+        - then (state, label) tuples can be created and added to a list
+        - catch any exceptions occured
+        - call createIOLTS with this list
+--}
+
+-- Door Implementation 1 (Pre-defined as the correct one...)
 correctDoorModel :: IOLTS
 correctDoorModel = createIOLTS [
                 (0,"?close", 1),(0,"!closed",1),
@@ -44,14 +61,12 @@ correctDoorModel = createIOLTS [
                 (1, "?lock", 2), (1,"!locked",2),
                 (2, "?unlock", 1), (2,"!unlocked",1)]
 
-
 doorImpl2ToIOLTS :: IOLTS
 doorImpl2ToIOLTS = createIOLTS [
                 (0,"?close", 1),(0,"!opened",1),
                 (1,"?open", 0),(1,"!closed",0),
                 (1, "?lock", 2), (1,"!locked",2),
                 (2, "?unlock", 1), (2,"!unlocked",1)]
-
 
 doorImpl3ToIOLTS :: IOLTS
 doorImpl3ToIOLTS = createIOLTS [
@@ -114,37 +129,28 @@ doorImpl8ToIOLTS = createIOLTS [
     (7, "?lock", 2), (7,"!locked",2),
     (7, "?close", 2), (7,"!closed",2)]
 
-
-{-- This function receives the model and the implementation
-    First of all, another function should be created that will convert the implementation to an IOLTS
-        - will call the implementation function with 0 and any of these labels = ["open", "close", "lock", "unlock"]
-        - and the repeat for states we get
-        - then (state, label) tuples can be created and added to a list
-        - catch any exceptions occured
-        - call createIOLTS with this list
-    Then, testLTSAgainstSUT will just call ioco with the two IOLTS's and return the result
+{-- 
+    Retrieves a list of all the given pre-defined IOLTS which we hardcoded above.
+    Right now we include not all of them. If two are equal then the LTS against SUT check
+    would run indefinetely. 
+    The infinite loops are probably happening due to open-close loops inside of the IOLTS.
+    This concerns door implementation 5 and 7, which is why we left them out of this list,
+    to have a running test.
 --}
-
 getDoorLTSs :: [IOLTS]
-getDoorLTSs = [doorImpl4ToIOLTS ]
+getDoorLTSs = [doorImpl2ToIOLTS, doorImpl3ToIOLTS, doorImpl4ToIOLTS, doorImpl6ToIOLTS, doorImpl8ToIOLTS]
 
+-- Check of a single IOLTS implementation (like the hard-coded ones above...) if it lines up with the correct model.
+-- Just runs "ioco" for the model and the implementation.
 testLTSAgainstSUT :: IOLTS -> (State -> Label -> (State, Label)) -> Bool
 testLTSAgainstSUT model impl = 
     trace ("ioco: " ++ show (ioco correctDoorModel model)) $
     ioco correctDoorModel model
-    -- ioco doorImpl3ToIOLTS model
 
-
-
-{--
-testLTSsAgainstSUT :: [IOLTS] -> (State -> Label -> (State, Label)) -> [Bool]
-testLTSsAgainstSUT models impl = map (`ioco` correctDoorModel) getDoorLTSs
---}
-
+-- Helper function to check multiple IOLTS models at once against the correct model.
+-- Just for easier final test execution and better overview.
 testLTSsAgainstSUT :: [IOLTS] -> (State -> Label -> (State, Label)) -> [(String,Bool)]
 testLTSsAgainstSUT models impl = map (\impl -> ("Door " ++ show ( ((fromMaybe 0 (elemIndex impl models)) + 2) ),impl `ioco` correctDoorModel)) getDoorLTSs
---testLTSsAgainstSUT [] impl = []
---testLTSsAgainstSUT (x:xs) impl = (testLTSAgainstSUT x impl) ++ (testLTSsAgainstSUT xs impl) 
 
 -- Define ioco Function to get the outputs.
 -- Definition of ioco is for all (s)traces of the model must confirm: out ( implementation after trace ) is a subset
@@ -163,8 +169,3 @@ ioco implementation model = and
 main :: IO ()
 main = do
     print (testLTSsAgainstSUT getDoorLTSs doorImpl1)
---    print (testLTSAgainstSUT correctDoorModel doorImpl2)
-
-
-
-
