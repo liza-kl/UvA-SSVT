@@ -10,7 +10,6 @@ Time spent: 60 Minutes
 {-- Thinking process before implementing the Generator
 type IOLTS = ([State], [Label], [Label], [LabeledTransition], State)
 The type IOLTS consists of a 
-
 - Set of possible States in the LTS (Q)
 - Set of possible Inputs for the LTS (L_I)
 - Set of possible outputs for the LTS (L_U)
@@ -18,12 +17,11 @@ The type IOLTS consists of a
 - An initil State (q) which needs to be in the Q 
 (Definition 6 in the paper)
 
-So we need some individual Generators for the components. Maybe we could use a predefined lists for 
+So we need some individual Generators for the components. Maybe we could use predefined lists for 
 the labels?
-- Regarding the state the generator only needs to create a random number, in the list they need to be unique 
--- Do the numbers have to be 
-- Regarding the label: Create a list of random labels? 
--- Quiescence should be considered 
+Regarding the state the generator only needs to create a random number, in the list they need to be unique 
+Regarding the label: Create a list of random labels? 
+Quiescence should be considered 
  --}
 
 {-- For sake of ease, transitioned labels need to have at least one elem.--}

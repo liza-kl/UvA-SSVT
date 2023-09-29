@@ -24,9 +24,11 @@ List of Factors that make an IOLTS invalid:
 createCartesian :: [State] -> [Label] -> [(State, Label, State)]
 createCartesian setState inputValues =  [(preState, transitionLabel, afterState) | preState <- setState, transitionLabel <- inputValues ,afterState <- setState ]
 
+-- either finite, or has the same cardinality as the set of positive integers Z+
 isCountable :: [Label] -> Bool
 isCountable inputOrOutput = True
 
+-- check that LTS is valid
 validateLTS :: IOLTS -> Bool
 validateLTS ([], _, _, _, _) = False -- #4 if your initial set is empty, it is not an LTS / IOLTS , but not checking for empty inputs as this can be the case according to definition 
 validateLTS (setState, inputValues, outputValues, labeledTransitions, initialState)
@@ -37,6 +39,9 @@ validateLTS (setState, inputValues, outputValues, labeledTransitions, initialSta
     | tau `elem` inputValues = False    -- #6
     | not (all (`elem` createCartesian setState (inputValues ++ [tau] ++ [delta] ++ outputValues)) labeledTransitions) = False -- #7
     | otherwise = True
+
+
+--- TESTS ---
 
 -- #2 Factor
 prop_interSectionOfInputOutputIsEmpty :: IOLTS -> Bool
@@ -77,6 +82,7 @@ prop_deltaBehavior (_, _, _,transitions,_) = all (\(pre, trans, post) -> (trans 
 {-- 
 Concise Test Report
 Validated against the coffee examples in the LTS module as no QuickCheck tests are asked for.
+All tests passed.
 --}
 main :: IO ()
 main =  do
