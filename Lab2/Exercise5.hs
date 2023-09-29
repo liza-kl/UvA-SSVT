@@ -58,8 +58,8 @@ wrongDoorModel = createIOLTS [
 
 testLTSAgainstSUT :: IOLTS -> (State -> Label -> (State, Label)) -> Bool
 testLTSAgainstSUT model impl = 
-    trace ("ioco: " ++ show (ioco wrongDoorModel correctDoorModel)) $
-    ioco wrongDoorModel correctDoorModel
+    trace ("ioco: " ++ show (ioco wrongDoorModel model)) $
+    ioco wrongDoorModel model
 
 -- Define ioco Function to get the outputs.
 -- Definition of ioco is for all (s)traces of the model must confirm: out ( implementation after trace ) is a subset
@@ -78,3 +78,14 @@ ioco implementation model = and
 main :: IO ()
 main = do
     print (testLTSAgainstSUT correctDoorModel doorImpl2)
+
+{-- Test Report
+
+    - doorImpl1: correct
+    - doorImpl2: when it closes, it goes to an opened state
+    - doorImpl3: when it unlocks, it transitions to the wrong state (2)
+    - doorImpl4: when it locks, it transitions to the wrong state (1) && when it unlocks, it transitions to the wrong state (2) 
+
+
+
+--}

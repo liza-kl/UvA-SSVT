@@ -13,8 +13,6 @@ Indication of time spent: 60 Minutes
 
 -- quescient state in after should be the same state as before
 -- Definition number 5 in Tretman 
--- epsilon in a trace should return nothing 
--- Von dem Trace auf die nächsten drübergehen 
 -- encountering tao you are in both states
 -- encountering delta you are looping and staying in same state 
 -- after is the state in which you remain 
@@ -25,6 +23,7 @@ after (_, _, _, [], _) _ = []  -- No labeled transitions, return an empty list
 after (_, _, _, transitions, initialState) trace =
     findNextStates initialState trace transitions
 
+-- Function to remove the ?, ! from the input, output
 removePrefixChar :: String -> String
 removePrefixChar (x:xs)
     | head (x:xs) == '?' || head (x:xs) == '!' = xs

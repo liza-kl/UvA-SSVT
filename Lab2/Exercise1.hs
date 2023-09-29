@@ -18,7 +18,7 @@ List of Factors that make an IOLTS invalid:
 - #5 Factor q0 (inital state) is not an element of Q 
 - #6 Factor tau is in the L_i set
 - #7 Factor Transition T is not a subset of the cartesian does not satisfy the transition relation  
-- #8 Factor Delta Transitions are not returning the previous state (-> not "looping") 
+- #8 Factor Delta Transitions are not returning the previous state (-> not "looping"), not relevant for this exercise
 --}
 
 createCartesian :: [State] -> [Label] -> [(State, Label, State)]
@@ -35,7 +35,7 @@ validateLTS (setState, inputValues, outputValues, labeledTransitions, initialSta
     | not(isCountable outputValues) = False -- #3
     | initialState `notElem` setState = False -- #5
     | tau `elem` inputValues = False    -- #6
-    | not (all (`elem` createCartesian setState (inputValues ++ [tau] ++ outputValues)) labeledTransitions) = False -- #7
+    | not (all (`elem` createCartesian setState (inputValues ++ [tau] ++ [delta] ++ outputValues)) labeledTransitions) = False -- #7
     | otherwise = True
 
 -- #2 Factor
@@ -77,7 +77,6 @@ prop_deltaBehavior (_, _, _,transitions,_) = all (\(pre, trans, post) -> (trans 
 {-- 
 Concise Test Report
 Validated against the coffee examples in the LTS module as no QuickCheck tests are asked for.
-First, we didn't udnerstand why the prop_cartesianRelationInTransition returns false but validates correctly?
 --}
 main :: IO ()
 main =  do
@@ -93,4 +92,4 @@ main =  do
                                 tretmanI1,tretmanI2,tretmanI3,tretmanI4,
                                 tretmanS1,tretmanS2,tretmanS3,tretmanS4,
                                 tretmanR1,tretmanR2]
-        print (all validateLTS ltsImplementations)
+        print (all validateLTS ltsImplementations) -- if all LTS implementations confirm the validateLTS function, it returns true

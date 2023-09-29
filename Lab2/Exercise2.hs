@@ -23,7 +23,7 @@ the labels?
 - Regarding the state the generator only needs to create a random number, in the list they need to be unique 
 -- Do the numbers have to be 
 - Regarding the label: Create a list of random labels? 
--- Epsilon States need to be considered and the quiescent stuff
+-- Quiescence should be considered 
  --}
 
 {-- For sake of ease, transitioned labels need to have at least one elem.--}
@@ -40,6 +40,7 @@ ltsGenLabeledTransition possibleStateGen possibleLabelGen = do
     lastState <- possibleStateGen
     return (firstState, transitionLabel, if transitionLabel == delta then firstState else lastState)
 
+-- this generator generates an IOLTS without delta states
 ltsGen :: Gen IOLTS
 ltsGen = do
     setOfPossibleStates <- listOf ltsGenState `suchThat` (not . null . nub)
@@ -51,6 +52,7 @@ ltsGen = do
     -- Recording to the Definition we need to include tau in the inputs
     return (nub setOfPossibleStates, setOfPossibleInputs, setOfPossibleOutputs, setOfPossibleLabeledTransitions, initialState)
 
+-- this generator generates an IOLTS with delta states
 ltsGenDelta :: Gen IOLTS
 ltsGenDelta = do
     setOfPossibleStates <- listOf ltsGenState `suchThat` (not . null . nub)
@@ -67,6 +69,7 @@ ltsGenDelta = do
 main :: IO()
 main = do
    -- Tests for ltsGen 
+   quickCheck $ forAll ltsGen validateLTS
    quickCheck $ forAll ltsGen prop_initialSetNotEmpty
    quickCheck $ forAll ltsGen prop_interSectionOfInputOutputIsEmpty
    quickCheck $ forAll ltsGen prop_tauNotInInputSet
@@ -76,6 +79,7 @@ main = do
    quickCheck $ forAll ltsGen prop_InputAndOutputIsCountable
 
    -- Tests for ltsGenDelta
+   quickCheck $ forAll ltsGenDelta validateLTS
    quickCheck $ forAll ltsGenDelta prop_initialSetNotEmpty
    quickCheck $ forAll ltsGenDelta prop_interSectionOfInputOutputIsEmpty
    quickCheck $ forAll ltsGenDelta prop_tauNotInInputSet
