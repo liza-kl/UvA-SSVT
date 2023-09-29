@@ -120,7 +120,7 @@ doorImpl8ToIOLTS = createIOLTS [
 --}
 
 getDoorLTSs :: [IOLTS]
-getDoorLTSs = [doorImpl2ToIOLTS, doorImpl3ToIOLTS, doorImpl4ToIOLTS]
+getDoorLTSs = [doorImpl4ToIOLTS ]
 
 testLTSAgainstSUT :: IOLTS -> (State -> Label -> (State, Label)) -> Bool
 testLTSAgainstSUT model impl = 
@@ -165,9 +165,10 @@ main = do
     - doorImpl2: when it closes, it goes to an opened state
     - doorImpl3: when it unlocks, it transitions to the wrong state (2)
     - doorImpl4: When you are in State (1) and "unlock" the door, it's locked and in state (2), when you are in state (2) and lock the door , its unlocked and in state (1) 
-    - doorImpl5: same as door 1?
-    - doorImpl6: After the trace ["closed","open"] door 6 can be in states [3,5,6] but the opened door only in 0
-    - doorImpl7:  ["closed","lock"] 
+    - doorImpl5: runs infinetely, so prob ioco
+    - doorImpl6: After the trace ["closed","open"], the door is { locked }, but the model is {closed }, and it says the door is stuck
+    - doorImpl7:  runs infinetely, but if looking at the impl, it says something like "wrong keycode"
+    - doorImpl8: After the trace ["closed"], doorImpl8 returns { closed }, but the model is {locked, opened} 
 
 
 
