@@ -21,14 +21,15 @@ List of Factors that make an IOLTS invalid:
 - #8 Factor Delta Transitions are not returning the previous state (-> not "looping"), not relevant for this exercise
 --}
 
+-- Helper function to check for the subset of the transitions
 createCartesian :: [State] -> [Label] -> [(State, Label, State)]
 createCartesian setState inputValues =  [(preState, transitionLabel, afterState) | preState <- setState, transitionLabel <- inputValues ,afterState <- setState ]
 
--- either finite, or has the same cardinality as the set of positive integers Z+
+-- Helper function to check if the elements of a set are countable
 isCountable :: [Label] -> Bool
 isCountable inputOrOutput = True
 
--- check that LTS is valid
+-- Function implementation for the validateLTS
 validateLTS :: IOLTS -> Bool
 validateLTS ([], _, _, _, _) = False -- #4 if your initial set is empty, it is not an LTS / IOLTS , but not checking for empty inputs as this can be the case according to definition 
 validateLTS (setState, inputValues, outputValues, labeledTransitions, initialState)
@@ -40,9 +41,8 @@ validateLTS (setState, inputValues, outputValues, labeledTransitions, initialSta
     | not (all (`elem` createCartesian setState (inputValues ++ [tau] ++ [delta] ++ outputValues)) labeledTransitions) = False -- #7
     | otherwise = True
 
-
---- TESTS ---
-
+{-- Properties for testing if an IOLTS is valid --}
+    
 -- #2 Factor
 prop_interSectionOfInputOutputIsEmpty :: IOLTS -> Bool
 prop_interSectionOfInputOutputIsEmpty (_, inputValues, outputValues,_,_) = null (inputValues `intersect` outputValues)
