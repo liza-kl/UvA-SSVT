@@ -4,7 +4,6 @@ import Data.List
 import Test.QuickCheck
 import Mutation
 import System.Random
-import Test.FitSpec
 
 {-- 
     Time Spent: 1 hour
