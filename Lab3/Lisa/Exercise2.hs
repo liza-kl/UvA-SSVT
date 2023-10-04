@@ -19,7 +19,7 @@ import Debug.Trace
 
 -- ## Deliverables ##
 -- implementation, documentation of approach, effect of using different mutators/properties, indication of time spent
--- Time spent: 
+-- Time spent: 180 min
 
 -- ## Thoughts ##
 -- The countSurvivors is going to be quite a specific function which is only going to work on 
@@ -60,7 +60,6 @@ countSurvivors numberOfMutants props mutators fut = do
 -- 3rd argument: function under test 
 -- 4th argument, if the mutant survived
 
-
 generateListOfSurvivedMutants :: Integer -> [[Integer] -> Integer -> Bool] -> [[Integer] -> Gen [Integer]]-> (Integer -> [Integer]) -> [Gen Bool]
 generateListOfSurvivedMutants 0 _ _ _ = [] -- if zero mutants are provided return an empty list 
 generateListOfSurvivedMutants numberOfMutants listOfProps listOfMutators fut = map (\mutator -> hasMutantSurvivedAllProps listOfProps mutator fut) listOfMutators
@@ -70,14 +69,7 @@ hasMutantSurvivedAllProps :: [[Integer] -> Integer -> Bool] -> ([Integer] -> Gen
 hasMutantSurvivedAllProps propertyList mutatorToTest fut = do
     testProps <- mutate' mutatorToTest propertyList fut 10 -- using mutate' as this takes a list of props, 
     -- 10 could be any random number since it is an input for the multiplication table 
-    return (all id testProps) -- return true if the mutant survived all given properties
-
--- generateListOfSurvivedMutants mutatorToTest propertyToTest fut input 
-
-main :: IO ()
-main = do
-    result <- generate (countSurvivors 4000 multiplicationTableProps [anyList] multiplicationTable)
-    putStrLn ("count survivors: " ++ show result)
+    return (and testProps) -- return true if the mutant survived all given properties
 
 -- ## Tests ##
 
