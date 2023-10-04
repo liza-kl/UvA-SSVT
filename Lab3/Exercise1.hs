@@ -1,4 +1,3 @@
-
 module Exercise1 where
 import Data.List
 import Test.QuickCheck
@@ -67,7 +66,7 @@ shuffleList xs = shuffle xs
 negativeList :: [Integer] -> Gen [Integer]
 negativeList xs = return (map negate xs)
 
-replaceAtIndex :: Int -> a -> [a] -> [a]
+replaceAtIndex :: Int -> Integer -> [Integer] -> [Integer]
 replaceAtIndex index newValue xs =
   take index xs ++ [newValue] ++ drop (index + 1) xs
 
