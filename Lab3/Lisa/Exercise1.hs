@@ -3,12 +3,30 @@ module Lisa.Exercise1 where
     import Data.List
     import Test.QuickCheck
     import Mutation
-    
+
+
+    mutatorEmptyList :: [Integer] -> Gen [Integer]
+    mutatorEmptyList _ = do return []
+
+    mutator_permutate
+
 -- ## Deliverables ##
 -- List of mutators and rationale, implementation, indication of time spent.
 -- Time spent: 
 
+-- ## What is not covered? ##
+
+-- Empty lists; Return an empty list – example taken from Stryker 
+-- https://stryker-mutator.io/docs/mutation-testing-elements/supported-mutators/#array-declaration
+-- Emptying the function body (or in Haskell return undefined)
+-- Inspired from https://stryker-mutator.io/docs/mutation-testing-elements/supported-mutators/#block-statement
+-- Reversed Lists 
+-- Shuffled Lists 
+-- While Loop 
+-- Runtime Errors 
+
 -- ## Reasoning of strength ##
+
 -- For this we can use Hoare's theory, Weak to Strong
 -- Ran the function in the Mutation.hs file and got the following 
 
@@ -30,5 +48,5 @@ module Lisa.Exercise1 where
 
 
 -- ## List of possible other mutators ##
--- Apply the maxBound for the Integer argument. The list does not conform the property of * 10 anymore 
+-- Empty List 
 
