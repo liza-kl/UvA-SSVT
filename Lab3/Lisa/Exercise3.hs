@@ -43,8 +43,20 @@ import Data.List
 -- Second: list of mutiers
 -- Third: function under test 
 -- Fourth: input for function under test 
--- Return the number of killed mutants with the given property set 
+-- Return the number of killed mutants with the given property set
 
+-- ## Helper Functions ##
+
+-- Basically doing the same workaround as in Lab1
+data NameableProperty = NameableProperty {
+    name:: String,
+    propertyFunc:: [Integer] -> Integer -> Bool
+}
+getName :: NameableProperty -> String
+getName (NameableProperty s _) = s
+
+getProp:: NameableProperty -> ([Integer] -> Integer -> Bool)
+getProp (NameableProperty _ func) = func
 
 genToList :: Gen [Bool] -> IO [Bool]
 genToList = generate
