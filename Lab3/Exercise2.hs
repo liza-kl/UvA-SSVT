@@ -6,18 +6,6 @@ import MultiplicationTable
 import Debug.Trace
 import Denis.Exercise1 (shuffleList)
 
--- ## Task ##
--- Write a function countSurvivors that counts the number of survivors:
--- countSurvivors :: Integer -> [([Integer] -> Integer -> Property)] -> (Integer -> [Integer]) -> Integer
--- Where the first argument is the number of mutants (4000 in the FitSpec example),
--- the second argument is the list of properties, 
--- and the third argument is the function under test
--- (the multiplication table function in this case).
--- The output is the number of surviving mutants (0 in the FitSpec example).
--- Document the effect of which mutations are used and which
--- properties are used on the number of survivors
-
-
 -- ## Deliverables ##
 -- implementation, documentation of approach, effect of using different mutators/properties, indication of time spent
 -- Time spent: 180 min
@@ -30,7 +18,6 @@ import Denis.Exercise1 (shuffleList)
 -- I have to iterate over the properties and for each property iterate over the mutants and then return a bool whether it
 -- survived or not. If it survived, increment up the count else do nothing. 
 
--- ## Considerung the relation between properties and mutations 
 
 -- ##The above-mentioned function definition is not final. Feel free to modify it, for example
 -- by adding the mutations that should be used.
@@ -48,9 +35,9 @@ import Denis.Exercise1 (shuffleList)
 -- properties passed, and return total no. of mutants surviving.
 
 countSurvivors :: Integer -> [[Integer] -> Integer -> Bool] -> ([Integer] -> Gen [Integer]) -> (Integer -> [Integer]) -> Gen Integer
-countSurvivors numberOfMutants props mutators fut = do
-    listOfSurvivedMutants <- sequence $ generateListOfSurvivedMutants numberOfMutants mutators props fut
-    return (toInteger (length (filter id listOfSurvivedMutants)))
+countSurvivors numberOfMutants props mutators fut =
+    fmap (toInteger . length . filter id) <$> sequence $ generateListOfSurvivedMutants numberOfMutants mutators props fut
+
 
 -- Tests, if the provided mutant survives a property 
 -- 1st argument: number of mutants  
@@ -82,12 +69,23 @@ hasMutantSurvivedAllProps mutator props fut inputNumber = do
     return (and mutatedValue)
 
 
--- ## Tests ##
+-- ## Considerung the relation between properties and mutations ##
 
--- Testing survivors of MultiplicationTable.prop_tenElements
+-- If we use our custom mutator "shuffleList" all mutants are going to survive, 
+-- because this property only checks for 10 elements (which are generated due to the [1..10] 
+-- list generation in the multiplicationTable function)
 survivedMutantsShuffle :: IO Integer
 survivedMutantsShuffle =
     generate $ countSurvivors 4000 [prop_tenElements] shuffleList multiplicationTable
+
+-- To check for the shuffle, we need to add the "prop_linear" which is going to 
+-- check if the difference between consecutive elements is the input. At this point we have 0 survivors.
+killMutantsShuffle :: IO Integer
+killMutantsShuffle =
+    generate $ countSurvivors 4000 [prop_linear] shuffleList multiplicationTable
+
+-- To check for the shuffle, we need to add the "prop_linear" which is going to 
+-- check if the difference between consecutive elements is the input. At this point we have 0 survivors.
 
 
 
