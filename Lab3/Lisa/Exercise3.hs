@@ -5,6 +5,7 @@ import Mutation
 import MultiplicationTable
 import Debug.Trace
 import Data.List
+import Exercise7 (Name)
 -- ## Task ##
 -- Implement a function that calculates the minimal property subsets, 
 -- given a 'function under test' and a set of properties
@@ -52,6 +53,15 @@ data NameableProperty = NameableProperty {
     name:: String,
     propertyFunc:: [Integer] -> Integer -> Bool
 }
+
+getMultiplicationTableProps :: [NameableProperty] = [
+    (NameableProperty {name = "prop_tenElements", propertyFunc = prop_tenElements}),
+    (NameableProperty {name = "prop_firstElementIsInput", propertyFunc = prop_firstElementIsInput}),
+    (NameableProperty {name = "prop_sumIsTriangleNumberTimesInput", propertyFunc = prop_sumIsTriangleNumberTimesInput}),
+    (NameableProperty {name = "prop_linear", propertyFunc = prop_linear}),
+    (NameableProperty {name = "prop_moduloIsZero", propertyFunc = prop_moduloIsZero})
+    ]
+
 getName :: NameableProperty -> String
 getName (NameableProperty s _) = s
 
@@ -81,25 +91,20 @@ getSubsequences = subsequences
 getMutators :: [[Integer] -> Gen [Integer]]
 getMutators = [addElements, removeElements, anyList]
 
+maxOrEqualValues :: Ord a => [a] -> [a]
+maxOrEqualValues xs = [x | x <- xs, x >= maximum xs]
+
 calculateMinimalSubset :: (Ord (IO Integer)) => (Integer -> [Integer]) -> [[[Integer] -> Integer -> Bool]] -> [Integer]-> IO [[Integer]]
-calculateMinimalSubset _ [] outputList = return outputList -- if properties set is empty, return the outputList (base case for recursion)
-calculateMinimalSubset fut (prop:prop':rest) outputList 
-                | do numberOfKilledMutants prop getMutators fut 10 > numberOfKilledMutants prop' getMutators fut 10 = calculateMinimalSubset fut (concat (prop:rest))
-                | do numberOfKilledMutants prop getMutators fut 10 < numberOfKilledMutants  prop' getMutators fut 10 = calculateMinimalSubset fut (concat (prop':rest))
-                | do numberOfKilledMutants prop getMutators fut 10 == numberOfKilledMutants  prop' getMutators fut 10 = calculateMinimalSubset fut (concat (prop:prop':rest))
-                | do otherwise return outputList -- if base case is reached 
+calculateMinimalSubset _ [] outputList = return [outputList] -- if properties set is empty, return the outputList (base case for recursion)
+calculateMinimalSubset fut (prop:prop':rest) outputList = do
+            let x = maxOrEqualProps [\propSet -> numberOfKilledMutants propSet getMutators fut 10 | propSet <- concat getSubsequences]
+            return x
+
 
 -- ## Some other Idea
 
 -- Putting this subsequence function outside to not to recurse it
 
--- maxOrEqualValues :: (Ord a) => [a] -> [a]
--- maxOrEqualValues xs = [x | x <- xs, x >= maximum xs]
-
--- calculateMinimalSubset :: (Ord (IO Integer)) => (Integer -> [Integer]) -> [[[Integer] -> Integer -> Bool]] -> [Integer]-> IO [[Integer]]
--- calculateMinimalSubset _ [] outputList = return [outputList] -- if properties set is empty, return the outputList (base case for recursion)
--- calculateMinimalSubset fut (prop:prop':rest) outputList = do
---             let x = maxOrEqualValues [\propSet -> numberOfKilledMutants propSet getMutators fut 10 | propSet <- getSubsequences]
 
 -- ## Some other Idea End
 
