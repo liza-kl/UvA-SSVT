@@ -2,6 +2,7 @@ module Conditions where
 
 import Logic
 
+
 stronger, weaker :: [a] ->
        (a -> Bool) -> (a -> Bool) -> Bool
 stronger xs p q = forall xs (\ x -> p x --> q x)

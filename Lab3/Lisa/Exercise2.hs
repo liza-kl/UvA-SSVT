@@ -88,9 +88,3 @@ countSurviviorsInAnyList :: IO Integer
 countSurviviorsInAnyList =
     generate $ countSurvivors 4000 multiplicationTableProps [anyList] multiplicationTable
 
-
--- Testing survivors of MultiplicationTable.prop_firstElementIsInput
--- Testing survivors of MultiplicationTable.prop_sumIsTriangleNumberTimesInput
--- Testing survivors of MultiplicationTable.prop_linear
--- Testing survivors of MultiplicationTable.prop_moduloIsZero
-

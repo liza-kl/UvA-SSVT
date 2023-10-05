@@ -24,6 +24,7 @@ module Lisa.Exercise1 where
 -- Shuffled Lists 
 -- While Loop 
 -- Runtime Errors 
+-- All items are unique 
 
 -- ## Reasoning of strength ##
 
