@@ -3,7 +3,6 @@ import Data.List
 import Test.QuickCheck
 import Mutation
 import MultiplicationTable
-import Debug.Trace
 import Exercise1 
 
 -- ## Deliverables ##

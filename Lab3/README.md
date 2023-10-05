@@ -19,10 +19,12 @@ Exercise-Specific
 ### TODOs Exercise 2 (Lisa) 
 
 Housekeeping
-- [] Check Naming Convention 
-- [] Check Compilation 
-- [] Check Implementation 
-- [] Check Indication of time spent
+- [x] Check Naming Convention (Checked by Lisa)
+- [x] Check Compilation (Checked by Lisa)
+- [x] Check Implementation (Checked by Lisa)
+- [x] Check Indication of time spent (Checked by Lisa)
+- [] Add some other properties and documentation
+
 
 Exercise-Specific
 - [] Document the effect of which mutations are used 
