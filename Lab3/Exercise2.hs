@@ -4,70 +4,103 @@ import Test.QuickCheck
 import Mutation
 import MultiplicationTable
 import Debug.Trace
-import Denis.Exercise1 (shuffleList)
+import Exercise1 
 
 -- ## Deliverables ##
 -- implementation, documentation of approach, effect of using different mutators/properties, indication of time spent
--- Time spent: 180 min
+-- Time spent: 240 min (documentation takes time)
 
--- ## Thoughts ##
--- The countSurvivors is going to be quite a specific function which is only going to work on 
--- functions which apply to the multiplicaton form. 
+-- ## Documentation of Approach ##
 -- In an imperative approach I would use a count variable and increment it if a mutant survives 
-    -- in functional I'd need to use recursion for that or monads. 
+    -- in functional I'd need to use recursion for that.
+    -- a number of mutants (modified output) is given (4000 in the FitSpec case)
+
 -- I have to iterate over the properties and for each property iterate over the mutants and then return a bool whether it
 -- survived or not. If it survived, increment up the count else do nothing. 
 
-
--- ##The above-mentioned function definition is not final. Feel free to modify it, for example
--- by adding the mutations that should be used.
--- Did that by added another argument in order to document the effect of mutations better 
-
--- ## Notes on Function ##
--- First Argument: number of mutants
--- Second Argument: list of properties to test (the "unit" tests)
--- Third argument: List of mutators that should be applied -- in the form of [Integer] -> Gen [Integer]
--- Fourth argument is the function under test (multiplication table)
-
--- For sake of ease, equivalent mutants are not counted.
+-- ## countSurvivors
+-- First Argument: Number of mutants
+-- Second Argument: Set of propertie(s) --> the list/set enables us to try out different
+    -- combinations of properties (or testing them on their own).
+-- Third argument: Provide one mutator which is going then to generate the number of prescribed mutants 
+    -- Only one mutator, because if we take a list, we could not derive which property kills which kind of mutant. 
+-- Fourth argument is the function under test
+    -- In our case only the multiplication table 
 
 -- So in the end the function filters the list of mutants which survive (true values) under the list of
--- properties passed, and return total no. of mutants surviving.
+-- properties passed, and return total no. of mutants of one kind (e.g. arbitraryList) surviving.
 
 countSurvivors :: Integer -> [[Integer] -> Integer -> Bool] -> ([Integer] -> Gen [Integer]) -> (Integer -> [Integer]) -> Gen Integer
 countSurvivors numberOfMutants props mutators fut =
-    fmap (toInteger . length . filter id) <$> sequence $ generateListOfSurvivedMutants numberOfMutants mutators props fut
+    -- What's happening in the fmap?
+    -- generateListOfSurvivedMutants generated the list of survived mutants
+    -- for a property set (or to be more precise a list of [Gen Bool] which could indicate the amount of survived mutants,
+    -- as we haven't filtered the list yet)
 
+    -- Now we need to use the sequence function to convert
+    -- the list of monads [Gen Bool] into one Monad of the type Gen [Bool]
+    -- with the help of the functor fmap in the infix notation <$> (a normal map function would here not work since 
+    -- we are in a monadic context and applying 3 functions in the function composition.
 
--- Tests, if the provided mutant survives a property 
--- 1st argument: number of mutants  
--- 2nd argument: property 
--- 3rd argument: function under test 
--- 4th argument, if the mutant survived
+    -- starting with the inner von "filter", we filter for "True" Booleans (you could also filter for "id",
+    -- but I find (== True) more readable.
+    -- Then we have one list, and get the length out of it
+    -- since the previous output is an "Int", we need to cast it to "Integer", another
+    -- solution would be just to use the Int value in the function declaration, but Int
+    -- is fixed, whereas Integer is not (well, in theory, practically it 
+    -- is fixed by your hardware ressources) 
+
+    toInteger . length . filter (== True) <$> sequence (generateListOfSurvivedMutants numberOfMutants mutators props fut)
+
+-- ## generateListOfSurvivedMutants
 
 generateListOfSurvivedMutants
-    :: Integer
-    -> ([Integer] -> Gen [Integer])
-    -> [[Integer] -> Integer -> Bool]
-    -> (Integer -> [Integer])
-    -> [Gen Bool]
-generateListOfSurvivedMutants 0 mutator properties fut = [] -- If the list is empty, there are no 
+    :: Integer -- Number of mutants to generate 
+    -> ([Integer] -> Gen [Integer]) -- The mutator which generates the random output lists 
+    -> [[Integer] -> Integer -> Bool] -- A set of properties (can be combined as stated above)
+    -> (Integer -> [Integer]) -- The function under test 
+    -> [Gen Bool] -- Returns a list of Booleans (Survivors to the property set)
+    -- based on the "outsourced" function hasMutantSurvivedAllProps
+    -- If there are no mutants that need to be generated,
+    -- it makes to sense to continue generate survivors
+generateListOfSurvivedMutants 0 mutator properties fut = []
 generateListOfSurvivedMutants mutantNo mutator properties fut = do
-    hasMutantSurvivedAllProps mutator properties fut 20 -- inputNumber can be anything
+    -- mutator, properties, fut are given from the countSurvivors function 
+    -- (as they are not chaging, no need in putting them into recursion)
+    -- using the list constructor ":", we are calling the function 
+    -- "hasMutantSurvivedAllProps" which checks if a mutant has survived the given
+    -- prop set and insert the result to that list (either True (survived) / False (killed)) 
+    -- after the ":" we append the result of the recursion (the base case is at 
+    -- some point reached since we are decrementing the mutants to generate
+    -- at some point. If everything works correctly the list should then have 
+    -- the length == number of mutants (which could be a QuickCheck property if )
+    -- we needed to write tests
+    -- the last argument of hasMutantSurvivedAllProps is the input of
+    -- function under test. For the sake of ease I used a static value (but you could
+    -- generate a random number with RandomRIO or some Generator 
+    -- in the multiplicationTable function this input determines the multiply factor
+    hasMutantSurvivedAllProps mutator properties fut 5
         : generateListOfSurvivedMutants (mutantNo - 1) mutator properties fut
 
--- Returns all true surviving mutations
-hasMutantSurvivedAllProps
-    :: Eq a
-    => (a -> Gen a)
-    -> [a -> Integer -> Bool]
-    -> (Integer -> a)
+-- ## hasMutantSurvivedAllProps
+hasMutantSurvivedAllProps ::
+    ([Integer] -> Gen [Integer])
+    -- The set of properties to check
+    -> [[Integer] -> Integer -> Bool]
+    -- The function under test 
+    -> (Integer -> [Integer])
+    -- The input for the function under test
     -> Integer
+    -- Due to the fact that we are in a monadic context (?) we are not simply
+    -- returning a "Bool"
     -> Gen Bool
 hasMutantSurvivedAllProps mutator props fut inputNumber = do
+    -- Using the mutate' function from the Mutation module as this has the advantage
+    -- over the mutate function that it can take a list of properties, instead of only one
+    -- this is better because you don't have to deal then with lists of [Gen Maybe (Bool)] 
     mutatedValue <- mutate' mutator props fut inputNumber
-    return (and mutatedValue)
-
+    -- "return" wraps then the Bool into the needed type "Gen Bool"
+    return (and mutatedValue) -- If all survived (the "and-ing") we are going to return true.
 
 -- ## Considerung the relation between properties and mutations ##
 
@@ -87,22 +120,8 @@ killMutantsShuffle =
 -- To check for the shuffle, we need to add the "prop_linear" which is going to 
 -- check if the difference between consecutive elements is the input. At this point we have 0 survivors.
 
+-- A negative list is not catched by the "prop_moduloIsZero" 
+surviveNegList :: IO Integer
+surviveNegList =
+    generate $ countSurvivors 4000 [prop_moduloIsZero] negativeList multiplicationTable
 
-
--- ## TRASH
-
--- generateListOfSurvivedMutants :: Integer -> [[Integer] -> Integer -> Bool] -> [Integer] -> Gen [Integer]-> (Integer -> [Integer]) -> [Gen Bool]
--- generateListOfSurvivedMutants 0 _ _ _ = [] -- if zero mutants are provided return an empty list 
--- -- generateListOfSurvivedMutants numberOfMutants listOfProps listOfMutators fut = map (\mutator -> hasMutantSurvivedAllProps listOfProps mutator fut) listOfMutators
--- generateListOfSurvivedMutants mutantNo properties mutator fut = do
---     hasMutantSurvivedAllProps properties  mutator fut 
---         : generateListOfSurvivedMutants (mutantNo - 1) mutator properties fut
---     where inputNumber = 20 -- This can be amended to whatever random value
---                            -- one wants to try generate mult table (fut) for
-
-
--- hasMutantSurvivedAllProps :: [[Integer] -> Integer -> Bool] -> ([Integer] -> Gen [Integer]) -> (Integer -> [Integer]) -> Gen Bool
--- hasMutantSurvivedAllProps propertyList mutatorToTest fut = do
---     testProps <- mutate' mutatorToTest propertyList fut 10 -- using mutate' as this takes a list of props, 
---     -- 10 could be any random number since it is an input for the multiplication table 
---     return (and testProps) -- return true if the mutant survived all given properties
