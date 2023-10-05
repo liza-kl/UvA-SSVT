@@ -49,6 +49,7 @@ import Debug.Trace
 countSurvivors :: Integer -> [[Integer] -> Integer -> Bool] -> [[Integer] -> Gen [Integer]]-> (Integer -> [Integer]) -> Gen Integer
 countSurvivors numberOfMutants props mutators fut = do
     listOfSurvivedMutants <- sequence $ generateListOfSurvivedMutants numberOfMutants props mutators fut
+    -- use numberOfMutants
     return (toInteger (length (filter id listOfSurvivedMutants)))
     -- counting all True values, we can skip "filter" 
     --  with the <$> functor and the True value
