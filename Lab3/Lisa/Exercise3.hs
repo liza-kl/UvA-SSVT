@@ -89,6 +89,19 @@ calculateMinimalSubset fut (prop:prop':rest) outputList
                 | do numberOfKilledMutants prop getMutators fut 10 == numberOfKilledMutants  prop' getMutators fut 10 = calculateMinimalSubset fut (concat (prop:prop':rest))
                 | do otherwise return outputList -- if base case is reached 
 
+-- ## Some other Idea
+
+-- Putting this subsequence function outside to not to recurse it
+
+-- maxOrEqualValues :: (Ord a) => [a] -> [a]
+-- maxOrEqualValues xs = [x | x <- xs, x >= maximum xs]
+
+-- calculateMinimalSubset :: (Ord (IO Integer)) => (Integer -> [Integer]) -> [[[Integer] -> Integer -> Bool]] -> [Integer]-> IO [[Integer]]
+-- calculateMinimalSubset _ [] outputList = return [outputList] -- if properties set is empty, return the outputList (base case for recursion)
+-- calculateMinimalSubset fut (prop:prop':rest) outputList = do
+--             let x = maxOrEqualValues [\propSet -> numberOfKilledMutants propSet getMutators fut 10 | propSet <- getSubsequences]
+
+-- ## Some other Idea End
 
 
 -- main = do
