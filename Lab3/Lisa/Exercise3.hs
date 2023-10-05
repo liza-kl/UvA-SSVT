@@ -1,3 +1,4 @@
+{-# LANGUAGE AllowAmbiguousTypes #-}
 module Exercise3 where
 import Test.QuickCheck
 import Mutation
@@ -36,11 +37,6 @@ import Debug.Trace
 -- 2nd argument the properties
 -- Result: Minimal subset(s)
 
--- calculateMinimalSubset :: Eq b => (Integer -> b) -> [b -> Integer -> Bool] -> [Int]
--- calculateMinimalSubset _ [] = [] -- if properties set is empty, there can't be a minimal set 
--- calculateMinimalSubset fut propsToTest =
---     let mutiers = [addElements, removeElements, anyList]
---     in map (\mutierToTest -> getKilledByProp propsToTest propToTest fut 10) mutiers
 
 -- Sequential search an adding stuff 
 -- First list of props 
@@ -48,6 +44,7 @@ import Debug.Trace
 -- Third: function under test 
 -- Fourth: input for function under test 
 -- Return the number of killed mutants with the given property set 
+
 
 genToList :: Gen [Bool] -> IO [Bool]
 genToList = generate
@@ -58,11 +55,28 @@ numberOfKilledMutants listOfProps listOfMutiers fut inputFut = do
     convert2 <- mapM genToList convert
     return (toInteger (length (filter (== True) (concat convert2))))
 
-percentageOfKilledMutants :: Integral a => a -> a -> a
-percentageOfKilledMutants totalnoMutants killedMutants = totalnoMutants `div` 100 * killedMutants
+
+-- Basically the idea is to generate a list of all provided properties
+-- This functions also provide "single" properties, up until the whole set
+-- Calculate then the number of killed mutants, keep those who are "equally strong" in terms
+-- of killing.
+combinationsOfSubsets :: [a] -> [[a]]
+combinationsOfSubsets [] = [[]]  -- There is one combination, the empty list
+combinationsOfSubsets (x:xs) = combinationsOfSubsets xs ++ map (x:) (combinationsOfSubsets xs)
+
+calculateMinimalSubset :: Eq b => (Integer -> [Integer]) -> [[Integer] -> Integer -> Bool] -> IO [Integer]
+calculateMinimalSubset _ [] = [] -- if properties set is empty, there can't be a minimal set 
+calculateMinimalSubset fut propsToTest =
+            let mutiers = [addElements, removeElements, anyList]
+                (prop:prop':rest) = combinationsOfSubsets propsToTest 
+            in
+                if numberOfKilledMutants x > numberOfKilledMutants x' then calculateMinimalSubset fut (prop:rest)
+                if numberOfKilledMutants x < numberOfKilledMutants x' then calculateMinimalSubset fut (prop':rest) else (prop:prop':rest)
+
+
 
 main = do
-    let status =  numberOfKilledMutants multiplicationTableProps [removeElements] multiplicationTable 10
+    let status =  numberOfKilledMutants multiplicationTableProps [addElements, removeElements] multiplicationTable 10
     status 
     -- numberOfKilledMutants [prop_sumIsTriangleNumberTimesInput] [addElements] multiplicationTable 10
 
