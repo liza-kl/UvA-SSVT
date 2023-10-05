@@ -62,24 +62,26 @@ numberOfKilledMutants listOfProps listOfMutiers fut inputFut = do
 -- of killing.
 
 
+-- Putting this subsequence function outside to not to recurse it
+getSubsequences ::  [[Integer] -> Integer -> Bool] -> [[[Integer] -> Integer -> Bool]]
+getSubsequences = subsequences
 
-calculateMinimalSubset :: (Ord (IO Integer)) => (Integer -> [Integer]) -> [[Integer] -> Integer -> Bool] -> IO [Integer]
-calculateMinimalSubset _ [] = return [] -- if properties set is empty, there can't be a minimal set 
-calculateMinimalSubset fut propsToTest = do
-            let mutiers = [addElements, removeElements, anyList]
-                (prop:prop':[rest]) = subsequences propsToTest
+getMutators :: [[Integer] -> Gen [Integer]]
+getMutators = [addElements, removeElements, anyList]
 
-                in
-                if numberOfKilledMutants prop mutiers fut 10 > numberOfKilledMutants prop' mutiers fut 10 then calculateMinimalSubset fut (concat (prop:rest))
-                else if numberOfKilledMutants prop mutiers fut 10 < numberOfKilledMutants  prop' mutiers fut 10 then calculateMinimalSubset fut (concat (prop':rest))
-                else if numberOfKilledMutants prop mutiers fut 10 == numberOfKilledMutants  prop' mutiers fut 10 then calculateMinimalSubset fut (concat (prop:prop':rest))
-                else return [1,2,3]
-
+calculateMinimalSubset :: (Ord (IO Integer)) => (Integer -> [Integer]) -> [[[Integer] -> Integer -> Bool]] -> [Integer]-> IO [[Integer]]
+calculateMinimalSubset _ [] outputList = return outputList -- if properties set is empty, return the outputList (base case for recursion)
+calculateMinimalSubset fut (prop:prop':rest) outputList 
+                | do numberOfKilledMutants prop getMutators fut 10 > numberOfKilledMutants prop' getMutators fut 10 = calculateMinimalSubset fut (concat (prop:rest))
+                | do numberOfKilledMutants prop getMutators fut 10 < numberOfKilledMutants  prop' getMutators fut 10 = calculateMinimalSubset fut (concat (prop':rest))
+                | do numberOfKilledMutants prop getMutators fut 10 == numberOfKilledMutants  prop' getMutators fut 10 = calculateMinimalSubset fut (concat (prop:prop':rest))
+                | do otherwise return outputList -- if base case is reached 
 
 
-main = do
-    let status =  numberOfKilledMutants multiplicationTableProps [addElements, removeElements] multiplicationTable 10
-    status
+
+-- main = do
+--     let status =  numberOfKilledMutants multiplicationTableProps [addElements, removeElements] multiplicationTable 10
+--     status
 
 
 -- ## CODE GRAVEYARD ##
