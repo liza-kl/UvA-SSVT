@@ -49,18 +49,21 @@ import Debug.Trace
 -- Fourth: input for function under test 
 -- Return the number of killed mutants with the given property set 
 
-numberOfKilledMutants ::  (Eq a) => [a -> Integer -> Bool] -> [a -> Gen a] -> (Integer -> a) -> Integer -> Int
+genToList :: Gen [Bool] -> IO [Bool]
+genToList = generate
+
+numberOfKilledMutants ::  (Eq a) => [a -> Integer -> Bool] -> [a -> Gen a] -> (Integer -> a) -> Integer -> IO Integer
 numberOfKilledMutants listOfProps listOfMutiers fut inputFut = do
-    length [ (\mutier -> mutate' mutier listOfProps fut inputFut) | mutier <- listOfMutiers]
-
-
+    let convert = map (\mutier -> mutate' mutier listOfProps fut inputFut) listOfMutiers
+    convert2 <- mapM genToList convert
+    return (toInteger (length (filter (== True) (concat convert2))))
 
 percentageOfKilledMutants :: Integral a => a -> a -> a
-percentageOfKilledMutants totalnoMutants killedMutants = (totalnoMutants `div` 100) * killedMutants
+percentageOfKilledMutants totalnoMutants killedMutants = totalnoMutants `div` 100 * killedMutants
 
 main = do
-    let status =  numberOfKilledMutants [prop_sumIsTriangleNumberTimesInput] [addElements] multiplicationTable 10
-    trace ("Killed Mutants: " ++ show status) $ status;
+    let status =  numberOfKilledMutants multiplicationTableProps [removeElements] multiplicationTable 10
+    status 
     -- numberOfKilledMutants [prop_sumIsTriangleNumberTimesInput] [addElements] multiplicationTable 10
 
 
