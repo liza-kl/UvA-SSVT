@@ -3,53 +3,63 @@ import Data.List
 import Test.QuickCheck
 import Mutation
 import System.Random
+import MultiplicationTable (multiplicationTable)
 
-{-- 
-    Time Spent: 1 hour
+-- ## Deliverables ##
+-- List of mutators and rationale, implementation, indication of time spent.
+-- Time spent: 60 Minutes
 
-    We want to check:
-    - edge cases like empty lists
-    - list length changes 
-    - element value changes
-    - patterns e.g. sort, reverse, shuffle, same-number list
 
-    Outputs that are covered:
-    1) Add elements to start or end of list -> 
-        - Strength: Increases list length.
-        - Weakness: Only adds in the start or end of the list. Does not remove elements or check edge cases/patterns.
-    2) Remove random elements -> 
-        - Strength: Decreases the list length. 
-        - Weakness: Does not add elements or check edge cases/patterns.
-    3) Random list ->
-        - Strength: Checks what happens with different data.
-        - Weakness: Does not change the existing list.
+-- ## List of Mutators and Rationale ##
 
-    Outputs that are not covered:
-    1) Empty output list -> 
-        - Strength: Checks the edge case of empty list.
-        - Weakness: Does not add or remove or modify elements. Does not check patterns.
-    2) Sort output list ->
-        - Strength: Checks what happens with a sorted list.
-        - Weakness: Does not add or remove or modify elements.
-    3) Reverse output list -> 
-        - Strength: Checks what happens with the reversed list.
-        - Weakness: Does not add or remove or modify elements.
-    4) Shuffle output list -> 
-        - Strength: Checks what happens if we the elements are in different positions.
-        - Weakness: Does not add or remove or modify elements.
-    5) Negate output list ->
-        - Strength: Checks what happens if the numbers are negative.
-        - Weakness: Does not add or remove or modify elements.
-    6) Replace random values in output list ->
-        - Strength: Checks what happens if some values are changed.
-        - Weakness: Does not add or remove elements. Does not check patterns.
-    7) Output list that contains the same number ->
-        - Strength: Checks the edge case of having duplicates.
-        - Weakness: Does not add or remove elements. 
-    8) Add numbers in random spots 
-        - Strength: Random numbers in random spots. Increases list length.
-        - Weakness: Does not remove elements.  Does not check patterns.
---}
+    -- We want to check:
+    -- - edge cases like empty lists
+    -- - list length changes 
+    -- - element value changes
+    -- - patterns e.g. sort, reverse, shuffle, same-number list
+
+    -- Outputs that are covered:
+    -- 1) Add elements to start or end of list -> 
+    --     - Strength: Increases list length.
+    --     - Weakness: Only adds in the start or end of the list. Does not remove elements or check edge cases/patterns.
+    -- 2) Remove random elements -> 
+    --     - Strength: Decreases the list length. 
+    --     - Weakness: Does not add elements or check edge cases/patterns.
+    -- 3) Random list ->
+    --     - Strength: Checks what happens with different data.
+    --     - Weakness: Does not change the existing list.
+
+    -- Outputs that are not covered:
+    -- 1) Empty output list -> 
+    --     - Strength: Checks the edge case of empty list.
+    --     - Weakness: Does not add or remove or modify elements. Does not check patterns.
+    -- 2) Sort output list ->
+    --     - Strength: Checks what happens with a sorted list.
+    --     - Weakness: Does not add or remove or modify elements.
+    -- 3) Reverse output list -> 
+    --     - Strength: Checks what happens with the reversed list.
+    --     - Weakness: Does not add or remove or modify elements.
+    -- 4) Shuffle output list -> 
+    --     - Strength: Checks what happens if we the elements are in different positions.
+    --     - Weakness: Does not add or remove or modify elements.
+    -- 5) Negate output list ->
+    --     - Strength: Checks what happens if the numbers are negative.
+    --     - Weakness: Does not add or remove or modify elements.
+    -- 6) Replace random values in output list ->
+    --     - Strength: Checks what happens if some values are changed.
+    --     - Weakness: Does not add or remove elements. Does not check patterns.
+    -- 7) Output list that contains the same number ->
+    --     - Strength: Checks the edge case of having duplicates.
+    --     - Weakness: Does not add or remove elements. 
+    -- 8) Add numbers in random spots 
+    --     - Strength: Random numbers in random spots. Increases list length.
+    --     - Weakness: Does not remove elements.  Does not check patterns.
+    -- 9) An exact same list which could arise because of the arbitrary list generator
+    --     - This would be a so-called "equivalent mutant" which unfortunately can't be really tested.
+
+
+
+-- ## Implementation ##
 
 emptyList :: [Integer] -> Gen [Integer]
 emptyList xs = return []
@@ -61,7 +71,7 @@ reverseList :: [Integer] -> Gen [Integer]
 reverseList xs = return (reverse xs)
 
 shuffleList :: [Integer] -> Gen [Integer]
-shuffleList xs = shuffle xs
+shuffleList = shuffle
 
 negativeList :: [Integer] -> Gen [Integer]
 negativeList xs = return (map negate xs)
@@ -70,15 +80,15 @@ replaceAtIndex :: Int -> Integer -> [Integer] -> [Integer]
 replaceAtIndex index newValue xs =
   take index xs ++ [newValue] ++ drop (index + 1) xs
 
--- helper function
+-- ## HelperFunctions ##
 changeList :: [Integer] -> Gen [Integer]
 changeList xs = do
-    indicesToReplace <- sublistOf [0..(length xs - 1)] 
-    valuesToReplaceWith <- vectorOf (length indicesToReplace) arbitrary 
+    indicesToReplace <- sublistOf [0..(length xs - 1)]
+    valuesToReplaceWith <- vectorOf (length indicesToReplace) arbitrary
     return $ foldl (\list (index, newValue) -> replaceAtIndex index newValue list) xs (zip indicesToReplace valuesToReplaceWith)
 
 sameNumberList :: [Integer] -> Gen [Integer]
-sameNumberList xs = do 
+sameNumberList xs = do
     num <- choose (1, 100)
     return (replicate (length xs) num)
 
@@ -92,7 +102,7 @@ addElementsRandomly xs = do
 main :: IO ()
 main =  do
     -- simple example
-    let nums = [1, 2, 3, 4, 5]
+    let nums = multiplicationTable 5
 
     empty <- generate (emptyList nums)
     sorted <- generate (sortList nums)
@@ -105,7 +115,7 @@ main =  do
     addedRandomly <- generate (addElementsRandomly nums)
     removed <- generate (removeElements nums)
     anylist <- generate (anyList nums)
-    
+
     -- Mutated lists
     putStrLn "Empty list:"
     print empty
@@ -114,11 +124,11 @@ main =  do
     putStrLn "Sorted list:"
     print sorted
     putStrLn "\n"
-    
+
     putStrLn "Reversed list:"
     print reversed
     putStrLn "\n"
-    
+
     putStrLn "Shuffled list:"
     print shuffled
     putStrLn "\n"
