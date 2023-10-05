@@ -44,7 +44,7 @@ import Test.QuickCheck
     ((Total amount of mutants) - (countSurvivors of the property set) = Amount of killed mutants) / (Total amount of mutants) = Percentage of killed mutants.
     
     High percentage -> Strong property set -> Most likely higher quality properties if not too specific and good coverage is implied.
-    -> big number = good (kinda...)
+    -> big number = good (kinda... :D)
 
 -}
 
