@@ -4,6 +4,7 @@ import Test.QuickCheck
 import Mutation
 import MultiplicationTable
 import Debug.Trace
+import Denis.Exercise1 (shuffleList)
 
 -- ## Task ##
 -- Write a function countSurvivors that counts the number of survivors:
@@ -46,14 +47,11 @@ import Debug.Trace
 -- So in the end the function filters the list of mutants which survive (true values) under the list of
 -- properties passed, and return total no. of mutants surviving.
 
-countSurvivors :: Integer -> [[Integer] -> Integer -> Bool] -> [[Integer] -> Gen [Integer]]-> (Integer -> [Integer]) -> Gen Integer
+countSurvivors :: Integer -> [[Integer] -> Integer -> Bool] -> ([Integer] -> Gen [Integer]) -> (Integer -> [Integer]) -> Gen Integer
 countSurvivors numberOfMutants props mutators fut = do
     listOfSurvivedMutants <- sequence $ generateListOfSurvivedMutants numberOfMutants props mutators fut
     -- use numberOfMutants
     return (toInteger (length (filter id listOfSurvivedMutants)))
-    -- counting all True values, we can skip "filter" 
-    --  with the <$> functor and the True value
-    -- because the filter function looks for "True"
 
 -- Tests, if the provided mutant survives a property 
 -- 1st argument: number of mutants  
@@ -61,31 +59,52 @@ countSurvivors numberOfMutants props mutators fut = do
 -- 3rd argument: function under test 
 -- 4th argument, if the mutant survived
 
-generateListOfSurvivedMutants :: Integer -> [[Integer] -> Integer -> Bool] -> [[Integer] -> Gen [Integer]]-> (Integer -> [Integer]) -> [Gen Bool]
-generateListOfSurvivedMutants 0 _ _ _ = [] -- if zero mutants are provided return an empty list 
-generateListOfSurvivedMutants numberOfMutants listOfProps listOfMutators fut = map (\mutator -> hasMutantSurvivedAllProps listOfProps mutator fut) listOfMutators
+generateListOfSurvivedMutants
+    :: Integer
+    -> ([Integer] -> Gen [Integer])
+    -> [[Integer] -> Integer -> Bool]
+    -> (Integer -> [Integer])
+    -> [Gen Bool]
+generateListOfSurvivedMutants 0 mutator properties fut = [] -- If the list is empty, there are no 
+generateListOfSurvivedMutants mutantNo mutator properties fut = do
+    hasMutantSurvivedAllProps mutator properties fut 20 -- inputNumber can be anything
+        : generateListOfSurvivedMutants (mutantNo - 1) mutator properties fut
 
+-- Returns all true surviving mutations
+hasMutantSurvivedAllProps
+    :: Eq a
+    => (a -> Gen a)
+    -> [a -> Integer -> Bool]
+    -> (Integer -> a)
+    -> Integer
+    -> Gen Bool
+hasMutantSurvivedAllProps mutator props fut inputNumber = do
+    mutatedValue <- mutate' mutator props fut inputNumber
+    return (and mutatedValue)
 
-hasMutantSurvivedAllProps :: [[Integer] -> Integer -> Bool] -> ([Integer] -> Gen [Integer]) -> (Integer -> [Integer]) -> Gen Bool
-hasMutantSurvivedAllProps propertyList mutatorToTest fut = do
-    testProps <- mutate' mutatorToTest propertyList fut 10 -- using mutate' as this takes a list of props, 
-    -- 10 could be any random number since it is an input for the multiplication table 
-    return (and testProps) -- return true if the mutant survived all given properties
 
 -- ## Tests ##
 
 -- Testing survivors of MultiplicationTable.prop_tenElements
-survivedMutantsAddElements :: IO Integer
-survivedMutantsAddElements =
-    generate $ countSurvivors 4000 multiplicationTableProps [addElements] multiplicationTable
+survivedMutantsShuffle :: IO Integer
+survivedMutantsShuffle =
+    generate $ countSurvivors 4000 [prop_tenElements] shuffleList multiplicationTable
 
--- Counting survivors in removeElements mutator
-countSurviviorsInRemoveElements :: IO Integer
-countSurviviorsInRemoveElements =
-    generate $ countSurvivors 4000 multiplicationTableProps [removeElements] multiplicationTable
 
--- Counting survivors in removeElements mutator
-countSurviviorsInAnyList :: IO Integer
-countSurviviorsInAnyList =
-    generate $ countSurvivors 4000 multiplicationTableProps [anyList] multiplicationTable
+-- ## TRASH
 
+-- generateListOfSurvivedMutants :: Integer -> [[Integer] -> Integer -> Bool] -> [Integer] -> Gen [Integer]-> (Integer -> [Integer]) -> [Gen Bool]
+-- generateListOfSurvivedMutants 0 _ _ _ = [] -- if zero mutants are provided return an empty list 
+-- -- generateListOfSurvivedMutants numberOfMutants listOfProps listOfMutators fut = map (\mutator -> hasMutantSurvivedAllProps listOfProps mutator fut) listOfMutators
+-- generateListOfSurvivedMutants mutantNo properties mutator fut = do
+--     hasMutantSurvivedAllProps properties  mutator fut 
+--         : generateListOfSurvivedMutants (mutantNo - 1) mutator properties fut
+--     where inputNumber = 20 -- This can be amended to whatever random value
+--                            -- one wants to try generate mult table (fut) for
+
+
+-- hasMutantSurvivedAllProps :: [[Integer] -> Integer -> Bool] -> ([Integer] -> Gen [Integer]) -> (Integer -> [Integer]) -> Gen Bool
+-- hasMutantSurvivedAllProps propertyList mutatorToTest fut = do
+--     testProps <- mutate' mutatorToTest propertyList fut 10 -- using mutate' as this takes a list of props, 
+--     -- 10 could be any random number since it is an input for the multiplication table 
+--     return (and testProps) -- return true if the mutant survived all given properties
