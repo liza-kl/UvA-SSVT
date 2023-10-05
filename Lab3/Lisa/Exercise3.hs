@@ -114,7 +114,7 @@ calculateMinimalSubset fut (prop:prop':rest) outputList = do
 --     status
 
 
--- ## CODE GRAVEYARD ##
+-- ## TRASH ##
 -- Retuns number of killed mutants 
 -- 1st list of props 
 -- 2nd mutantToTest 
