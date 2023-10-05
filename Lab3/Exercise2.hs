@@ -49,8 +49,7 @@ import Denis.Exercise1 (shuffleList)
 
 countSurvivors :: Integer -> [[Integer] -> Integer -> Bool] -> ([Integer] -> Gen [Integer]) -> (Integer -> [Integer]) -> Gen Integer
 countSurvivors numberOfMutants props mutators fut = do
-    listOfSurvivedMutants <- sequence $ generateListOfSurvivedMutants numberOfMutants props mutators fut
-    -- use numberOfMutants
+    listOfSurvivedMutants <- sequence $ generateListOfSurvivedMutants numberOfMutants mutators props fut
     return (toInteger (length (filter id listOfSurvivedMutants)))
 
 -- Tests, if the provided mutant survives a property 
@@ -89,6 +88,7 @@ hasMutantSurvivedAllProps mutator props fut inputNumber = do
 survivedMutantsShuffle :: IO Integer
 survivedMutantsShuffle =
     generate $ countSurvivors 4000 [prop_tenElements] shuffleList multiplicationTable
+
 
 
 -- ## TRASH
