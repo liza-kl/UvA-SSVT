@@ -2,7 +2,7 @@ module Exercise3 where
 import Test.QuickCheck
 import Mutation
 import MultiplicationTable
-
+import Debug.Trace
 -- ## Task ##
 -- Implement a function that calculates the minimal property subsets, 
 -- given a 'function under test' and a set of properties
@@ -28,31 +28,53 @@ import MultiplicationTable
 -- We could use the mutate' function for that. 
 -- In the function we need to provide some mutators (for sake of ease we use the ones from MultiplicationTable.hs)
 
+-- Probably solution number 2:
+-- Iterate through the mutant and check by how many properties it is killed
+-- 
+
 -- 1st argument the fut
 -- 2nd argument the properties
 -- Result: Minimal subset(s)
 
-calculateMinimalSubset :: (a -> b) -> [d -> e -> Bool] -> [[c]]
-calculateMinimalSubset _ [] = [] -- if properties set is empty, there can't be a minimal set 
-calculateMinimalSubset fut propsToTest =
-    let mutiers = [addElements, removeElements, anyList]
-    in map (\propToTest -> getKilledMutants mutiers propToTest fut 10) propsToTest
+-- calculateMinimalSubset :: Eq b => (Integer -> b) -> [b -> Integer -> Bool] -> [Int]
+-- calculateMinimalSubset _ [] = [] -- if properties set is empty, there can't be a minimal set 
+-- calculateMinimalSubset fut propsToTest =
+--     let mutiers = [addElements, removeElements, anyList]
+--     in map (\mutierToTest -> getKilledByProp propsToTest propToTest fut 10) mutiers
+
+-- Sequential search an adding stuff 
+-- First list of props 
+-- Second: list of mutiers
+-- Third: function under test 
+-- Fourth: input for function under test 
+-- Return the number of killed mutants with the given property set 
+
+numberOfKilledMutants ::  (Eq a) => [a -> Integer -> Bool] -> [a -> Gen a] -> (Integer -> a) -> Integer -> Int
+numberOfKilledMutants listOfProps listOfMutiers fut inputFut = do
+    length [ (\mutier -> mutate' mutier listOfProps fut inputFut) | mutier <- listOfMutiers]
 
 
+
+percentageOfKilledMutants :: Integral a => a -> a -> a
+percentageOfKilledMutants totalnoMutants killedMutants = (totalnoMutants `div` 100) * killedMutants
+
+main = do
+    let status =  numberOfKilledMutants [prop_sumIsTriangleNumberTimesInput] [addElements] multiplicationTable 10
+    trace ("Killed Mutants: " ++ show status) $ status;
+    -- numberOfKilledMutants [prop_sumIsTriangleNumberTimesInput] [addElements] multiplicationTable 10
+
+
+-- ## CODE GRAVEYARD ##
 -- Retuns number of killed mutants 
--- 1st list of mutiers
--- 2nd property to test
+-- 1st list of props 
+-- 2nd mutantToTest 
 -- 3rd function unter test
 -- 4rd input of fut 
 -- Returns Integer (the number of killed mutants)
 
-getKilledMutants :: [a -> Gen a] -> (b -> Integer -> Bool) -> (Integer -> b) -> Integer -> Int
-getKilledMutants [] _ _ _ = 0 -- If no mutiers present, no one can be killed 
-getKilledMutants listOfMutiers propToTest functionUnderTest inputOfFut = do
-    length listOfMutiers - length ( [\mutier
-                                    -> mutate mutier propToTest functionUnderTest inputOfFut |
-                                    (== Just True), mutier <- listOfMutiers])
-
-
-main :: IO ()
-main = print (calculateMinimalSubset multiplicationTable multiplicationTableProps)
+-- getKilledByProp :: Eq b => [a -> Gen a] -> (b -> Integer -> Bool) -> (Integer -> b) -> Integer -> Int
+-- getKilledByProp [] _ _ _ = 0 -- If no mutiers present, no one can be killed 
+-- getKilledByProp listOfMutiers propToTest functionUnderTest inputOfFut = do
+--     length listOfMutiers - length ( [\ mutier
+--                                     -> mutate' mutier [propToTest] functionUnderTest inputOfFut |
+--                                     mutier <- listOfMutiers])
