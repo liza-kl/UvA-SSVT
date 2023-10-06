@@ -52,8 +52,9 @@ genToList = generate
 -- ## checkIfMutantGetsKilledBySet
 -- one mutator, with all properties 
 checkIfMutantGetsKilledBySet :: (Eq a) => [a -> Integer -> Bool] -> (a -> Gen a) -> (Integer -> a) -> Integer -> Gen [Bool]
-checkIfMutantGetsKilledBySet propSet mutator fut inputFut = 
-    mutate' mutator propSet fut inputFut
+checkIfMutantGetsKilledBySet propSet mutator fut inputFut = do 
+    result <-   mutate' mutator propSet fut inputFut
+    return [(and result)] -- 
 
 -- This function contains a bug, or it's like not finished yet.
 -- It actually does not need to return the length, or like it should but it needs to check if the property set kills the X mutants
@@ -70,7 +71,7 @@ getSubsequences props = tail (subsequences props)
 
 -- list of mutators
 getMutators :: [[Integer] -> Gen [Integer]]
-getMutators = [removeElements]
+getMutators = [removeElements, shuffleList]
 
 -- list of tuples of (propertyName, property), because we need to save the property name somewhere
 multiplicationTablePropsWithNames :: [(String, [Integer] -> Integer -> Bool)]
