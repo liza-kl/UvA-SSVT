@@ -5,24 +5,21 @@ import Mutation
 import MultiplicationTable
 import Debug.Trace
 import Data.List
-import Exercise7 (Name)
 -- ## Task ##
 -- Implement a function that calculates the minimal property subsets, 
 -- given a 'function under test' and a set of properties
 
 -- ## Deliverables ##
 -- implementation, documentation of approach, indication of time spent
--- Time spent: 
+-- Time spent: 10 hours (we were kinda in a loop of thoughts.)
 
 -- ## Documentation of Approach ##
--- First naive thoughts :
+-- ⏭️ You could skip until ⏸️ First naive thoughts :
 
 -- We take as an argument something comparabable and generic (need to work with constaints)
 -- Need to derive if a property is a subset of another property, if yes replace it (recursion maybe)
 -- Use stronger / weaker functions and leave in the end only the strongest ones or equal and this is the subset (?).
 -- You need to check if a prop is weaker than the other one, if yes then take that (because it then includes the stronger prop).
-
--- Probably the solution: 
 
 -- Or we could execute the property and check how many mutants are killed with the property. Based on that we make a subset
 -- Proposed in the FitSpec Paper "FitSpec discovers two possible minimal subsets of [...] As measured by the number of
@@ -31,51 +28,45 @@ import Exercise7 (Name)
 -- We could use the mutate' function for that. 
 -- In the function we need to provide some mutators (for sake of ease we use the ones from MultiplicationTable.hs)
 
--- Probably solution number 2:
--- Iterate through the mutant and check by how many properties it is killed
--- 
+-- ⏸️ Solution which we thought we implemented, but which is currently not bug-free:
+-- The function "combinations" creates all subsets of the properties (including an empty list which should
+-- be excluded in the best case to avoid exceptions when working with certain list operations).
+-- We have a list of mutants which need to be checked and we iterate over them to get somehow of a "matrix"
 
--- 1st argument the fut
--- 2nd argument the properties
--- Result: Minimal subset(s)
 
--- Sequential search an adding stuff 
--- First list of props 
--- Second: list of mutiers
--- Third: function under test 
--- Fourth: input for function under test 
--- Return the number of killed mutants with the given property set
 
 -- ## Helper Functions ##
 
--- Basically doing the same workaround as in Lab1
-data NameableProperty = NameableProperty {
-    name:: String,
-    propertyFunc:: [Integer] -> Integer -> Bool
-}
+-- ## propertiesWithoutNames
+-- Takes the name of the prop and the prop-function itself
+-- map iterates over the list and returns the second element of a tuple 
+-- -> The prop function.
+propertiesWithoutNames :: [(String, a)] -> [a]
+propertiesWithoutNames = map snd
 
-getMultiplicationTableProps :: [NameableProperty] = [
-    (NameableProperty {name = "prop_tenElements", propertyFunc = prop_tenElements}),
-    (NameableProperty {name = "prop_firstElementIsInput", propertyFunc = prop_firstElementIsInput}),
-    (NameableProperty {name = "prop_sumIsTriangleNumberTimesInput", propertyFunc = prop_sumIsTriangleNumberTimesInput}),
-    (NameableProperty {name = "prop_linear", propertyFunc = prop_linear}),
-    (NameableProperty {name = "prop_moduloIsZero", propertyFunc = prop_moduloIsZero})
-    ]
 
-getName :: NameableProperty -> String
-getName (NameableProperty s _) = s
-
-getProp:: NameableProperty -> ([Integer] -> Integer -> Bool)
-getProp (NameableProperty _ func) = func
-
+-- ## genToList
+-- We use Gen to List in order to convert our Generator Monad into an IO Monad which we can print
+-- There should be probably a better solution for this, maybe you could have done this inline
+-- but this "random" type conversions seem wrong.
 genToList :: Gen [Bool] -> IO [Bool]
 genToList = generate
 
+
+-- ## checkIfMutantGetsKilledBySet
+-- This function is used is 
+checkIfMutantGetsKilledBySet :: (Eq a) => [a -> Integer -> Bool] -> (a -> Gen a) -> (Integer -> a) -> Integer -> Gen [Bool]
+checkIfMutantGetsKilledBySet propSet mutant fut _ = 
+    mutate' mutant propSet fut 10
+
+-- This function contains a bug, or it's like not finished yet.
+-- It actually does not need to return the length, or like it should but it needs to check if the property set kills the X mutants
+-- Then it returns something. But at the moment it checks for every property in the list if it's killing it.
 numberOfKilledMutants ::  (Eq a) => [a -> Integer -> Bool] -> [a -> Gen a] -> (Integer -> a) -> Integer -> IO Integer
 numberOfKilledMutants listOfProps listOfMutiers fut inputFut = do
-    let convert = map (\mutier -> mutate' mutier listOfProps fut inputFut) listOfMutiers
+    let convert = map (\mutier -> checkIfMutantGetsKilledBySet listOfProps mutier fut 10) listOfMutiers
     convert2 <- mapM genToList convert
-    return (toInteger (length (filter (== False) (concat convert2))))
+    return (toInteger (length (filter not (concat convert2))))
 
 
 -- Basically the idea is to generate a list of all provided properties
@@ -85,36 +76,39 @@ numberOfKilledMutants listOfProps listOfMutiers fut inputFut = do
 
 
 -- Putting this subsequence function outside to not to recurse it
-getSubsequences ::  [[Integer] -> Integer -> Bool] -> [[[Integer] -> Integer -> Bool]]
-getSubsequences = subsequences
+getSubsequences ::  [(String, [Integer] -> Integer -> Bool)] -> [[(String, [Integer] -> Integer -> Bool)]]
+getSubsequences props = tail (subsequences props)
 
-getMutators :: [[Integer] -> Gen [Integer]]
-getMutators = [addElements, removeElements, anyList]
+-- getMutators :: [[Integer] -> Gen [Integer]]
+-- getMutators = [addElements, removeElements, anyList]
 
-maxOrEqualValues :: Ord a => [a] -> [a]
-maxOrEqualValues xs = [x | x <- xs, x >= maximum xs]
+-- calculateMinimalSubset :: (Ord (IO Integer)) => (Integer -> [Integer]) -> [[[Integer] -> Integer -> Bool]] -> [Integer] -> IO [[Integer]]
+-- calculateMinimalSubset _ [] outputList = return outputList -- if properties set is empty, return the outputList (base case for recursion)
+-- calculateMinimalSubset fut (prop:prop':rest) outputList 
+--                 | do numberOfKilledMutants prop getMutators fut 10 > numberOfKilledMutants prop' getMutators fut 10 = calculateMinimalSubset fut (concat (prop:rest))
+--                 | do numberOfKilledMutants prop getMutators fut 10 < numberOfKilledMutants  prop' getMutators fut 10 = calculateMinimalSubset fut (concat (prop':rest))
+--                 | do numberOfKilledMutants prop getMutators fut 10 == numberOfKilledMutants  prop' getMutators fut 10 = calculateMinimalSubset fut (concat (prop:prop':rest))
+--                 | do otherwise return outputList -- if base case is reached 
 
-calculateMinimalSubset :: (Ord (IO Integer)) => (Integer -> [Integer]) -> [[[Integer] -> Integer -> Bool]] -> [Integer]-> IO [[Integer]]
-calculateMinimalSubset _ [] outputList = return [outputList] -- if properties set is empty, return the outputList (base case for recursion)
-calculateMinimalSubset fut (prop:prop':rest) outputList = do
-            let x = maxOrEqualProps [\propSet -> numberOfKilledMutants propSet getMutators fut 10 | propSet <- concat getSubsequences]
-            return x
+multiplicationTablePropsWithNames :: [(String, [Integer] -> Integer -> Bool)]
+multiplicationTablePropsWithNames = [("prop_tenElements", prop_tenElements), ("prop_firstElementIsInput", prop_firstElementIsInput), ("prop_sumIsTriangleNumberTimesInput", prop_sumIsTriangleNumberTimesInput), ("prop_linear", prop_linear), ("prop_moduloIsZero", prop_moduloIsZero)]
+
+getCombinationPropertyNames :: [(String, a)] -> [String]
+getCombinationPropertyNames = map fst
+
+--[("P1", P1), ("P2", P2)]
+main = do
+    -- ([("P1", P1), ("P2", P2)], 5)
+    let combinations = getSubsequences multiplicationTablePropsWithNames
+    results <- mapM (\combination -> do
+        status <- numberOfKilledMutants (propertiesWithoutNames combination) [anyList] multiplicationTable 10
+        return (getCombinationPropertyNames combination, status)
+        ) combinations
+    -- Print the results
+    mapM_ (\(names, status) -> putStrLn $ "Combination: " ++ show names ++ ", Status: " ++ show status) results
 
 
--- ## Some other Idea
-
--- Putting this subsequence function outside to not to recurse it
-
-
--- ## Some other Idea End
-
-
--- main = do
---     let status =  numberOfKilledMutants multiplicationTableProps [addElements, removeElements] multiplicationTable 10
---     status
-
-
--- ## TRASH ##
+-- ## CODE GRAVEYARD ##
 -- Retuns number of killed mutants 
 -- 1st list of props 
 -- 2nd mutantToTest 
