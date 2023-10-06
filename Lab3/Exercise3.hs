@@ -94,11 +94,11 @@ propertiesWithoutNames :: [(String, a)] -> [a]
 propertiesWithoutNames = map snd
 
 -- main functionality
-findMinimalPropertySubsets :: IO ()
-findMinimalPropertySubsets = do
-    let combinations = getSubsequences multiplicationTablePropsWithNames
+findMinimalPropertySubsets :: (Integer -> [Integer]) -> [(String, [Integer] -> Integer -> Bool)] -> IO ()
+findMinimalPropertySubsets fut props = do
+    let combinations = getSubsequences props
     results <- mapM (\combination -> do
-        killed <- numberOfKilledMutants (propertiesWithoutNames combination) getMutators multiplicationTable 5
+        killed <- numberOfKilledMutants (propertiesWithoutNames combination) getMutators fut 5
         return (getCombinationPropertyNames combination, killed)
         ) combinations
         
@@ -129,7 +129,10 @@ findMinimalPropertySubsets = do
     putStrLn "Minimal property subsets:"
     mapM_ (\(names, killed) -> putStrLn $ "Combination: " ++ show names ++ ", Killed Mutants: " ++ show killed) smallestNameCombinations
 
-
+main =  do
+    let fut = multiplicationTable  -- Replace with your actual function.
+    let props = multiplicationTablePropsWithNames  -- Replace with your actual properties.
+    findMinimalPropertySubsets fut props
 -- ## CODE GRAVEYARD ##
 -- Retuns number of killed mutants 
 -- 1st list of props 

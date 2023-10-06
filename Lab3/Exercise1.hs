@@ -40,7 +40,7 @@ import MultiplicationTable (multiplicationTable)
     --     - Strength: Checks what happens with the reversed list.
     --     - Weakness: Does not add or remove or modify elements.
     -- 4) Shuffle output list -> 
-    --     - Strength: Checks what happens if we the elements are in different positions.
+    --     - Strength: Checks what happens if the elements are in different positions.
     --     - Weakness: Does not add or remove or modify elements.
     -- 5) Negate output list ->
     --     - Strength: Checks what happens if the numbers are negative.
