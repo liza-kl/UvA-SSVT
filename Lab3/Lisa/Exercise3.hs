@@ -34,19 +34,13 @@ import Data.Ord (comparing)
 -- ⏸️ Solution which we thought we implemented, but which is currently not bug-free:
 -- The function "combinations" creates all subsets of the properties (including an empty list which should
 -- be excluded in the best case to avoid exceptions when working with certain list operations).
--- We have a list of mutants which need to be checked and we iterate over them to get somehow of a "matrix"
-
+-- We have a list of mutants which need to be checked and we iterate over them to get somehow of a "matrix".
+-- We end up with the number of killed mutants for every combination of properties.
+-- Then we find the combinations that for the largest number of killed mutants,
+-- are composed of the smallest number of properties.
 
 
 -- ## Helper Functions ##
-
--- ## propertiesWithoutNames
--- Takes the name of the prop and the prop-function itself
--- map iterates over the list and returns the second element of a tuple 
--- -> The prop function.
-propertiesWithoutNames :: [(String, a)] -> [a]
-propertiesWithoutNames = map snd
-
 
 -- ## genToList
 -- We use Gen to List in order to convert our Generator Monad into an IO Monad which we can print
@@ -54,7 +48,6 @@ propertiesWithoutNames = map snd
 -- but this "random" type conversions seem wrong.
 genToList :: Gen [Bool] -> IO [Bool]
 genToList = generate
-
 
 -- ## checkIfMutantGetsKilledBySet
 -- This function is used is 
@@ -71,38 +64,40 @@ numberOfKilledMutants listOfProps listOfMutators fut inputFut = do
     convert2 <- mapM genToList convert
     return (toInteger (length (filter not (concat convert2))))
 
-
--- Basically the idea is to generate a list of all provided properties
--- This functions also provide "single" properties, up until the whole set
--- Calculate then the number of killed mutants, keep those who are "equally strong" in terms
--- of killing.
-
-
 -- Putting this subsequence function outside to not to recurse it
 getSubsequences ::  [(String, [Integer] -> Integer -> Bool)] -> [[(String, [Integer] -> Integer -> Bool)]]
 getSubsequences props = tail (subsequences props)
 
--- getMutators :: [[Integer] -> Gen [Integer]]
--- getMutators = [addElements, removeElements, anyList]
+-- list of mutators
+getMutators :: [[Integer] -> Gen [Integer]]
+getMutators = [removeElements]
 
--- calculateMinimalSubset :: (Ord (IO Integer)) => (Integer -> [Integer]) -> [[[Integer] -> Integer -> Bool]] -> [Integer] -> IO [[Integer]]
--- calculateMinimalSubset _ [] outputList = return outputList -- if properties set is empty, return the outputList (base case for recursion)
--- calculateMinimalSubset fut (prop:prop':rest) outputList 
---                 | do numberOfKilledMutants prop getMutators fut 10 > numberOfKilledMutants prop' getMutators fut 10 = calculateMinimalSubset fut (concat (prop:rest))
---                 | do numberOfKilledMutants prop getMutators fut 10 < numberOfKilledMutants  prop' getMutators fut 10 = calculateMinimalSubset fut (concat (prop':rest))
---                 | do numberOfKilledMutants prop getMutators fut 10 == numberOfKilledMutants  prop' getMutators fut 10 = calculateMinimalSubset fut (concat (prop:prop':rest))
---                 | do otherwise return outputList -- if base case is reached 
-
+-- list of tuples of (propertyName, property), because we need to save the property name somewhere
 multiplicationTablePropsWithNames :: [(String, [Integer] -> Integer -> Bool)]
 multiplicationTablePropsWithNames = [("prop_tenElements", prop_tenElements), ("prop_firstElementIsInput", prop_firstElementIsInput), ("prop_sumIsTriangleNumberTimesInput", prop_sumIsTriangleNumberTimesInput), ("prop_linear", prop_linear), ("prop_moduloIsZero", prop_moduloIsZero)]
 
+-- ## getCombinationPropertyNames
+-- Takes the name of the prop and the prop-function itself
+-- map iterates over the list and returns the first element of a tuple 
+-- -> The prop name.
+-- given this [(propertyName, property), (propertyName2, property2)] get this [propertyName, propertyName2]
 getCombinationPropertyNames :: [(String, a)] -> [String]
 getCombinationPropertyNames = map fst
 
+-- ## propertiesWithoutNames
+-- Takes the name of the prop and the prop-function itself
+-- map iterates over the list and returns the second element of a tuple 
+-- -> The prop function.
+-- given this [(propertyName, property), (propertyName2, property2)] get this [property, property2]
+propertiesWithoutNames :: [(String, a)] -> [a]
+propertiesWithoutNames = map snd
+
+-- main functionality
+findMinimalPropertySubsets :: IO ()
 findMinimalPropertySubsets = do
     let combinations = getSubsequences multiplicationTablePropsWithNames
     results <- mapM (\combination -> do
-        killed <- numberOfKilledMutants (propertiesWithoutNames combination) [removeElements] multiplicationTable 5
+        killed <- numberOfKilledMutants (propertiesWithoutNames combination) getMutators multiplicationTable 5
         return (getCombinationPropertyNames combination, killed)
         ) combinations
         
@@ -133,6 +128,7 @@ findMinimalPropertySubsets = do
     putStrLn "Minimal property subsets:"
     mapM_ (\(names, killed) -> putStrLn $ "Combination: " ++ show names ++ ", Killed Mutants: " ++ show killed) smallestNameCombinations
 
+
 -- ## CODE GRAVEYARD ##
 -- Retuns number of killed mutants 
 -- 1st list of props 
@@ -142,8 +138,16 @@ findMinimalPropertySubsets = do
 -- Returns Integer (the number of killed mutants)
 
 -- getKilledByProp :: Eq b => [a -> Gen a] -> (b -> Integer -> Bool) -> (Integer -> b) -> Integer -> Int
--- getKilledByProp [] _ _ _ = 0 -- If no Mutators present, no one can be killed 
+-- getKilledByProp [] _ _ _ = 0 -- If no mutators present, no one can be killed 
 -- getKilledByProp listOfMutators propToTest functionUnderTest inputOfFut = do
---     length listOfMutators - length ( [\ Mutator
---                                     -> mutate' Mutator [propToTest] functionUnderTest inputOfFut |
---                                     Mutator <- listOfMutators])
+--     length listOfMutators - length ( [\ mutator
+--                                     -> mutate' mutator [propToTest] functionUnderTest inputOfFut |
+--                                     mutator <- listOfMutators])
+
+-- calculateMinimalSubset :: (Ord (IO Integer)) => (Integer -> [Integer]) -> [[[Integer] -> Integer -> Bool]] -> [Integer] -> IO [[Integer]]
+-- calculateMinimalSubset _ [] outputList = return outputList -- if properties set is empty, return the outputList (base case for recursion)
+-- calculateMinimalSubset fut (prop:prop':rest) outputList 
+--                 | do numberOfKilledMutants prop getMutators fut 10 > numberOfKilledMutants prop' getMutators fut 10 = calculateMinimalSubset fut (concat (prop:rest))
+--                 | do numberOfKilledMutants prop getMutators fut 10 < numberOfKilledMutants  prop' getMutators fut 10 = calculateMinimalSubset fut (concat (prop':rest))
+--                 | do numberOfKilledMutants prop getMutators fut 10 == numberOfKilledMutants  prop' getMutators fut 10 = calculateMinimalSubset fut (concat (prop:prop':rest))
+--                 | do otherwise return outputList -- if base case is reached 
