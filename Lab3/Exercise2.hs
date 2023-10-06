@@ -101,26 +101,133 @@ hasMutantSurvivedAllProps mutator props fut inputNumber = do
     -- "return" wraps then the Bool into the needed type "Gen Bool"
     return (and mutatedValue) -- If all survived (the "and-ing") we are going to return true.
 
--- ## Considerung the relation between properties and mutations ##
+-- ## Considering the relation between properties and mutations ##
+
+-- original output: [5, 10, 15, 20, 25, 30, 35, 40, 45, 50]
 
 -- If we use our custom mutator "shuffleList" all mutants are going to survive, 
 -- because this property only checks for 10 elements (which are generated due to the [1..10] 
 -- list generation in the multiplicationTable function)
-survivedMutantsShuffle :: IO Integer
-survivedMutantsShuffle =
+-- 4000 survivors
+survivedShuffle_tenElements :: IO Integer
+survivedShuffle_tenElements =
     generate $ countSurvivors 4000 [prop_tenElements] shuffleList multiplicationTable
 
 -- To check for the shuffle, we need to add the "prop_linear" which is going to 
 -- check if the difference between consecutive elements is the input. At this point we have 0 survivors.
-killMutantsShuffle :: IO Integer
-killMutantsShuffle =
+-- 0 survivors
+survivedShuffle_linear :: IO Integer
+survivedShuffle_linear =
     generate $ countSurvivors 4000 [prop_linear] shuffleList multiplicationTable
 
--- To check for the shuffle, we need to add the "prop_linear" which is going to 
--- check if the difference between consecutive elements is the input. At this point we have 0 survivors.
-
 -- A negative list is not catched by the "prop_moduloIsZero" 
-surviveNegList :: IO Integer
-surviveNegList =
+survivedNegList_moduloIsZero :: IO Integer
+survivedNegList_moduloIsZero =
     generate $ countSurvivors 4000 [prop_moduloIsZero] negativeList multiplicationTable
 
+-----------------------------------------
+
+-- 1 survivors
+-- random numbers have beed added, so the elements wont be 10 necessarily
+-- eg addElements [5, 10, 15, 20, 25, 30, 35, 40, 45, 50] = [18,-6,22,19,12,-7,-3,-21,14,10,-15,-4,-8,-8,15,-6,-15,17,-20,8,-17,0,5,10,15,20,25,30,35,40,45,50]
+survivedAddElements_tenElements :: IO Integer
+survivedAddElements_tenElements =
+    generate $ countSurvivors 4000 [prop_tenElements] addElements multiplicationTable
+
+-- 194 survivors
+-- numbers have beed added, so the first element can be anything
+-- eg addElements [5, 10, 15, 20, 25, 30, 35, 40, 45, 50] = [18,-6,22,19,12,-7,-3,-21,14,10,-15,-4,-8,-8,15,-6,-15,17,-20,8,-17,0,5,10,15,20,25,30,35,40,45,50]
+survivedAddElements_firstElementIsInput :: IO Integer
+survivedAddElements_firstElementIsInput =
+    generate $ countSurvivors 4000 [prop_firstElementIsInput] addElements multiplicationTable
+
+-- 20 survivors
+-- random numbers have beed added, so the sum of the output is not necessarily the input times the 10th triangle number
+-- eg addElements [5, 10, 15, 20, 25, 30, 35, 40, 45, 50] = [18,-6,22,19,12,-7,-3,-21,14,10,-15,-4,-8,-8,15,-6,-15,17,-20,8,-17,0,5,10,15,20,25,30,35,40,45,50]
+survivedAddElements_sumIsTriangleNumberTimesInput :: IO Integer
+survivedAddElements_sumIsTriangleNumberTimesInput =
+    generate $ countSurvivors 4000 [prop_sumIsTriangleNumberTimesInput] addElements multiplicationTable
+
+-- 3 survivors
+-- random numbers have beed added, so the difference between consecutive elements is not necessarily the input
+-- eg addElements [5, 10, 15, 20, 25, 30, 35, 40, 45, 50] = [18,-6,22,19,12,-7,-3,-21,14,10,-15,-4,-8,-8,15,-6,-15,17,-20,8,-17,0,5,10,15,20,25,30,35,40,45,50]
+survivedAddElements_linear :: IO Integer
+survivedAddElements_linear =
+    generate $ countSurvivors 4000 [prop_linear] addElements multiplicationTable
+
+-- 5 survivors
+-- random numbers have beed added, so modulo the input is not necessarily zero
+-- eg addElements [5, 10, 15, 20, 25, 30, 35, 40, 45, 50] = [18,-6,22,19,12,-7,-3,-21,14,10,-15,-4,-8,-8,15,-6,-15,17,-20,8,-17,0,5,10,15,20,25,30,35,40,45,50]
+survivedAddElements_moduloIsZero :: IO Integer
+survivedAddElements_moduloIsZero =
+    generate $ countSurvivors 4000 [prop_moduloIsZero] addElements multiplicationTable
+
+-----------------------------------------
+
+-- 416 survivors
+-- numbers have beed removed, so the elements wont be 10 necessarily
+-- eg removeElements [5, 10, 15, 20, 25, 30, 35, 40, 45, 50] = [5, 10, 15, 20]
+survivedRemoveElements_tenElements :: IO Integer
+survivedRemoveElements_tenElements =
+    generate $ countSurvivors 4000 [prop_tenElements] removeElements multiplicationTable
+
+-- 4000 survivors
+-- numbers have beed removed from the back, so the first element will still always be the same as input
+-- eg removeElements [5, 10, 15, 20, 25, 30, 35, 40, 45, 50] = [5, 10, 15, 20]
+survivedRemoveElements_firstElementIsInput :: IO Integer
+survivedRemoveElements_firstElementIsInput =
+    generate $ countSurvivors 4000 [prop_firstElementIsInput] removeElements multiplicationTable
+
+-- 375 survivors
+-- numbers have beed removed, so the sum of the output is not necessarily the input times the 10th triangle number
+-- eg removeElements [5, 10, 15, 20, 25, 30, 35, 40, 45, 50] = [5, 10, 15, 20]
+survivedRemoveElements_sumIsTriangleNumberTimesInput :: IO Integer
+survivedRemoveElements_sumIsTriangleNumberTimesInput =
+    generate $ countSurvivors 4000 [prop_sumIsTriangleNumberTimesInput] removeElements multiplicationTable
+
+-- 4000 survivors
+-- numbers have beed removed from the back, so the difference between consecutive elements will still be the input
+-- eg removeElements [5, 10, 15, 20, 25, 30, 35, 40, 45, 50] = [5, 10, 15, 20]
+survivedRemoveElements_linear :: IO Integer
+survivedRemoveElements_linear =
+    generate $ countSurvivors 4000 [prop_linear] removeElements multiplicationTable
+
+-- 4000 survivors
+-- modulo the input will still always be zero
+-- eg removeElements [5, 10, 15, 20, 25, 30, 35, 40, 45, 50] = [5, 10, 15, 20]
+survivedRemoveElements_moduloIsZero :: IO Integer
+survivedRemoveElements_moduloIsZero =
+    generate $ countSurvivors 4000 [prop_moduloIsZero] removeElements multiplicationTable
+
+-----------------------------------------
+
+-- 0 survivors
+-- 0 elements, never 10
+survivedEmptyList_tenElements :: IO Integer
+survivedEmptyList_tenElements =
+    generate $ countSurvivors 4000 [prop_tenElements] emptyList multiplicationTable
+
+-- Empty list exception
+survivedEmptyList_firstElementIsInput :: IO Integer
+survivedEmptyList_firstElementIsInput =
+    generate $ countSurvivors 4000 [prop_firstElementIsInput] emptyList multiplicationTable
+
+-- 0 survivors
+-- sum will always be 0
+survivedEmptyList_sumIsTriangleNumberTimesInput :: IO Integer
+survivedEmptyList_sumIsTriangleNumberTimesInput =
+    generate $ countSurvivors 4000 [prop_sumIsTriangleNumberTimesInput] emptyList multiplicationTable
+
+-- 4000 survivors
+-- always true because of 0 elements
+survivedEmptyList_linear :: IO Integer
+survivedEmptyList_linear =
+    generate $ countSurvivors 4000 [prop_linear] emptyList multiplicationTable
+
+-- 4000 survivors
+-- always true because of 0 elements
+survivedEmptyList_moduloIsZero :: IO Integer
+survivedEmptyList_moduloIsZero =
+    generate $ countSurvivors 4000 [prop_moduloIsZero] emptyList multiplicationTable
+
+-----------------------------------------
