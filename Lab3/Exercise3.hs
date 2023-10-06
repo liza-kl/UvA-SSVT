@@ -7,6 +7,7 @@ import Debug.Trace
 import Data.List
 import Exercise1
 import Data.Ord (comparing)
+import MultiplicationTable (multiplicationTable)
 
 -- ## Task ##
 -- Implement a function that calculates the minimal property subsets, 
@@ -133,12 +134,12 @@ propertiesWithoutNames = map snd
 -- ## findMinimalPropertySubsets
 -- Implementing the approach and taking into account all the previous helper
 -- functions. 
-findMinimalPropertySubsets = do
-    let combinations = getSubsequences multiplicationTablePropsWithNames
+
+findMinimalPropertySubsets propSet functionUnderTest= do
     results <- mapM (\combination -> do
-        killed <- numberOfKilledMutants (propertiesWithoutNames combination) getMutators multiplicationTable 5
+        killed <- numberOfKilledMutants (propertiesWithoutNames combination) getMutators functionUnderTest 5
         return (getCombinationPropertyNames combination, killed)
-        ) combinations
+        ) (getSubsequences propSet)
 
     -- print all combinations with killed mutants
     putStrLn "All combinations:"
@@ -168,6 +169,10 @@ findMinimalPropertySubsets = do
     mapM_ (\(names, killed) -> putStrLn $ "Combination: " ++ show names ++ ", Killed Mutants: " ++ show killed) smallestNameCombinations
 
 
+main :: IO ()
+main = findMinimalPropertySubsets multiplicationTablePropsWithNames multiplicationTable
+
+
 -- ## Not used, because too complicated.  ##
 -- Wanted to to go property one by one and then creating all 
 -- the combinations with this property and always compare the initial with the next one and return then
@@ -181,3 +186,4 @@ findMinimalPropertySubsets = do
 --                 | do numberOfKilledMutants prop getMutators fut 10 < numberOfKilledMutants  prop' getMutators fut 10 = calculateMinimalSubset fut (concat (prop':rest))
 --                 | do numberOfKilledMutants prop getMutators fut 10 == numberOfKilledMutants  prop' getMutators fut 10 = calculateMinimalSubset fut (concat (prop:prop':rest))
 --                 | do otherwise return outputList -- if base case is reached 
+
