@@ -50,7 +50,7 @@ genToList :: Gen [Bool] -> IO [Bool]
 genToList = generate
 
 -- ## checkIfMutantGetsKilledBySet
--- This function is used is 
+-- one mutator, with all properties 
 checkIfMutantGetsKilledBySet :: (Eq a) => [a -> Integer -> Bool] -> (a -> Gen a) -> (Integer -> a) -> Integer -> Gen [Bool]
 checkIfMutantGetsKilledBySet propSet mutator fut inputFut = 
     mutate' mutator propSet fut inputFut
