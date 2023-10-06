@@ -16,6 +16,9 @@ import MultiplicationTable (prop_moduloIsZero, prop_tenElements)
 -- that visualizes the results of the functions from the previous exercises.
 
 -- ## Approach ##
+-- Note: Input for fut is for the sake of ease through all of the exercises always
+-- 5. No special meaning.
+
 -- 1.) Print it in a table in the terminal
 -- 2.) Use a plotting library like https://github.com/timbod7/haskell-chart/wiki 
 -- or https://hackage.haskell.org/package/QuickPlot

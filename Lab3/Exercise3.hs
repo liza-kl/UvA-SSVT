@@ -17,6 +17,9 @@ import MultiplicationTable (multiplicationTable)
 -- implementation, documentation of approach, indication of time spent
 -- Time spent: 10 hours (we were kinda in a loop of thoughts.)
 
+-- Note: Input for fut is for the sake of ease through all of the exercises always
+-- 5. No special meaning.
+
 -- ## Documentation of Approach ##
 -- ⏭️ You could skip until ⏸️ First naive thoughts :
 
