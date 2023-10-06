@@ -15,6 +15,8 @@ import MultiplicationTable (prop_moduloIsZero, prop_tenElements)
 -- a set of properties, and a number indicating the number of mutants,
 -- that visualizes the results of the functions from the previous exercises.
 
+-- Indication of time spent: 60 Mins
+
 -- ## Approach ##
 -- Note: Input for fut is for the sake of ease through all of the exercises always
 -- 5. No special meaning.
@@ -22,12 +24,12 @@ import MultiplicationTable (prop_moduloIsZero, prop_tenElements)
 -- 1.) Print it in a table in the terminal
 -- 2.) Use a plotting library like https://github.com/timbod7/haskell-chart/wiki 
 -- or https://hackage.haskell.org/package/QuickPlot
-
+-- 3) Creating an HTML report like Stryker
 
 -- We want a report (maybe a table or graph) which shows the output of the previous functions.
 -- Function should take as arguments a set of properties, a number of mutants
 -- and the function under test.
--- To make it more readable create for every row that needs to be produced a tablerow
+-- To make it more readable create for every row that needs to be produced a Row
 -- So we need one for countSurvivors (Exercise 2)
 -- One for minimal subsetOfProperties (Exercise 3)
 -- One Table for strength (Exercise 4)
@@ -52,23 +54,23 @@ representPercentageOfKilled = do
 -- Define a data structure for a row in the table. We are using Float to show the percentages.
 -- Integer returns are just casted then.
 -- The result' was intended to return other "string"-results such as minimal property subsets or conjenctures
-data TableRow = TableRow { name :: String, result':: String, result ::  Float }
+data Row = Row { name :: String, result':: String, result ::  Float }
 
 -- Create a list of sample data
-testStatistics :: [TableRow]
+testStatistics :: [Row]
 testStatistics =
-    [ TableRow  "Killed Mutants in Percentage" "" (unsafePerformIO representPercentageOfKilled)
-    , TableRow "Survivors" "" (unsafePerformIO representSurvivorsAndKilled)
+    [ Row  "Killed Mutants in Percentage" "" (unsafePerformIO representPercentageOfKilled * 100.0)
+    , Row "Survivors" "" (unsafePerformIO representSurvivorsAndKilled)
     ]
 
 -- Function to print the table
-printTable :: [TableRow] -> IO ()
+printTable :: [Row] -> IO ()
 printTable rows = do
     putStrLn header
     putStrLn separator
     mapM_ printRow rows
     where
-    header =    "| Function | Result  |            |"
+    header =    "|  Metric  | Result  |            |"
     separator = "+----------+---------+------------+"
 
     printRow row = putStrLn $ "| " ++ formatField (name row) ++ " | " ++

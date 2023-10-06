@@ -61,7 +61,7 @@ mapEqualProperties propertyTables = map (map fst) (groupPropertyTables propertyT
 -- I spent way too much time and sanity on this exercise though and at this point I am just happy that it seems working.
 -- So this was a deliberate choice to optimise, both for functionality and most amount of sanity left.
 -- If you were to do this better, as mentioned, one could add IO monads everywhere and re-implement the necessary functions to work with their corresponding IO variants.
--- Now please excuse me... I need to go to the next punching bag. 
+-- Now please excuse me... I need to go to the next punching bag.
 groupPropertyTables:: [(([Integer] -> Integer -> Bool), Gen [Bool])] -> [[(([Integer] -> Integer -> Bool), Gen [Bool])]]
 groupPropertyTables propertyTables = groupBy (\(_, a) (_, b) -> unsafePerformIO(isMutationStatusEquivalent a b)) propertyTables
 

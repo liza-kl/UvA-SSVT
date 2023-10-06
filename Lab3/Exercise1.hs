@@ -13,6 +13,9 @@ import MultiplicationTable (multiplicationTable)
 
 -- ## List of Mutators and Rationale ##
 
+-- Weak Mutant in our understanding: A mutant which gets caught by as many properties as possible.
+-- Strong Mutant in our understanding: A mutant which gets caught by as few properties as possible.
+
     -- We want to check:
     -- - edge cases like empty lists
     -- - list length changes 
@@ -52,13 +55,27 @@ import MultiplicationTable (multiplicationTable)
     -- 7) Output list that contains the same number ->
     --     - Strength: Checks the edge case of having duplicates.
     --     - Weakness: Does not add or remove elements. 
-    -- 8) Add numbers in random spots 
-    --     - Strength: Random numbers in random spots. Increases list length.
+    -- 8) Add numbers in random spots or in specific positions, like the first, last, middle element. 
+    --     - Strength: Random numbers in "random" spots. Increases list length.
     --     - Weakness: Does not remove elements.  Does not check patterns.
     -- 9) An exact same list which could arise because of the arbitrary list generator
     --     - This would be a so-called "equivalent mutant" which unfortunately can't be really tested.
+    -- 10) Replacing the output with a given, fixed list. 
+    --     - Strength: Look for specialized edge cases (for example a list of doubles in this case) and it is super fast.
+    --                 For example you can check for edge cases in length or difference dependent properties.
+    --     - Weakness: Very limited to highly-specific outputs.
+    -- 11) Applying any mathematical operation to every element of a list.
+    --     For example multiplying every number by a given factor, or taking the n-th root or applying the n-th power of every value.
+    --     - Strength: -
+    --     - Weakness: The "ratio" between the differences of each element stays the same. So the general pattern of the output list remains.
+    -- 12) Applying mathematical operations of one list with n other lists.
+    --     For example adding [2,3,4] and [5,2,1] together to [7,5,5] or multiplying [2,1,0] and [1,2,3] to [2,2,0].
+    --     - Strength: Same as in 11) but resulting list is more "randomized".
+    --     - Weakness: Does not add or remove elements. Does not check patterns.
 
-
+    -- Because we are limited to modifying the output of the modified function and not the actual source code, we can't use "real mutators".
+    -- Therefore we are also limited to a small set of the real possibilities in this case.
+    -- For example introducing runtime errors (invalid mutant) is way more limited and could only be done by applying an illegal operation to the corresponding output list.
 
 -- ## Implementation ##
 

@@ -1,9 +1,7 @@
-{-# LANGUAGE AllowAmbiguousTypes #-}
 module Exercise3 where
 import Test.QuickCheck
 import Mutation
 import MultiplicationTable
-import Debug.Trace
 import Data.List
 import Exercise1
 import Data.Ord (comparing)
@@ -35,6 +33,28 @@ import MultiplicationTable (multiplicationTable)
 -- We could use the mutate' function for that. 
 -- In the function we need to provide some mutators (for sake of ease we use the ones from MultiplicationTable.hs)
 
+{- 
+
+    Alternative approach:
+    The minimal property subset consists of two given properties.
+
+    1) If a property kills no mutants, then it isn't in the MSP (minimum property subset)
+    2) If a property kills the same or a subset of the same mutants than another property, it is redundant, thus also not in the MPS.
+
+    Therefore we could structuralize it in the following way.
+        - We create a function which checks if for a given property of the initial property set, the mutate' function only returns "True" values. 
+          In that case, all mutants survived, no mutant was killed and property 1 holds. So we can remove that property from the given set.
+        - We then go through the rest of the properties and remove all properties whose mutation survival/kill result list is equal or a subset of another property's mutation list.
+          In this case we can also remove the property, which is equal or weaker to another property.
+
+    Then both properties hold, and the MPS is created from the initial property set.
+
+    Other concept:
+    We could apply a "search" or "optimization" algorithm approach and use one of the algorithms present there.
+    The goal of such a search algorithm would be to optimize for the fewest amount of properties, which still hold the same result from the mutate' function as with the original property set.
+
+-}
+
 -- ⏸️ Solution which we implemented
 -- The function "combinations" creates all subsets of the properties (subsequences)
 -- We have a list of static mutators which need to be checked (getMutators) 
@@ -50,6 +70,11 @@ import MultiplicationTable (multiplicationTable)
 -- results of the checkIfMutantSurvivesTheSet function.
 -- It actually does not need to return the length, or like it should, but it needs to check if the property set kills the X mutants
 -- and not return the length of properties which killed the mutant. 
+
+-- Sometimes it returns an exception due to empty lists provided.
+-- For example this error can happen when accessing the first element of a list, which is empty.
+-- So this would logically lead to an error since that element doesn't exist.
+-- These types of exceptions are triggering these errors.
 
 -- ## Helper Functions ##
 
