@@ -1,11 +1,13 @@
 module Denis.Exercise5 where
 import Test.QuickCheck
---import Exercise3
+import Exercise2
+import Exercise1
 import Mutation
 import Data.List
 import System.IO.Unsafe
+import FitSpec
 
--- Estimated Time 120 Mins.
+-- Estimated Time 200 Mins.
 
 {-
 
@@ -55,14 +57,6 @@ isMutationStatusEquivalent gen1 gen2 = do
     mutationStatus1 <- generate gen1
     mutationStatus2 <- generate gen2
     return (mutationStatus1 == mutationStatus2)
-
-{-
--- Something like this... But some parts do not compile in Ex3
-calculateSubset :: (Ord (IO Integer)) => (Integer -> [Integer]) -> [[[Integer] -> Integer -> Bool]] -> [Integer]-> IO [[Integer]]
-calculateSubset _ [] outputList = return [outputList] -- if properties set is empty, return the outputList (base case for recursion)
-calculateSubset fut (prop:prop':rest) outputList = do
-            [\propSet -> numberOfKilledMutants propSet getMutators fut 10 | propSet <- concat getSubsequences]
--}
 
 -- Takes a list of already equivalent properties and then generates a map which contains the equivalent property set and their property subsets.
 calculateSubsetsOfEquivalentProperties:: [[([Integer] -> Integer -> Bool)]] -> [([([Integer] -> Integer -> Bool)], [[([Integer] -> Integer -> Bool)]])]
