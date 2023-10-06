@@ -3,6 +3,11 @@ import Exercise2
 import Data.List
 import Test.QuickCheck
 
+-- Estimation of time spent. 45 Mins.
+-- The actual function took like 5 Mins but concept thinking and writing everything down took time. :D
+-- Note: Input for fut is for the sake of ease through all of the exercises always
+-- 5. No special meaning.
+
 {-
 
     The general approach in this exercise is the following:

@@ -8,6 +8,8 @@ import Exercise1
 -- ## Deliverables ##
 -- implementation, documentation of approach, effect of using different mutators/properties, indication of time spent
 -- Time spent: 240 min (documentation takes time)
+-- Note: Input for fut is for the sake of ease through all of the exercises always
+-- 5. No special meaning.
 
 -- ## Documentation of Approach ##
 -- In an imperative approach I would use a count variable and increment it if a mutant survives 

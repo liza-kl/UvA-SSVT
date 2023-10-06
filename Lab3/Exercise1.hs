@@ -8,7 +8,8 @@ import MultiplicationTable (multiplicationTable)
 -- ## Deliverables ##
 -- List of mutators and rationale, implementation, indication of time spent.
 -- Time spent: 60 Minutes
-
+-- Note: Input for fut is for the sake of ease through all of the exercises always
+-- 5. No special meaning.
 
 -- ## List of Mutators and Rationale ##
 

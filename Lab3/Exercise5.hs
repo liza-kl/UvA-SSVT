@@ -11,10 +11,10 @@ import Mutation
 -- ## Deliverables ##
 
 -- Implementations, documentation of approach, indication of time spent
-
--- ## Code Trash ##
-
 -- Estimated Time 200 Mins.
+
+-- Note: Input for fut is for the sake of ease through all of the exercises always
+-- 5. No special meaning.
 
 {-
 

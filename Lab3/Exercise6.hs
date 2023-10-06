@@ -6,8 +6,9 @@ import Mutation
 import Exercise1
 import Test.QuickCheck
 import MultiplicationTable
+import Exercise4
 import System.IO.Unsafe
-import MultiplicationTable (prop_moduloIsZero)
+import MultiplicationTable (prop_moduloIsZero, prop_tenElements)
 
 -- ## Task ##
 -- Create a function that we pass the function under test, 
@@ -15,6 +16,9 @@ import MultiplicationTable (prop_moduloIsZero)
 -- that visualizes the results of the functions from the previous exercises.
 
 -- ## Approach ##
+-- Note: Input for fut is for the sake of ease through all of the exercises always
+-- 5. No special meaning.
+
 -- 1.) Print it in a table in the terminal
 -- 2.) Use a plotting library like https://github.com/timbod7/haskell-chart/wiki 
 -- or https://hackage.haskell.org/package/QuickPlot
@@ -34,43 +38,48 @@ import MultiplicationTable (prop_moduloIsZero)
 getMutators = [shuffleList]
 getproperties = [prop_tenElements, prop_firstElementIsInput, prop_sumIsTriangleNumberTimesInput, prop_linear, prop_moduloIsZero]
 
-representSurvivorsAndKilled :: IO Integer
+representSurvivorsAndKilled :: IO Float
 representSurvivorsAndKilled = do
-    survivors <- generate $ countSurvivors 4000 [prop_linear] shuffleList multiplicationTable
-    return survivors
+    survivors <- generate $ countSurvivors 4000 [prop_tenElements] shuffleList multiplicationTable
+    let floatedSurvivors = fromInteger survivors :: Float
+    return floatedSurvivors
+
+representPercentageOfKilled :: IO Float
+representPercentageOfKilled = do
+    calculateSurvivorPercentage 4000 [prop_tenElements] shuffleList multiplicationTable
 
 
-
--- Define a data structure for a row in the table
-data TableRow = TableRow { name :: String, result :: Integer }
+-- Define a data structure for a row in the table. We are using Float to show the percentages.
+-- Integer returns are just casted then.
+-- The result' was intended to return other "string"-results such as minimal property subsets or conjenctures
+data TableRow = TableRow { name :: String, result':: String, result ::  Float }
 
 -- Create a list of sample data
-sampleData :: [TableRow]
-sampleData =
-    [ TableRow "Killed Mutants in Percentage" 35
-    , TableRow "Used Mutants" ()
-    , TableRow "Used Properties" ()
-    , TableRow "Survivors" (unsafePerformIO representSurvivorsAndKilled)
+testStatistics :: [TableRow]
+testStatistics =
+    [ TableRow  "Killed Mutants in Percentage" "" (unsafePerformIO representPercentageOfKilled)
+    , TableRow "Survivors" "" (unsafePerformIO representSurvivorsAndKilled)
     ]
 
 -- Function to print the table
 printTable :: [TableRow] -> IO ()
 printTable rows = do
-    putStrLn mainHeader
     putStrLn header
     putStrLn separator
     mapM_ printRow rows
     where
-    mainHeader ="| REPORT                          |"
     header =    "| Function | Result  |            |"
     separator = "+----------+---------+------------+"
 
-    printRow row = putStrLn $ "| " ++ formatField (name row) ++ " | "
+    printRow row = putStrLn $ "| " ++ formatField (name row) ++ " | " ++
+                            "| " ++ formatField (result' row) ++ " | "
                             ++ formatField (show $ result row) ++ " | "
 
-    formatField field = let width = 20 in take width (field ++ repeat ' ')
+    formatField field = let width = 30 in take width (field ++ repeat ' ')
 
 main :: IO ()
 main = do
-    putStrLn "Table Example:"
-    printTable sampleData
+    putStrLn ""
+    putStrLn "REPORT:"
+    putStrLn ""
+    printTable testStatistics
