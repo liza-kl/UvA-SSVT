@@ -43,18 +43,17 @@ representSurvivorsAndKilled = do
 
 representPercentageOfKilled :: IO Float
 representPercentageOfKilled = do
-    killPercentage <- calculateSurvivorPercentage 4000 [prop_tenElements] shuffleList multiplicationTable
-    return killPercentage
+    calculateSurvivorPercentage 4000 [prop_tenElements] shuffleList multiplicationTable
 
 
-
-
--- Define a data structure for a row in the table
+-- Define a data structure for a row in the table. We are using Float to show the percentages.
+-- Integer returns are just casted then.
+-- The result' was intended to return other "string"-results such as minimal property subsets or conjenctures
 data TableRow = TableRow { name :: String, result':: String, result ::  Float }
 
 -- Create a list of sample data
-sampleData :: [TableRow]
-sampleData =
+testStatistics :: [TableRow]
+testStatistics =
     [ TableRow  "Killed Mutants in Percentage" "" (unsafePerformIO representPercentageOfKilled)
     , TableRow "Survivors" "" (unsafePerformIO representSurvivorsAndKilled)
     ]
@@ -80,4 +79,4 @@ main = do
     putStrLn ""
     putStrLn "REPORT:"
     putStrLn ""
-    printTable sampleData
+    printTable testStatistics
