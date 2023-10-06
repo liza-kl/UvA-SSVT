@@ -5,6 +5,9 @@ import Mutation
 import MultiplicationTable
 import Debug.Trace
 import Data.List
+import Exercise1
+import Data.Ord (comparing)
+
 -- ## Task ##
 -- Implement a function that calculates the minimal property subsets, 
 -- given a 'function under test' and a set of properties
@@ -56,15 +59,15 @@ genToList = generate
 -- ## checkIfMutantGetsKilledBySet
 -- This function is used is 
 checkIfMutantGetsKilledBySet :: (Eq a) => [a -> Integer -> Bool] -> (a -> Gen a) -> (Integer -> a) -> Integer -> Gen [Bool]
-checkIfMutantGetsKilledBySet propSet mutant fut _ = 
-    mutate' mutant propSet fut 10
+checkIfMutantGetsKilledBySet propSet mutator fut inputFut = 
+    mutate' mutator propSet fut inputFut
 
 -- This function contains a bug, or it's like not finished yet.
 -- It actually does not need to return the length, or like it should but it needs to check if the property set kills the X mutants
 -- Then it returns something. But at the moment it checks for every property in the list if it's killing it.
 numberOfKilledMutants ::  (Eq a) => [a -> Integer -> Bool] -> [a -> Gen a] -> (Integer -> a) -> Integer -> IO Integer
-numberOfKilledMutants listOfProps listOfMutiers fut inputFut = do
-    let convert = map (\mutier -> checkIfMutantGetsKilledBySet listOfProps mutier fut 10) listOfMutiers
+numberOfKilledMutants listOfProps listOfMutators fut inputFut = do
+    let convert = map (\mutator -> checkIfMutantGetsKilledBySet listOfProps mutator fut inputFut) listOfMutators
     convert2 <- mapM genToList convert
     return (toInteger (length (filter not (concat convert2))))
 
@@ -96,17 +99,39 @@ multiplicationTablePropsWithNames = [("prop_tenElements", prop_tenElements), ("p
 getCombinationPropertyNames :: [(String, a)] -> [String]
 getCombinationPropertyNames = map fst
 
---[("P1", P1), ("P2", P2)]
-main = do
-    -- ([("P1", P1), ("P2", P2)], 5)
+findMinimalPropertySubsets = do
     let combinations = getSubsequences multiplicationTablePropsWithNames
     results <- mapM (\combination -> do
-        status <- numberOfKilledMutants (propertiesWithoutNames combination) [anyList] multiplicationTable 10
-        return (getCombinationPropertyNames combination, status)
+        killed <- numberOfKilledMutants (propertiesWithoutNames combination) [removeElements] multiplicationTable 5
+        return (getCombinationPropertyNames combination, killed)
         ) combinations
-    -- Print the results
-    mapM_ (\(names, status) -> putStrLn $ "Combination: " ++ show names ++ ", Status: " ++ show status) results
-
+        
+    -- print all combinations with killed mutants
+    putStrLn "All comibinations:"
+    mapM_ (\(names, killed) -> putStrLn $ "Combination: " ++ show names ++ ", Killed Mutants: " ++ show killed) results
+    
+    -- find the maximum number of killed mutants
+    let maxKilled = maximum (map snd results)
+    
+    -- filter combinations with the maximum number of killed mutants
+    let maxCombinations = filter (\(_, killed) -> killed == maxKilled) results
+    
+    -- group combinations with the same number of killed mutants
+    let groupedCombinations = groupBy (\(_, killed1) (_, killed2) -> killed1 == killed2) maxCombinations
+    
+    -- flatten the inner lists
+    let flattenedCombinations = concat groupedCombinations
+    
+    -- find the minimum length of property names among flattened combinations
+    let minNameLength = minimumBy (comparing (length . fst)) flattenedCombinations
+    
+    -- filter combinations with the minimum length of property names
+    let smallestNameCombinations = filter (\(names, _) -> length names == length (fst minNameLength)) flattenedCombinations
+    
+    -- print minimal property subsets
+    putStrLn "-------------------------"
+    putStrLn "Minimal property subsets:"
+    mapM_ (\(names, killed) -> putStrLn $ "Combination: " ++ show names ++ ", Killed Mutants: " ++ show killed) smallestNameCombinations
 
 -- ## CODE GRAVEYARD ##
 -- Retuns number of killed mutants 
@@ -117,8 +142,8 @@ main = do
 -- Returns Integer (the number of killed mutants)
 
 -- getKilledByProp :: Eq b => [a -> Gen a] -> (b -> Integer -> Bool) -> (Integer -> b) -> Integer -> Int
--- getKilledByProp [] _ _ _ = 0 -- If no mutiers present, no one can be killed 
--- getKilledByProp listOfMutiers propToTest functionUnderTest inputOfFut = do
---     length listOfMutiers - length ( [\ mutier
---                                     -> mutate' mutier [propToTest] functionUnderTest inputOfFut |
---                                     mutier <- listOfMutiers])
+-- getKilledByProp [] _ _ _ = 0 -- If no Mutators present, no one can be killed 
+-- getKilledByProp listOfMutators propToTest functionUnderTest inputOfFut = do
+--     length listOfMutators - length ( [\ Mutator
+--                                     -> mutate' Mutator [propToTest] functionUnderTest inputOfFut |
+--                                     Mutator <- listOfMutators])
