@@ -40,6 +40,6 @@ getRandomNumber = unsafePerformIO(generate (choose(1,1000)))
     Other concept:
     We could apply a "search" or "optimization" algorithm approach and use one of the algorithms present there.
     The goal of such a search algorithm would be to optimize for the fewest amount of properties, which still hold the same result from the mutate' function as with the original property set.
-    TODO Example of Search Algorithm in place??? But that could be a concept as well...
+    TODO: Example of Search Algorithm in place??? But that could be a concept as well...
 
 -}
