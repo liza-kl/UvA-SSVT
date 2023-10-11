@@ -20,6 +20,7 @@ generateSet size min max = do
     rest <- generateSet (size - 1) min max
     return (insertSet randInt rest)
 
+
 main :: IO ()
 main = do
     let size = 10 -- max set size
