@@ -9,6 +9,16 @@ import SetOrd
 randomInt:: Gen Int
 randomInt = arbitrary
 
+-- 16807 also possible
+randomLCGInt :: Gen Int
+randomLCGInt = do
+    -- (seed * multiplier) % modulus 
+    -- Alternative lel
+    -- currentTime <- getCurrentTime
+    -- let seed = round (utctDayTime currentTime)
+    let nextSeed = (1256785 * 48271) `rem` 2147483647
+    return nextSeed
+
 generateRandomList:: Int -> Gen [Int]
 generateRandomList 0 = pure []
 generateRandomList size = do
