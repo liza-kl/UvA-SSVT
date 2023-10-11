@@ -20,13 +20,22 @@ generateRandomSet:: Int -> Gen (Set Int)
 generateRandomSet size = do
                 randomList <- generateRandomList size
                 return (list2set randomList)
-                
+
 generateSets :: Gen (Set Int)
 generateSets = do
             randInt <- randomInt
             generateRandomSet randInt
 
+generateRandomList':: Gen [Int]
+generateRandomList' = arbitrary
+
+generateSets':: Gen (Set Int)
+generateSets' = do
+                list2set <$> generateRandomList'
+
 main :: IO ()
 main = do
-    value <- generate generateSets
-    print value
+    value1 <- generate generateSets
+    value2 <- generate generateSets'
+    print value1
+    print value2
