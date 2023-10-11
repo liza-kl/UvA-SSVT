@@ -5,8 +5,7 @@ module Exercise4 where
 -- Thought of process: First understand what they want from me.
 -- But you are basically providing a Set of "a" -- numbers and check if there is 
 -- a corresponding y in the thing. Serial Relation must be binary 
--- 
-
+-- Time spent: until now 10 Minutes ?!
 -- Example of a serial relation is less then 
 type Rel a = [(a,a)]
 
