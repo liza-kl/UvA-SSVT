@@ -8,4 +8,9 @@ module Exercise7 where
 
     -- They are not the same? 
     
-    
+    -- Haha, it depends on the domain which you are using it. 
+
+    -- It depends on the set you are using.
+
+    -- e.g. For the relation: [(1,2),(2,3)] they are indeed the same. 
+
