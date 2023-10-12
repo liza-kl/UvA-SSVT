@@ -19,6 +19,12 @@ module Exercise7 where
     -- Transitive closure of symmetric closure: [(1,2),(2,1),(2,3),(3,2),(1,1),(1,3),(2,2),(3,1),(3,3)]
     -- if a relation is reflexive it can be 
 
+-- transitive closure has identiy in symmetric closure
+-- Symmetric Closure and Transitive closure can be the same if you have an empty set or only identity sets inside
+-- of it 
+
+-- Maybe reason with some commuative law etc.
+
     -- You can prob remove the duplicates of the transitive closure 
     -- as this is not expected so you have both cases covered 
 
