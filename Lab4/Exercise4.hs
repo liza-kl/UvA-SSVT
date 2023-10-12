@@ -7,8 +7,7 @@ import Denis.Exercise1
 
 
 -- TODO Documentation, Test for 2nd part, Short Test Report.
--- Time estimate 90 Mins. (Mainly due to debugging)
-
+-- Time estimate 140 Mins. (Mainly due to debugging and induction proof thinking)
 
 {-
 
@@ -55,6 +54,7 @@ genListOfInts = do
     n <- choose (0, 5)
     vectorOf n arbitrary
 
+-- Helper functions for set operations.
 setToList:: Set a -> [a]
 setToList (Set []) = []
 setToList (Set (x:xs)) = x : setToList (Set xs)
@@ -62,12 +62,21 @@ setToList (Set (x:xs)) = x : setToList (Set xs)
 setLength:: Set a -> Int
 setLength set = length (setToList set)
 
+-- Creates a at least 3 long integer list (until a given limit, this case 8 long, just to be able to process it)
+-- This integer list also has no duplicate elements.
+-- We need a unique, at least 3 integer long list, for the second property, since that only holds for these types of lists.
 uniqueIntList :: Gen [Int]
 uniqueIntList = do
     set <- suchThat generateSets' (\s -> setLength s >= 3 && setLength s < 8)
     let setList = setToList set
     return setList
 
+{-
+
+    This function checks if for a domain of more than 2 elements a relation always has at least one element which isn't part of the relation but part of the domain.
+    For example, if the domain is [1,4,5] and the relation is [1,5], the relation is serial and has the [4] element which isn't in the relation.
+
+-}
 hasNonSerialElement:: (Eq a, Ord a) => [a] -> Rel a -> Bool
 hasNonSerialElement domain [] = True
 hasNonSerialElement domain (x:xs) = (inSet (fst x) domainSet && inSet (snd x) domainSet) && isSerial domain xs
@@ -88,35 +97,81 @@ hasNonSerialElementinDomain domain ((x,y):xs) = (length [e | e <- domain, e /= x
     For the relation R = {(x,y) | x = y % n} it can be proven by induction that it is indeed serial.
 
     For the base case n=1
-    If we take the modulo of any integer number by one, it always equals 0.
-    So therefore we can choose any y for the given x = 0, therefore fulfilling the base case.
+    If we take the modulo of any integer number by one, it always equals 0, since every number is divisible by one.
+    So therefore we can choose any value y for the given x = 0. 
+    Thus the base case is fulfilled.
 
     If we consider the hypothesis to be true, we now try to check if the statement holds true for n+1 as well.
     
-    To prove this, we consider two cases.
+    To prove this, we consider three cases.
 
-    If y < (n+1), then y can be just x itself. 
+    If y < (n+1) and y >= 0, then always x = y. 
     If you take the modulo of a number by a larger quotient it always equals the dividend.
-    Thus if we set y=x -> x % (n+1), (if n+1 > y), is just x and we have a relating element.
+    Therefore in this case y % (n+1) = y => y = x, because y is not fully divisible by (n+1) 
+    and the full divisor rest has to be taken into account.
+    Since the hypothesis also presumes that y ∈ A, therefore x ∈ A as well, because y = x.
     Thus the hypothesis holds true in this case.
 
     If you consider y >= (n+1),
     then you can "subtract" (n+1) any number of times until we arrive at the case that y < (n+1).
-    This is since in this case, y % (n+1) = y - i*(n+1) % (n+1).
-    Example. If y = 6 and n = 4, then 6 % 4 = (6 - 4) % 4 = 2.
+    This is the case since, y % (n+1) = y - i*(n+1) % (n+1). (i is integer >= 0)
+    Example. If y = 6 and n = 4, then 6 % 4 = (6 - 4) % 4 = 2 % 4 = 2.
     Therefore this case then transforms into the first case, which we already proven.
     Thus this case also holds true.
 
-    Therefore both cases hold true and the induction step is proven. 
+    For cases where y < (n+1) and y < 0,
+    then the same argument applies as with the second case, but we could then "add" (n+1) 
+    any number of times until we arrive at the case that y < (n+1).
+    This is the case since, y % (n+1) = y + i*(n+1) % (n+1). (i is integer >= 0)
+    For example -11 % 7 = -4 % 7 = 3 % 7 = 3.
+    Therefore this case then transforms into the first case, which we already proven.
+    Thus this case also holds true.
+
+    Therefore all cases hold true and the induction step is proven. 
     
-    With this R = {(x,y) | x = y % n} is proven to be serial. q.e.d. □
+    With this R = {(x,y) | x = y % n} is proven to be serial (every y is connected to an x). q.e.d. □
 
     (I really hate induction... Please don't do this again...)
 
 -}
+
+{-
+
+    To test if this relation is serial, we can define a QuickCheck property.
+    The problem we're facing though, is that we need to have a certain domain where a relation is valid.
+    This is due to the "isSerial" function needing a domain to execute its seriality check. 
+
+    While it is true that generally this relation serial, so there is always a connection,
+    this doesn't mean the connection which can be established from one element to another is in the required domain.
+
+    For example, if we consider the relation [(0,0),(1,1),(0,2),(1,3)].
+    When we look at it, it would be serial, since every element is connected to another one.
+    But if we were to look at it from the domain perspective of [9,10,11], 
+    for example this relation wouldn't be serial anymore.
+
+    -- TODO ADD EXPLAINATION FOR THAT [0..n] thing and why it is needed like that here...
+
+-}
+genRandomRelationFromDomain:: [Int] -> Int -> Rel Int
+genRandomRelationFromDomain domain n = do
+                            [(y `mod` n, y) | y <- domain]
+
+isModuloRelationSerial:: [Int] -> Int -> Bool
+isModuloRelationSerial domain n = isSerial domain (genRandomRelationFromDomain domain n)
+
+getRandomDomainAndModulo:: Gen ([Int], Int)
+getRandomDomainAndModulo = do
+                  limit <- choose(1,15)
+                  let domain = [0..limit]
+                  n <- choose(1,100)
+                  return (domain, n)
+
+prop_isModuloRelationSerial:: ([Int], Int) -> Bool
+prop_isModuloRelationSerial (domain, n) = isModuloRelationSerial domain n
 
 main :: IO()
 main =
     do
         quickCheck $ forAll genListOfInts prop_isEndorelatorSerial
         quickCheck $ forAll uniqueIntList prop_hasNonSerialElement
+        quickCheck $ forAll getRandomDomainAndModulo prop_isModuloRelationSerial
