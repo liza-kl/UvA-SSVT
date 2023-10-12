@@ -1,4 +1,4 @@
-module Bonus1 where
+module Exercise8 where
 import Test.QuickCheck
 import Data.List
 import System.Random
