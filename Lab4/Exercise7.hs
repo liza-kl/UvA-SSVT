@@ -20,3 +20,4 @@ module Exercise7 where
     -- because a == b and b == c and a == c ("looping")
 
     -- Conclusion: Both cases are possible. 
+    -- Create a quickcheck test with relation stuff and falsify 
