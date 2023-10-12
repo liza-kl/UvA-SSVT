@@ -25,8 +25,7 @@ import SetOrd
     -- 2.2) If you have a set of solely identities e.g. [(1,1),(2,2)], then you are going to have the case symmetric closure of the transitive closure == transitive closure of the symmetric closure
     -- because a == b and b == c and a == c ("looping")
     -- 2.3) If you have a relation with only one binary tuple in it, the statement applies [(1,1)], because then you are only referring to yourself
-    -- 2.4) If you have an identity tuple and another tuple where the numbers not equal the identity tuple number. e.g. [(-3,-1),(5,5)], because then you have no "c" for the
-    -- transitive relation 
+
 
     -- Conclusion: Both cases are possible. 
     -- Create a quickcheck test with relation stuff and falsify 
