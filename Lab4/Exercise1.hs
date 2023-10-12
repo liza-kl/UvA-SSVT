@@ -126,6 +126,9 @@ generateSets = do
             randInt <- randomInt
             generateRandomSet randInt
 
+generateSetsWithFixedSize :: Gen (Set Int)
+generateSetsWithFixedSize = do
+            generateRandomSet 8
 
 -- QuickCheck variant
 
