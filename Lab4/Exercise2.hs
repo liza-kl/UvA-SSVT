@@ -90,6 +90,14 @@ prop_absorptionLaw set1 set2 = setIntersection set1 (setUnion set1 set2) == set1
 prop_intersectionInDifference ::  (Eq a, Ord a) => Set a -> Set a -> Bool
 prop_intersectionInDifference set1 set2 = setIntersection set1 set2 == setDifference set1 (setDifference set1 set2)
 
+-- Demorgan's laws are a set of two postulates that are widely used in set theory.
+-- They state that: (i) (A ∪ B)’ = A’ ∩ B’ and (ii) (A ∩ B)’ = A’ ∪ B’.
+
+prop_firstMorganLaw ::  (Eq a, Ord a) => Set a -> Set a -> Bool
+prop_firstMorganLaw = undefined -- TODO Implement
+prop_secondMorganLaw ::  (Eq a, Ord a) => Set a -> Set a -> Bool
+prop_secondMorganLaw set1 set2 = undefined -- TODO Implement
+
 uniqueIntList :: Gen (Set Int)
 uniqueIntList = suchThat generateSets' (\s -> setLength s < 8)
 
