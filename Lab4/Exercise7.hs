@@ -1,4 +1,10 @@
 module Exercise7 where
+import qualified Exercise6 as Ex6
+import qualified Exercise3 as Ex3
+import qualified Exercise5 as Ex5
+import Data.List
+import Test.QuickCheck
+import SetOrd
 
     -- Indication of time spent: 20 Minutes
 
@@ -21,3 +27,46 @@ module Exercise7 where
 
     -- Conclusion: Both cases are possible. 
     -- Create a quickcheck test with relation stuff and falsify 
+
+    -- To give more examples we can create QuickCheck and check with verbose. We can use our Generator from Exercise 
+    -- 6 for that 
+
+type Rel a = [(a,a)]
+
+getTransSymClos :: Ord a => Rel a -> Rel a
+getTransSymClos rel = Ex3.symClos (Ex5.trClos rel)
+
+getSymTransClos :: Ord a => Rel a -> Rel a
+getSymTransClos rel = Ex5.trClos (Ex3.symClos rel)
+
+relationToSet :: Ord a => Rel a -> [a]
+relationToSet [] = []
+relationToSet ((x,y):ps) = sort (nub s)
+  where s = x : y : relationToSet ps
+
+compareRels:: Ord a => Rel a -> Rel a -> Bool
+compareRels rel1 rel2 = relationToSet rel1 == relationToSet rel2
+
+prop_symCloseIstransClose :: Ord a => Rel a -> Bool
+prop_symCloseIstransClose rel = compareRels (getTransSymClos rel) (getSymTransClos rel)
+
+prop_symCloseNottransClose :: Ord a => Rel a -> Bool
+prop_symCloseIstransClose rel = not (compareRels (getTransSymClos rel) (getSymTransClos rel))
+
+
+genSymClosEqTrClosRel :: Gen (Rel Int)
+genSymClosEqTrClosRel = do
+    Ex6.genRel `suchThat` prop_symCloseIstransClose
+
+genSymClosNEqTrClosRel :: Gen (Rel Int)
+genSymClosNEqTrClosRel = do
+    genRel `suchThat` prop_symCloseNottransClose
+
+
+
+main = do
+    print "Generating some pro and contra examples"
+    
+    print "Testing those examples"
+
+

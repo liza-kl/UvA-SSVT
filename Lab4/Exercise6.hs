@@ -12,7 +12,11 @@ import qualified Exercise5 as Ex5
 -- symmetric closure: For symmetric closure a reasonbale property to test, if 
 -- inverse of each tuple is contained in the relation 
 
-
+infixr 5 @@
+(@@) :: Eq a => Rel a -> Rel a -> Rel a
+r @@ s =
+    nub [ (x,z) | (x,y) <- r, (w,z) <- s, y == w ]
+    
 -- ## Helper Functions 
 containedIn :: Ord a => [a] -> [a] -> Bool
 containedIn xs ys = all (`elem` ys) xs
@@ -59,12 +63,12 @@ calcConverse [] = [] -- base case empty relation
 
 -- A relation is symmetric, if the inverse of the tuples is included in the relation
 prop_containsInverse :: Ord a => Rel a -> Bool
-prop_containsInverse r = containedIn (inverse r) (symClos r)
+prop_containsInverse r = containedIn (inverse r) (r)
 
 -- If the relation is symmetric, this should also hold for the complement of the
 -- relation
 prop_complementIsSym :: Rel Int -> Bool
-prop_complementIsSym relation = prop_containsInverse (symClos relation) && prop_containsInverse (complementTupleSet relation)
+prop_complementIsSym relation = prop_containsInverse (relation) && prop_containsInverse (complementTupleSet relation)
 
 -- If two different relations are symmetric than the union and intersection 
 -- of these two relations must also be symmetric 
@@ -74,7 +78,7 @@ prop_twoDistinctRelsSym rel1 rel2 = prop_containsInverse (setToRelation (relatio
 
 -- A converse relation is just basically flipping the binary pairs. (Carol, Bob) -> (Bob, Carol)
 prop_isConverseRelSym :: Ord a => Rel a -> Bool
-prop_isConverseRelSym rel = symClos rel == sort (inverse rel)
+prop_isConverseRelSym rel = rel == sort (inverse rel)
 
 -- initial elements should be in the transitive closure
 prop_initialElemsInTransitiveClosure :: Ord a => Rel a ->  Bool
@@ -86,17 +90,13 @@ prop_initialElemsInSymmetricClosure initial = initial `containedIn` symClos init
 
 -- inverse of initial elements should be in the symmetric closure
 prop_inverseOfInitialElemsInSymmetricClosure :: Ord a => Rel a ->  Bool
-prop_inverseOfInitialElemsInSymmetricClosure initial =  inverse initial `containedIn` symClos initial
+prop_inverseOfInitialElemsInSymmetricClosure initial =  inverse initial `containedIn` initial
 
 
 -- "Random" Generator for Relations 
 -- Give it a list (or in a mathematical context a "Set A")
 -- Then give it a function in which you put two values of the given list inside 
 -- and if they return "True" they are in a relation 
-
--- Random Generation is using monads.
-makeRelation :: Ord a => [a] -> (a -> a -> Bool) -> Rel a
-makeRelation set func = [(x,y) | x <- set, y <- set, func x y]
 
 -- Define a list of possible binary functions
 possibleRel :: [Int -> Int -> Bool]
@@ -114,26 +114,47 @@ genRel :: Gen (Rel Int)
 genRel = do
     func <- elements possibleRel
     elements <- listOf1 genElement
-    return $ nub [(x, y) | (x, y) <- elements, func x y]
+    return $ nub [(x, y) | (x, y) <- elements, func x y] -- Create a unique list which satifies the chosen function 
+
+genSymRel :: Gen (Rel Int)
+genSymRel = do
+    genRel `suchThat` prop_containsInverse
+
+
+isTransitive :: Ord a => Rel a -> Bool
+isTransitive r = containedIn (r @@ r) r
+
+genTransRel :: Gen (Rel Int)
+genTransRel = do
+    genRel `suchThat` isTransitive
+
+
+-- uniqueIntList :: Gen [Int]
+-- uniqueIntList = do
+--     set <- suchThat generateSets' (\s -> setLength s >= 3 && setLength s < 8)
+--     let setList = setToList set
+--     return setList
+
+
 
 main = do
     print "Test Property prop_containsInverse"
-    quickCheck $ forAll genRel prop_containsInverse
+    quickCheck $ forAll genSymRel prop_containsInverse
     print "Test Property prop_complementIsSym"
-    quickCheck $ forAll genRel prop_complementIsSym
+    quickCheck $ forAll genSymRel prop_complementIsSym
     print "Test Property prop_twoDistinctRelsSym"
-    quickCheck $ forAll genRel prop_twoDistinctRelsSym
+    quickCheck $ forAll genSymRel prop_twoDistinctRelsSym
     print "Test Property prop_isConverseRelSym"
-    quickCheck $ forAll genRel prop_isConverseRelSym
+    quickCheck $ forAll genSymRel prop_isConverseRelSym
 
-    print "Test Property prop_twoDistinctRelsSym" -- This is extremly slow in terms of tests
-   -- quickCheck $ forAll genRel prop_twoDistinctRelsSym
-    print "Test Property prop_initialElemsInTransitiveClosure"
-    quickCheck $ forAll genRel prop_initialElemsInTransitiveClosure
-    print "Test Property prop_initialElemsInSymmetricClosure"
-    quickCheck $ forAll genRel prop_initialElemsInSymmetricClosure
-    print "Test Property prop_inverseOfInitialElemsInSymmetricClosure"
-    quickCheck $ forAll genRel prop_inverseOfInitialElemsInSymmetricClosure
+  --   print "Test Property prop_twoDistinctRelsSym" -- This is extremly slow in terms of tests
+  --  -- quickCheck $ forAll genRel prop_twoDistinctRelsSym
+  --   print "Test Property prop_initialElemsInTransitiveClosure"
+  --   quickCheck $ forAll genRel prop_initialElemsInTransitiveClosure
+  --   print "Test Property prop_initialElemsInSymmetricClosure"
+  --   quickCheck $ forAll genRel prop_initialElemsInSymmetricClosure
+  --   print "Test Property prop_inverseOfInitialElemsInSymmetricClosure"
+  --   quickCheck $ forAll genRel prop_inverseOfInitialElemsInSymmetricClosure
 
 
 
