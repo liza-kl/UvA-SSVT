@@ -4,6 +4,7 @@ import Data.List
 import System.Random
 import SetOrd
 import Exercise1
+import Data.Sequence.Internal.Sorting (Queue(Q))
 
 -- ## Deliverables
 -- implementations, test properties, short test report, indication of time spent.
@@ -39,6 +40,7 @@ setDifference (Set (x:xs)) set2
   | inSet x set2 = setDifference (Set xs) set2
   | otherwise = insertSet x (setDifference (Set xs) set2)
 
+
 prop_differenceEmptySet1 :: (Eq a, Ord a) => Set a -> Set a -> Property
 prop_differenceEmptySet1 set1 set2 = property (setDifference set1 set2 == emptySet)
 
@@ -66,16 +68,49 @@ prop_intersectionCommulative :: (Eq a, Ord a) => Set a -> Set a -> Property
 prop_intersectionCommulative set1 set2 = property (setIntersection set1 set2 == setIntersection set2 set1) 
 
 -- (A∩B)∩C=A∩(B∩C)
-prop_intersectionAssociative :: (Eq a, Ord a) => Set a -> Set a -> Set a -> Property
-prop_intersectionAssociative set1 set2 set3 = property (setIntersection (setIntersection set1 set2) set3 == setIntersection set1 (setIntersection set2 set3))
+prop_intersectionAssociative :: Set Int -> Set Int -> Set Int -> Property
+prop_intersectionAssociative set1 set2 set3 =
+    property (setIntersection (setIntersection set1 set2) set3 == setIntersection set1 (setIntersection set2 set3))
 
--- A∩(B∩C)=(A∩B)∪(A∩C)
+-- A∩(B∪C)=(A∩B)∪(A∩C)
 prop_intersectionDistributive :: (Eq a, Ord a) => Set a -> Set a -> Set a -> Property
-prop_intersectionDistributive set1 set2 set3 = property (setIntersection set1 (setIntersection set2 set3) == setUnion (setIntersection set1 set2) (setIntersection set1 set3))
+prop_intersectionDistributive set1 set2 set3 = property (setIntersection set1 (setUnion set2 set3) == setUnion (setIntersection set1 set2) (setIntersection set1 set3))
+
+uniqueIntList :: Gen (Set Int)
+uniqueIntList = do
+    suchThat generateSets' (\s -> setLength s < 8)
+
+instance Arbitrary (Set Int) where
+    arbitrary = uniqueIntList -- Use your existing generator
+
+setToList:: Set a -> [a]
+setToList (Set []) = []
+setToList (Set (x:xs)) = x : setToList (Set xs)
+
+setLength:: Set a -> Int
+setLength set = length (setToList set)
 
 -- ## Testing 
-main :: IO()
-main = 
-    putStrLn "Tests using custom generator"
-    putStrLn "Tests using quickCheck generator"
+main = do
+    print "Testing prop_unionCommulative"
+    quickCheckResult $ forAll generateSets' prop_unionCommulative
+    print "Testing prop_unionAssociative"
+    quickCheckResult $ forAll generateSets' prop_unionAssociative
+    print "Testing prop_unionIdempotent"
+    quickCheckResult $ forAll generateSets' prop_unionIdempotent
+    print "Testing prop_differenceSameSet"
+    quickCheckResult $ forAll generateSets' prop_differenceSameSet
+    print "Testing setDifference"
+    print "Testing prop_differenceEmptySet1"
     quickCheckResult $ forAll generateSets' prop_differenceEmptySet1
+    print "Testing prop_differenceEmptySet2"
+    quickCheckResult $ forAll generateSets' prop_differenceEmptySet2
+    print "Testing prop_differenceSameSet"
+    quickCheckResult $ forAll generateSets' prop_differenceSameSet
+    print "Testing setIntersection"
+    print "Testing prop_intersectionCommulative"
+    quickCheckResult $ forAll generateSets' prop_intersectionCommulative
+    print "Testing prop_intersectionAssociative"
+    quickCheckResult $ forAll generateSets' prop_intersectionAssociative
+    print "Testing prop_intersectionDistributive"
+    quickCheckResult $ forAll generateSets' prop_intersectionDistributive
