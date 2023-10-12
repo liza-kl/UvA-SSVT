@@ -6,7 +6,7 @@ import Data.List
 import Test.QuickCheck
 import SetOrd
 
-    -- Indication of time spent: 20 Minutes
+    -- Indication of time spent: 60 Minutes (Basically the practice with generators.. but I think it was worth it?)
 
     -- 1.) Example for when the symmetric closure of the transitive closure != transitive closure of the symmetric closure
     -- Relation:[ (1, 2), (2, 3), (3, 4)]
