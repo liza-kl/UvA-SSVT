@@ -12,7 +12,7 @@ type Rel a = [(a,a)]
 
 symClos :: Ord a => Rel a -> Rel a
 symClos [] = []
-symClos relation = sort $ concat [ [(x,y),(y,x)] | (x,y) <- relation] 
+symClos relation = sort $ nub $ concat [ [(x,y),(y,x)] | (x,y) <- relation] 
 
 -- ## Discussion
 
