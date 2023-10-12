@@ -1,4 +1,4 @@
-module Denis.Exercise1 where
+module Exercise1 where
 import Test.QuickCheck
 import Data.List
 import System.Random
