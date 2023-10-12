@@ -28,7 +28,6 @@ relationToSet ((x,y):ps) = sort (nub s)
 setToRelation :: Ord a => [a] -> Rel a
 setToRelation xs = [(x, y) | x <- xs, y <- xs, x /= y]
 
-
 -- Define a list of tuples (you can replace this with your own set of pairs)
 tupleSet :: [(Int, Int)]
 tupleSet = [(1, 2), (2, 3), (4, 5)]
@@ -65,3 +64,19 @@ calcConverse [] = [] -- base case empty relation
 -- The converse of a relation must equal the initial relation 
 prop_isConverseRelSym :: Ord a => Rel a -> Bool 
 prop_isConverseRelSym rel = rel == sort (inverse rel )
+
+-- even number of elements in symmetric closure, since it contains the initial elements and their inverse
+prop_evenElemsInSymmetric :: Ord a => Rel a -> Bool
+prop_evenElemsInSymmetric relation = (mod (length relation) 2 == 0)
+
+-- initial elements should be in the transitive closure
+prop_initialElemsInTransitiveClosure :: Ord a => Rel a -> Rel a -> Bool
+prop_initialElemsInTransitiveClosure initial transitive = containedIn initial transitive
+
+-- initial elements should be in the symmetric closure
+prop_initialElemsInSymmetricClosure :: Ord a => Rel a -> Rel a -> Bool
+prop_initialElemsInSymmetricClosure initial symmetric = containedIn initial symmetric
+
+-- inverse of initial elements should be in the symmetric closure
+prop_inverseOfInitialElemsInSymmetricClosure :: Ord a => Rel a -> Rel a -> Bool
+prop_inverseOfInitialElemsInSymmetricClosure initial symmetric = containedIn (inverse initial) symmetric
