@@ -5,11 +5,15 @@ import System.Random
 import SetOrd
 
 -- Time estimate 30 mins. (Thanks syntax errors... 🙃)
+-- + 15 Mins to refreshen on my RNG knowledge. :D 
+-- https://en.wikipedia.org/wiki/Mersenne_Twister
+-- https://en.wikipedia.org/wiki/Linear_congruential_generator#Sample_code
 
 randomInt:: Gen Int
 randomInt = arbitrary
 
 -- 16807 also possible
+
 randomLCGInt :: Gen Int
 randomLCGInt = do
     -- (seed * multiplier) % modulus 
