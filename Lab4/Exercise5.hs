@@ -33,7 +33,7 @@ trClos r = until (\x -> x == oneStep x) oneStep r
 
 main :: IO ()
 main = do
-    let relation = [(1, 2), (2, 3), (3, 4)]
+    let relation = [(1,1),(1,1),(2,2),(2,2),(3,4),(4,3)]
     let transitiveClosure = trClos relation
     print transitiveClosure
 
