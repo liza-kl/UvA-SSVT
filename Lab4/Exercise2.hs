@@ -6,6 +6,8 @@ import SetOrd
 import Exercise1
 import Data.Sequence.Internal.Sorting (Queue(Q))
 
+-- TODO Implement De Morgan, Add Time Indication, Restructure the file maybe
+-- TODO a bit 
 -- ## Deliverables
 -- implementations, test properties, short test report, indication of time spent.
 
