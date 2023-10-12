@@ -37,10 +37,7 @@ import SetOrd
     -- Some other findings: 
     -- I just created some generators to "automate" the process of generating examples 
     -- + I found some other examples for the second case 
-    -- - I noticed that the generator for prop_symCloseNottransClose gets stucked, but I don't know why.
-    -- It's counterintuitive to me, because I thought it's easier to find relations where the symClos of trClos != trClos of symClos
-    -- - Some of the generator produce wrong values, but I still found them valuable to me, even though I needed to manually test them </3 
-    -- - The problem is the compareRels function, because Haskell checks differently list equality than I would expect.
+    -- - Took me a bit of time
 
 type Rel a = [(a,a)]
 
@@ -55,8 +52,15 @@ relationToSet [] = []
 relationToSet ((x,y):ps) = sort (nub s)
   where s = x : y : relationToSet ps
 
+
 compareRels :: Rel Int -> Rel Int -> Bool
-compareRels rel1 rel2 = (relationToSet rel1) == (relationToSet rel2) -- this is buggy, not working. 
+compareRels [] [] = True 
+compareRels _ [] = False 
+compareRels [] _ = False 
+compareRels ((a,b):xs) ((c,d):ys) 
+    | (a,b) `elem` ((c,d):ys) = compareRels xs ys
+    | otherwise = False 
+
 
 prop_symCloseIstransClose ::Rel Int -> Bool
 prop_symCloseIstransClose rel = compareRels (getTransSymClos rel) (getSymTransClos rel)
