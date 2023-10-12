@@ -24,12 +24,23 @@ import SetOrd
     -- 2.1) If you have an empty set, then the symmetric closure will be an empty set but also the transitive closure.
     -- 2.2) If you have a set of solely identities e.g. [(1,1),(2,2)], then you are going to have the case symmetric closure of the transitive closure == transitive closure of the symmetric closure
     -- because a == b and b == c and a == c ("looping")
+    -- 2.3) If you have a relation with only one binary tuple in it, the statement applies [(1,1)], because then you are only referring to yourself
+    -- 2.4) If you have an identity tuple and another tuple where the numbers not equal the identity tuple number. e.g. [(-3,-1),(5,5)], because then you have no "c" for the
+    -- transitive relation 
 
     -- Conclusion: Both cases are possible. 
     -- Create a quickcheck test with relation stuff and falsify 
 
     -- To give more examples we can create QuickCheck and check with verbose. We can use our Generator from Exercise 
     -- 6 for that 
+
+    -- Some other findings: 
+    -- I just created some generators to "automate" the process of generating examples 
+    -- + I found some other examples for the second case 
+    -- - I noticed that the generator for prop_symCloseNottransClose gets stucked, but I don't know why.
+    -- It's counterintuitive to me, because I thought it's easier to find relations where the symClos of trClos != trClos of symClos
+    -- - Some of the generator produce wrong values, but I still found them valuable to me, even though I needed to manually test them </3 
+    -- - The problem is the compareRels function, because Haskell checks differently list equality than I would expect.
 
 type Rel a = [(a,a)]
 
@@ -44,15 +55,14 @@ relationToSet [] = []
 relationToSet ((x,y):ps) = sort (nub s)
   where s = x : y : relationToSet ps
 
-compareRels:: Ord a => Rel a -> Rel a -> Bool
-compareRels rel1 rel2 = relationToSet rel1 == relationToSet rel2
+compareRels :: Rel Int -> Rel Int -> Bool
+compareRels rel1 rel2 = (relationToSet rel1) == (relationToSet rel2) -- this is buggy, not working. 
 
-prop_symCloseIstransClose :: Ord a => Rel a -> Bool
+prop_symCloseIstransClose ::Rel Int -> Bool
 prop_symCloseIstransClose rel = compareRels (getTransSymClos rel) (getSymTransClos rel)
 
-prop_symCloseNottransClose :: Ord a => Rel a -> Bool
-prop_symCloseIstransClose rel = not (compareRels (getTransSymClos rel) (getSymTransClos rel))
-
+prop_symCloseNottransClose :: Rel Int -> Bool
+prop_symCloseNottransClose rel = not (compareRels (getTransSymClos rel) (getSymTransClos rel))
 
 genSymClosEqTrClosRel :: Gen (Rel Int)
 genSymClosEqTrClosRel = do
@@ -60,13 +70,16 @@ genSymClosEqTrClosRel = do
 
 genSymClosNEqTrClosRel :: Gen (Rel Int)
 genSymClosNEqTrClosRel = do
-    genRel `suchThat` prop_symCloseNottransClose
-
+    Ex6.genRel `suchThat` prop_symCloseNottransClose
 
 
 main = do
-    print "Generating some pro and contra examples"
-    
-    print "Testing those examples"
+    a <- sample' genSymClosEqTrClosRel
+    b <- generate genSymClosNEqTrClosRel
+    print "Generating Examples where the symmetric closure of the transitive closure equals the transitive closure of the symmetric one"
+    print a
+    print "Generating Examples where the symmetric closure of the transitive closure does **not** equal the transitive closure of the symmetric one"
+    print "Unfortunately get's stuck."
+    print b
 
 
