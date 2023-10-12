@@ -13,4 +13,13 @@ module Exercise7 where
     -- It depends on the set you are using.
 
     -- e.g. For the relation: [(1,2),(2,3)] they are indeed the same. 
+    -- symclos [(1,2),(2,1),(2,3),(3,2)]
+    -- trclos [(1,2),(2,3),(1,3)]
+    -- Symmetric closure of transitive closure: [(1,2),(2,1),(2,3),(3,2),(1,3),(3,1)]
+    -- Transitive closure of symmetric closure: [(1,2),(2,1),(2,3),(3,2),(1,1),(1,3),(2,2),(3,1),(3,3)]
+    -- if a relation is reflexive it can be 
 
+    -- You can prob remove the duplicates of the transitive closure 
+    -- as this is not expected so you have both cases covered 
+
+    -- notes on wolfram alpha 

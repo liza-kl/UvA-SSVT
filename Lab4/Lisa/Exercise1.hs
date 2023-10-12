@@ -26,11 +26,11 @@ randomIntList nRange tupleRange = do
     replicateM n (randomRIO (minValue, maxValue))
 
 
--- randomSetGen :: IO (Set Int)
--- randomSetGen = do
---     randomNum <- randomInt
---     num1 <- randomInt
---     num2 <- randomInt
---     return (list2set [(randomIntList randomNum num1 num2)])
+randomSetGen :: IO (Set Int)
+randomSetGen = do
+    randomNum <- randomInt
+    num1 <- randomInt
+    num2 <- randomInt
+    return (list2set [(randomIntList randomNum num1 num2)])
 
 -- QuickCheck Generator 
