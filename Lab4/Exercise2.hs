@@ -12,11 +12,15 @@ import Data.Sequence.Internal.Sorting (Queue(Q))
 -- implementations, test properties, short test report, indication of time spent.
 
 -- ## Indication of time spent 80 minutes 
+-- Denis' comment: Spent like 45 Mins at least on this extra. :D
 setUnion :: Ord a => Set a -> Set a -> Set a
 setUnion = unionSet
 
+-- For the different properties we are using tuples since this makes providing the set values easier.
+-- With this we only have one value and we can use the derived (see below) generator functions to test the properties.
+
 -- A∪B=B∪A
-prop_unionCommutative :: (Eq a, Ord a) => (Set a, Set a )-> Bool
+prop_unionCommutative :: (Eq a, Ord a) => (Set a, Set a) -> Bool
 prop_unionCommutative (set1, set2) =  setUnion set1 set2 == setUnion set2 set1
 
 -- (A∪B)∪C=A∪(B∪C)
@@ -100,6 +104,11 @@ prop_firstMorganLaw = undefined -- TODO Implement
 prop_secondMorganLaw ::  (Eq a, Ord a) => (Set a, Set a) -> Bool
 prop_secondMorganLaw (set1, set2) = undefined -- TODO Implement
 
+-- We are providing multiple versions of the two versions of the Ex. 1 QuickCheck generators.
+-- This is to circumvent the QuickCheck limitation of only being able to supply one "object" with the generator.
+-- So we are using the Ex. 1 generators to generate the corresponding tuples that we need.
+-- Also we are restricting the output to eight elements set elements, due to performance.
+-- Eight was chosen since it was just a number small enough to easily compute everything while providing decent test coverage for different cases.
 quickCheckGen :: Gen (Set Int)
 quickCheckGen = do
                   genSet <- generateSets'
@@ -112,11 +121,13 @@ quickCheckGenTuple = do
                   g2 <- quickCheckGen
                   return (g1,g2)
 
+-- Explaination for this, see below. Special case generator for "prop_differenceEmptySet1".
 quickCheckGenEqualTuple:: Gen (Set Int, Set Int)
 quickCheckGenEqualTuple = do
                   g <- quickCheckGen
                   return (g, g)
 
+-- Explaination for this, see below. Special case generator for "prop_differenceEmptySet2".
 quickCheckGenHalfEmptyTuple:: Gen (Set Int, Set Int)
 quickCheckGenHalfEmptyTuple = do
                   g <- quickCheckGen
@@ -141,11 +152,13 @@ noQuickCheckGenTuple = do
                   g2 <- noQuickCheckGen
                   return (g1,g2)
 
+-- Explaination for this, see below. Special case generator for "prop_differenceEmptySet1".
 noQuickCheckGenEqualTuple:: Gen (Set Int, Set Int)
 noQuickCheckGenEqualTuple = do
                   g <- noQuickCheckGen
                   return (g, g)
 
+-- Explaination for this, see below. Special case generator for "prop_differenceEmptySet2".
 noQuickCheckGenHalfEmptyTuple:: Gen (Set Int, Set Int)
 noQuickCheckGenHalfEmptyTuple = do
                   g <- noQuickCheckGen
@@ -158,6 +171,7 @@ noQuickCheckGenTriple = do
                   g3 <- noQuickCheckGen
                   return (g1, g2, g3)
 
+-- Helper functions for set manipulation.
 setToList:: Set a -> [a]
 setToList (Set []) = []
 setToList (Set (x:xs)) = x : setToList (Set xs)
@@ -175,7 +189,6 @@ setLength set = length (setToList set)
 -- Although, the properties seem kind of complete, we are limited to the fact, that we can't test infinite sets. So a precondition
 -- for a Bool tests are fixed-sized sets. 
 -- Maybe we can prove by induction that if it holds for n, it holds for n+1 ?
-
 
 main = do
     print "Testing Idempotence. Can be proven with Venn Diagramms or Truth Tables"
@@ -215,12 +228,19 @@ main = do
     print "Testing prop_differenceSameSet"
     quickCheckResult $ forAll noQuickCheckGen prop_differenceSameSet
     quickCheckResult $ forAll quickCheckGen prop_differenceSameSet
+
+-- Needs the special generator, which provides a tuple with the same sets.
+-- This is since we test here if a subtraction of those elements would result in an empty set.
     print "Testing prop_differenceEmptySet1"
     quickCheckResult $ forAll noQuickCheckGenEqualTuple prop_differenceEmptySet1
     quickCheckResult $ forAll quickCheckGenEqualTuple prop_differenceEmptySet1
+
+-- Needs the special generator, which provides a tuple with a normal set element and an empty set.
+-- This is since we test here if a subtraction of those elements would result in the original set.
     print "Testing prop_differenceEmptySet2"
     quickCheckResult $ forAll noQuickCheckGenHalfEmptyTuple prop_differenceEmptySet2
     quickCheckResult $ forAll quickCheckGenHalfEmptyTuple prop_differenceEmptySet2
+
     print "Testing prop_differenceSameSet"
     quickCheckResult $ forAll noQuickCheckGen prop_differenceSameSet
     quickCheckResult $ forAll quickCheckGen prop_differenceSameSet
@@ -228,6 +248,7 @@ main = do
     print "Testing prop_absorptionLaw"
     quickCheckResult $ forAll noQuickCheckGenTuple prop_absorptionLaw
     quickCheckResult $ forAll quickCheckGenTuple prop_absorptionLaw
+
     print "Testing prop_intersectionInDifference"
     quickCheckResult $ forAll noQuickCheckGenTuple prop_intersectionInDifference
     quickCheckResult $ forAll quickCheckGenTuple prop_intersectionInDifference
