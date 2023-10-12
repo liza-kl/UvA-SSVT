@@ -79,11 +79,10 @@ genSymClosNEqTrClosRel = do
 
 main = do
     a <- sample' genSymClosEqTrClosRel
-    b <- generate genSymClosNEqTrClosRel
+    b <- sample' genSymClosNEqTrClosRel
     print "Generating Examples where the symmetric closure of the transitive closure equals the transitive closure of the symmetric one"
     print a
     print "Generating Examples where the symmetric closure of the transitive closure does **not** equal the transitive closure of the symmetric one"
-    print "Unfortunately get's stuck."
     print b
 
 
