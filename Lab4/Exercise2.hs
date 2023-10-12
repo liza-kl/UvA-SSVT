@@ -11,11 +11,11 @@ import Data.Sequence.Internal.Sorting (Queue(Q))
 
 -- ## Indication of time spent 80 minutes 
 setUnion :: Ord a => Set a -> Set a -> Set a
-setUnion set1 set2 = unionSet set1 set2
+setUnion = unionSet
 
 -- A∪B=B∪A
 prop_unionCommulative :: (Eq a, Ord a) => Set a -> Set a -> Property
-prop_unionCommulative set1 set2 = property (setUnion set1 set2 == setUnion set2 set1) 
+prop_unionCommulative set1 set2 = property (setUnion set1 set2 == setUnion set2 set1)
 
 -- (A∪B)∪C=A∪(B∪C)
 prop_unionAssociative :: (Eq a, Ord a) => Set a -> Set a -> Set a -> Property
@@ -65,7 +65,7 @@ setIntersection (Set (x:xs)) set2
 
 -- A∩B=B∩A
 prop_intersectionCommulative :: (Eq a, Ord a) => Set a -> Set a -> Property
-prop_intersectionCommulative set1 set2 = property (setIntersection set1 set2 == setIntersection set2 set1) 
+prop_intersectionCommulative set1 set2 = property (setIntersection set1 set2 == setIntersection set2 set1)
 
 -- (A∩B)∩C=A∩(B∩C)
 prop_intersectionAssociative :: Set Int -> Set Int -> Set Int -> Property
@@ -75,6 +75,12 @@ prop_intersectionAssociative set1 set2 set3 =
 -- A∩(B∪C)=(A∩B)∪(A∩C)
 prop_intersectionDistributive :: (Eq a, Ord a) => Set a -> Set a -> Set a -> Property
 prop_intersectionDistributive set1 set2 set3 = property (setIntersection set1 (setUnion set2 set3) == setUnion (setIntersection set1 set2) (setIntersection set1 set3))
+
+prop_absorptionLaw :: (Eq a, Ord a) => Set a -> Set a -> Bool
+prop_absorptionLaw set1 set2 = (setIntersection set1 (setUnion set1 set2) == set1) && (setUnion set1 (setIntersection set1 set2) == set1)
+
+prop_intersectionInDifference ::  (Eq a, Ord a) => Set a -> Set a -> Bool
+prop_intersectionInDifference set1 set2 = setIntersection set1 set2 == setDifference set1 (setDifference set1 set2)
 
 uniqueIntList :: Gen (Set Int)
 uniqueIntList = do
@@ -89,6 +95,8 @@ setToList (Set (x:xs)) = x : setToList (Set xs)
 
 setLength:: Set a -> Int
 setLength set = length (setToList set)
+
+
 
 -- ## Testing 
 main = do
@@ -114,3 +122,10 @@ main = do
     quickCheckResult $ forAll generateSets' prop_intersectionAssociative
     print "Testing prop_intersectionDistributive"
     quickCheckResult $ forAll generateSets' prop_intersectionDistributive
+    print "Testing prop_absorptionLaw"
+    quickCheckResult $ forAll generateSets' prop_absorptionLaw
+    print "Testing prop_intersectionInDifference"
+    quickCheckResult $ forAll generateSets' prop_intersectionInDifference
+
+
+
