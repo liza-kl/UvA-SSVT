@@ -129,33 +129,31 @@ genTransRel = do
     genRel `suchThat` isTransitive
 
 
--- uniqueIntList :: Gen [Int]
--- uniqueIntList = do
---     set <- suchThat generateSets' (\s -> setLength s >= 3 && setLength s < 8)
---     let setList = setToList set
---     return setList
-
+composeR :: Eq a => Rel a -> Rel a -> Int -> Int
+composeR r1 r2 counter
+  | counter == 1000 = 1000
+  | counter == 0 = composeR r1 newr2 (counter+1)
+  | r1 == r2 = counter
+  | otherwise = composeR r1 newr2 (counter+1)
+  where newr2 = concatMap (\(x,y) -> concatMap (\(x2, y2) -> [(x,y2) | y == x2]) r1) r2
 
 
 main = do
+    print "Testing symmetric closures"
     print "Test Property prop_containsInverse"
     quickCheck $ forAll genSymRel prop_containsInverse
+    print "Test Property prop_inverseOfInitialElemsInSymmetricClosure"
+    quickCheck $ forAll genSymRel prop_inverseOfInitialElemsInSymmetricClosure
     print "Test Property prop_complementIsSym"
     quickCheck $ forAll genSymRel prop_complementIsSym
-    print "Test Property prop_twoDistinctRelsSym"
+    print "Test Property prop_initialElemsInSymmetricClosure"
+    quickCheck $ forAll genRel prop_initialElemsInSymmetricClosure
+    print "Test Property prop_twoDistinctRelsSym"-- This is extremly slow in terms of tests
     quickCheck $ forAll genSymRel prop_twoDistinctRelsSym
     print "Test Property prop_isConverseRelSym"
     quickCheck $ forAll genSymRel prop_isConverseRelSym
-
-  --   print "Test Property prop_twoDistinctRelsSym" -- This is extremly slow in terms of tests
-  --  -- quickCheck $ forAll genRel prop_twoDistinctRelsSym
-  --   print "Test Property prop_initialElemsInTransitiveClosure"
-  --   quickCheck $ forAll genRel prop_initialElemsInTransitiveClosure
-  --   print "Test Property prop_initialElemsInSymmetricClosure"
-  --   quickCheck $ forAll genRel prop_initialElemsInSymmetricClosure
-  --   print "Test Property prop_inverseOfInitialElemsInSymmetricClosure"
-  --   quickCheck $ forAll genRel prop_inverseOfInitialElemsInSymmetricClosure
-
+    print "Testing transitive closures"
+    quickCheck $ forAll genTransRel prop_initialElemsInTransitiveClosure
 
 
 -- Trash 
