@@ -5,7 +5,7 @@ import Data.List
 -- Haskell program, indication of time spent
 
 -- ## Indication of type spent
--- 15 minutes (5 minutes implementation + 10 min documentation)
+-- Total: 15 minutes (5 minutes implementation + 10 min documentation)
 
 -- Type was taken from the *.pdf in the lab. 
 type Rel a = [(a,a)]
