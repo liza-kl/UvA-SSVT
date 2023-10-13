@@ -7,7 +7,7 @@ import SetOrd
 -- Time estimate 30 mins. (Thanks syntax errors... 🙃)
 -- + 20 Mins to refresh on my RNG knowledge. :D 
 -- + 20 Mins to write everything up. 😅
--- https://en.wikipedia.org/wiki/Linear_congruential_generator#Sample_code
+-- Time estimate total: 70 mins.
 
 {-
 
@@ -40,6 +40,7 @@ import SetOrd
     Another method would be to use either QuickCheck's "arbitrary" or "choose" function.
     This doesn't technically fulfil the requirement for a "from scratch" implementation.
     To keep the typing of all functions more simplified, we used that version just for the RNG.
+    (Asked a TA if that variant is also okay.)
 
     If we were to go REALLY "from scratch", we would need to implement a RNG from scratch.
     We included a version of a linear congruent generator with a fixed seed. 
@@ -126,6 +127,9 @@ generateSets = do
             randInt <- randomInt
             generateRandomSet randInt
 
+-- Helper function to get a set with a fixed size. 
+-- Eight is an arbitrary number which is low enough to be handled in later exercises/circumstances
+-- and still provides good coverage.
 generateSetsWithFixedSize :: Gen (Set Int)
 generateSetsWithFixedSize = do
             generateRandomSet 8
