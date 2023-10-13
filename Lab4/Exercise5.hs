@@ -4,14 +4,11 @@ import Data.List
 import System.Random
 import SetOrd
 
--- TODO Add discussion between the two implementations (Warshall and Nefeli + 
--- TODO how we did it and what is a transitive closure, definition and how our ).
--- TODO function does this. Maybe also add fixpoint implementation (look slides in course)
-
 -- Indication of time spent: 30 minutes
 
--- ## Definition of Transitive Clouse
--- Arelation R on A is transitive if for all x;y;z if xRy and yRz then xRz.
+-- ## Definition of Transitive Closure
+-- A relation R on A is transitive if for all x;y;z if xRy and yRz then xRz.
+-- So a transitive closure is the smallest possible set, that still fulfills full transitivity.
 type Rel a = [(a,a)]
 
 -- ## Given Helperfunction 
@@ -34,22 +31,14 @@ oneStep r = nub (r ++ (r @@ r))
 trClos :: Ord a => Rel a -> Rel a
 trClos r = until (\x -> x == oneStep x) oneStep r
 
-trClosFix = fix oneStep 
-
-
 main :: IO ()
 main = do
     let relation = [(1,1),(1,1),(2,2),(2,2),(3,4),(4,3)]
     let transitiveClosure = trClos relation
     print transitiveClosure
 
-
--- Maybe it's basically the same, idk . 
--- Compute the full transitive closure using Warshall's algorithm
--- trClos :: Ord a => Rel a -> Rel a
--- trClos relation = closure relation
---   where
---     closure r
---       | r == r2 = r
---       | otherwise = closure r2
---       where r2 = nub (r ++ (r @@ r))
+{-
+    As an alternative method Warshall's algorithm or a fixpoint-based method could be used.
+    But this is personal preference and we chose to stick with our implementation for this reason.
+    Not tested since that is provided in Exercise 6.
+-}
