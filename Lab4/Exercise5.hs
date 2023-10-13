@@ -10,8 +10,11 @@ import SetOrd
 
 -- Indication of time spent: 30 minutes
 
+-- ## Definition of Transitive Clouse
+-- Arelation R on A is transitive if for all x;y;z if xRy and yRz then xRz.
 type Rel a = [(a,a)]
 
+-- ## Given Helperfunction 
 -- get two tuples (x,y) and (w,z)
 -- if y == w, then add (x,z) to the result
 -- use num to remove duplicates
@@ -30,6 +33,9 @@ oneStep r = nub (r ++ (r @@ r))
 -- call oneStep until the result is the same as in the previous step
 trClos :: Ord a => Rel a -> Rel a
 trClos r = until (\x -> x == oneStep x) oneStep r
+
+trClosFix = fix oneStep 
+
 
 main :: IO ()
 main = do
