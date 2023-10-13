@@ -2,9 +2,13 @@ module Euler456 where
 import Test.QuickCheck
 import Data.List 
 import System.Random
-import SetOrd
 import Data.Set (Set)
 import qualified Data.Set as Set
+
+
+-- Time spent: 120 min
+-- The program works but for large numbers such as 2,000,000 it is not performant at all
+-- so it takes a lot of time to get a result
 
 -- x function
 x :: Integer -> Integer
@@ -19,42 +23,43 @@ generateTuple :: Integer -> (Integer, Integer)
 generateTuple n = (x n, y n)
 
 -- p function = {(x1, y1), (x2, y2),...,(xn, yn)}
-p :: Integer -> Set.Set (Integer, Integer)
+p :: Integer -> Set (Integer, Integer)
 p n = Set.fromList (map generateTuple [1..n])
 
 -- finds all the possible triads from all the points in p n
-generateCombinations :: Set.Set (Integer, Integer) -> Int -> [Set.Set (Integer, Integer)]
+generateCombinations :: Set (Integer, Integer) -> Int -> [Set (Integer, Integer)]
 generateCombinations tupleSet size = 
     let tupleList = Set.toList tupleSet
     in [Set.fromList combination | combination <- subsequences tupleList, length combination == size]
 
--- Given three points A(x1, y1), B(x2, y2), and C(x3, y3), you can calculate the area of the triangle formed by these points using the determinant method:
--- Area = 0.5 * |x1(y2 - y3) + x2(y3 - y1) + x3(y1 - y2)|
--- Calculate the area using the formula.
--- If the area is greater than 0, it means the origin is outside the triangle.
--- If the area is less than 0, it means the origin is inside the triangle.
+-- Given three points A(x1, y1), B(x2, y2), and C(x3, y3), 
+-- we can calculate the area of the triangle (shoelace formula)
+-- and the areas of the triangles that get formed by two of these points
+-- and the point that we want to see if it is contained in the initial triangle
+-- then we check if the sum of the small areas is equal to the area of the whole triangle
+-- if it is equal, that means that the point is contained in the triangle
 formsTriangle :: [(Integer, Integer)] -> Bool
 formsTriangle tupleList =
     case tupleList of
         [(x1, y1), (x2, y2), (x3, y3)] ->
-            -- Check if the origin (0, 0) is inside the triangle formed by the points
-            let area = 0.5 * fromInteger (abs (x1 * (y2 - y3) + x2 * (y3 - y1) + x3 * (y1 - y2)))
-            in area < 0
+            -- area of ABC
+            let a = 0.5 * fromInteger (abs (x1 * (y2 - y3) + x2 * (y3 - y1) + x3 * (y1 - y2)))
+            -- area of PBC
+                a1 = 0.5 * fromInteger (abs (0 * (y2 - y3) + x2 * (y3 - 0) + x3 * (0 - y2)))
+            -- area of PAC
+                a2 = 0.5 * fromInteger (abs (x1 * (0 - y3) + 0 * (y3 - y1) + x3 * (y1 - 0)))
+            -- area of PAB
+                a3 = 0.5 * fromInteger (abs (x1 * (y2 - 0) + x2 * (0 - y1) + 0 * (y1 - y2)))
+            -- check if sum of a1, a2, a3 is equal to a
+            in a == a1 + a2 + a3
         _ -> False
 
--- find all permutations of each combination
---   eg permutations(fromList [(8340,-10778),(12407,1060),(15852,-5203)]) =
---   fromList [(8340,-10778),(12407,1060),(15852,-5203)]
---   fromList [(8340,-10778),(15852,-5203),(12407,1060)]
---   fromList [(12407,1060),(8340,-10778),(15852,-5203)]
---   fromList [(12407,1060),(15852,-5203),(8340,-10778)]
---   fromList [(15852,-5203),(8340,-10778),(12407,1060)]
---   fromList [(15852,-5203),(12407,1060),(8340,-10778)]
--- check if each permutation forms a triangle
--- count the triangles
-countTrianglesContainingOrigin :: [Set.Set (Integer, Integer)] -> Int
+-- for each combination, check if its points form a triangle that contains the origin
+-- count all these triangles     
+countTrianglesContainingOrigin :: [Set (Integer, Integer)] -> Int
 countTrianglesContainingOrigin combinationsList =
-    sum [length [p | p <- permutations (Set.toList combo), formsTriangle p] | combo <- combinationsList]
+    sum [if formsTriangle (Set.toList combination) then 1 else 0 | combination <- combinationsList]
+
 
 -- c function -> counts number of triangles with vertices in p n that contain the origin O(0, 0) 
 -- for this, we need to find first all the possible combinations of points, 
@@ -66,5 +71,5 @@ main :: IO ()
 main = do
     -- let combinationsList = generateCombinations (p 8) 3
     -- mapM_ print combinationsList
-    let count = c 8
+    let count = c 2000000
     putStrLn $ "Number of combinations forming triangles containing the origin: " ++ show count
