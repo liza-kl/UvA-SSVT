@@ -5,8 +5,6 @@ import System.Random
 import SetOrd
 import Exercise1
 
-
--- TODO Documentation, Test for 2nd part, Short Test Report.
 -- Time estimate 140 Mins. (Mainly due to debugging and induction proof thinking)
 
 {-
@@ -49,6 +47,7 @@ prop_isEndorelatorSerial domain = isSerial domain (getEndorelatorPairs domain)
 genIntLists:: Gen [Int]
 genIntLists = arbitrary
 
+-- Generates fixed sized integer lists for better computability.
 genListOfInts :: Gen [Int]
 genListOfInts = do
     n <- choose (0, 5)
@@ -187,7 +186,6 @@ prop_isModuloRelationSerial:: ([Int], Int) -> Bool
 prop_isModuloRelationSerial (domain, n) = isModuloRelationSerial domain n
 
 -- All properties while running the QuickCheck test, hold true.
--- TODO is there something I could add to this "test report"?
 main :: IO()
 main =
     do
