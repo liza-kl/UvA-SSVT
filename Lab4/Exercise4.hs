@@ -3,7 +3,7 @@ import Test.QuickCheck
 import Data.List
 import System.Random
 import SetOrd
-import Denis.Exercise1
+import Exercise1
 
 
 -- TODO Documentation, Test for 2nd part, Short Test Report.
@@ -149,26 +149,45 @@ hasNonSerialElementinDomain domain ((x,y):xs) = (length [e | e <- domain, e /= x
     But if we were to look at it from the domain perspective of [9,10,11], 
     for example this relation wouldn't be serial anymore.
 
-    -- TODO ADD EXPLAINATION FOR THAT [0..n] thing and why it is needed like that here...
+    If we were to test the seriality for a given domain, 
+    then the following property for the domain for a given relation needs to be true.
+
+    - The domain needs to be a list from [0, max (Rel a)].
+
+    This is the case since the potential modulo operation for max (Rel a) could result in any value between 0 and itself.
+    (Since n can be any positive integer) 
 
 -}
-genRandomRelationFromDomain:: [Int] -> Int -> Rel Int
-genRandomRelationFromDomain domain n = do
+
+-- Creates a relation from a domain, by applying a modulo of a given n value to every value of the domain.
+genRelationFromDomain:: [Int] -> Int -> Rel Int
+genRelationFromDomain domain n = do
                             [(y `mod` n, y) | y <- domain]
 
+-- Checks if a domain and it's generated relation is serial for a given n value.
 isModuloRelationSerial:: [Int] -> Int -> Bool
-isModuloRelationSerial domain n = isSerial domain (genRandomRelationFromDomain domain n)
+isModuloRelationSerial domain n = isSerial domain (genRelationFromDomain domain n)
 
+-- We use a tuple for random domain and n generation.
+-- Just for ease of use in the property check.
 getRandomDomainAndModulo:: Gen ([Int], Int)
 getRandomDomainAndModulo = do
+                  -- We choose the arbitrary domain limitation size of 15 just to have good performance.
+                  -- While also having good coverage.
                   limit <- choose(1,15)
                   let domain = [0..limit]
-                  n <- choose(1,100)
+                  -- Since we are working with integers and n has to be larger than 0.
+                  -- Therefore we pick a random number between 1 and the integer limit.
+                  n <- choose(1,2147483647)
                   return (domain, n)
 
+-- In this case the "randomly" (in the given restrictions) chosen domain and its corresponding relation
+-- should always be serial, thus holding this property always true.
 prop_isModuloRelationSerial:: ([Int], Int) -> Bool
 prop_isModuloRelationSerial (domain, n) = isModuloRelationSerial domain n
 
+-- All properties while running the QuickCheck test, hold true.
+-- TODO is there something I could add to this "test report"?
 main :: IO()
 main =
     do
