@@ -8,6 +8,7 @@ import Control.Monad
 
 import qualified Exercise5 as Ex5
 import Test.QuickCheck (quickCheck)
+import System.Random
 
 -- TODO Check Complement and composition func in trash. Maybe add something to the test report
 -- symmetric closure: For symmetric closure a reasonbale property to test, if 
@@ -41,15 +42,16 @@ setToRelation xs = [(x, y) | x <- xs, y <- xs, x /= y]
 
 
 -- Define the range of values for each element in the tuple
--- TODO: Can we define a generator which is more flexible or takes the min max value for the complement?
-minValue, maxValue :: Int
-minValue = 1
-maxValue = 5
+genMinMaxTuple :: Gen (Int, Int)
+genMinMaxTuple = do
+            value1 <- choose (1, 100)
+            value2 <- choose (1, 100)
+            return (min value1 value2, max value1 value2)
 
 -- Calculate the complement of the tuple set
 -- For sake of ease only ints
-complementTupleSet :: Rel Int -> Rel Int
-complementTupleSet rel = [(x, y) | x <- [minValue..maxValue], y <- [minValue..maxValue], (x, y) `notElem` rel]
+complementTupleSet :: Rel Int -> Int -> Int -> Rel Int
+complementTupleSet rel minValue maxValue = [(x, y) | x <- [minValue..maxValue], y <- [minValue..maxValue], (x, y) `notElem` rel]
 
 -- ## Properties 
 
@@ -59,8 +61,8 @@ prop_containsInverse r = containedIn (inverse r) (r)
 
 -- If the relation is symmetric, this should also hold for the complement of the
 -- relation
-prop_complementIsSym :: Rel Int -> Bool
-prop_complementIsSym relation = prop_containsInverse relation && prop_containsInverse (complementTupleSet relation)
+prop_complementIsSym :: (Rel Int, Int, Int) -> Bool
+prop_complementIsSym (relation, minValue, maxValue) = prop_containsInverse relation && prop_containsInverse (complementTupleSet relation minValue maxValue)
 
 -- If two different relations are symmetric than the union and intersection 
 -- of these two relations must also be symmetric 
@@ -124,6 +126,13 @@ genSymRel :: Gen (Rel Int)
 genSymRel = do
     genRel `suchThat` prop_containsInverse
 
+genSymRelWithMinMaxValues :: Gen (Rel Int, Int, Int)
+genSymRelWithMinMaxValues = do
+                        rel <- genRel `suchThat` prop_containsInverse
+                        tuple <- genMinMaxTuple
+                        let minValue = fst tuple
+                        let maxValue = snd tuple
+                        return (rel, minValue, maxValue)
 
 genTransRel :: Gen (Rel Int)
 genTransRel = do
@@ -141,7 +150,7 @@ main = do
     print "Test Property prop_inverseOfInitialElemsInSymmetricClosure"
     quickCheck $ forAll genSymRel prop_inverseOfInitialElemsInSymmetricClosure
     print "Test Property prop_complementIsSym"
-    quickCheck $ forAll genSymRel prop_complementIsSym
+    quickCheck $ forAll genSymRelWithMinMaxValues prop_complementIsSym
     print "Test Property prop_initialElemsInSymmetricClosure"
     quickCheck $ forAll genRel prop_initialElemsInSymmetricClosure
     print "Test Property prop_twoDistinctRelsSym"-- This is extremly slow in terms of tests
