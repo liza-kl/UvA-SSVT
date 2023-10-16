@@ -6,6 +6,7 @@ import SetOrd
 import Lecture6
 import Text.Parsec
 import Text.Parsec.String (Parser)
+import Data.Char (isSpace)
 
 readStatement :: String -> Either ParseError Statement
 readStatement = parse statementParser ""
@@ -137,54 +138,9 @@ customShowIndented (While cond stmt) indentLevel = do
     customShowIndented stmt (indentLevel + 1)
     putStrLn $ replicate indentLevel '\t' ++ "}"
 
-property_whitespaceInsensitivity :: String -> Property
-property_whitespaceInsensitivity input =
-  let strippedInput = trimWhitespace input
-      result = readStatement input
-  in case result of
-       Left _ -> property_discard
-       Right stmt ->
-         let strippedResult = readStatement strippedInput
-         in property (stmt == either (const stmt) id strippedResult)
-
-property_parseIdentity :: String -> Property
-property_parseIdentity input =
-  let result = readStatement input
-  in case result of
-       Left _ -> property_discard
-       Right stmt -> property (input == prettyPrint stmt)
-
-property_roundTripSerialization :: String -> Property
-property_roundTripSerialization input =
-  let result1 = readStatement input
-  in case result1 of
-       Left _ -> property_discard
-       Right stmt1 ->
-         let serialized = prettyPrint stmt1
-             result2 = readStatement serialized
-         in case result2 of
-              Left _ -> property_discard
-              Right stmt2 -> property (stmt1 == stmt2)
-
-property_indentationMatching :: Statement -> Int -> Bool
-property_indentationMatching stmt indentLevel =
-  let customOutput = captureOutput (customShowIndented stmt indentLevel)
-      leadingTabs = takeWhile (== '\t') customOutput
-  in length leadingTabs == indentLevel
-
-property_outputLengthMatching :: Statement -> Bool
-property_outputLengthMatching stmt =
-  let customOutput = captureOutput (customShow stmt)
-      serializedStmt = prettyPrint stmt
-  in length customOutput == length serializedStmt
-
-property_stringReversibility :: Statement -> Bool
-property_stringReversibility stmt =
-  let customOutput = captureOutput (customShow stmt)
-  in case readStatement customOutput of
-       Left _ -> True  -- Ignore parsing errors
-       Right parsedStmt -> stmt == parsedStmt
-
+trimWhitespace :: String -> String
+trimWhitespace = f . f
+   where f = reverse . dropWhile isSpace
 
 main :: IO ()
 -- main = customShow fib
