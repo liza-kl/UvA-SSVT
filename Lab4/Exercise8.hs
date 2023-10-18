@@ -12,35 +12,32 @@ import System.IO
 
 -- Time Spent: 90 minutes
 
-readStatement :: String -> Either ParseError Statement
-readStatement = parse statementParser ""
-
-statementParser :: Parser Statement
-statementParser = do
-  statement <- choice [assignmentParser, conditionalParser, sequenceParser, whileParser]
+stmtParser :: Parser Statement
+stmtParser = do
+  statement <- choice [assParser, condParser, sequenceParser, whileParser]
   optional spaces
   return statement
 
-assignmentParser :: Parser Statement
-assignmentParser = do
+assParser :: Parser Statement
+assParser = do
   var <- many1 letter
   spaces >> char '=' >> spaces
-  expr <- expressionParser
+  expr <- exprParser
   return (Ass var expr)
 
-conditionalParser :: Parser Statement
-conditionalParser = do
+condParser :: Parser Statement
+condParser = do
   string "if"
   condition <- spaces >> conditionParser
   spaces >> string "then" >> spaces
-  stmt1 <- statementParser
+  stmt1 <- stmtParser
   spaces >> string "else" >> spaces
-  stmt2 <- statementParser
+  stmt2 <- stmtParser
   return (Cond condition stmt1 stmt2)
 
 sequenceParser :: Parser Statement
 sequenceParser = do
-  stmts <- many1 (statementParser <* optional (char ';'))
+  stmts <- many1 (stmtParser <* optional (char ';'))
   return (Seq stmts)
 
 whileParser :: Parser Statement
@@ -48,25 +45,25 @@ whileParser = do
   string "while"
   condition <- spaces >> conditionParser
   spaces >> string "do" >> spaces
-  stmt <- statementParser
+  stmt <- stmtParser
   return (While condition stmt)
 
-expressionParser :: Parser Expr
-expressionParser = choice [integerParser, variableParser, binaryOperationParser]
+exprParser :: Parser Expr
+exprParser = choice [numParser, varParser, operationsParser]
 
-integerParser :: Parser Expr
-integerParser = I <$> read <$> many1 digit
+numParser :: Parser Expr
+numParser = I <$> read <$> many1 digit
 
-variableParser :: Parser Expr
-variableParser = V <$> many1 letter
+varParser :: Parser Expr
+varParser = V <$> many1 letter
 
-binaryOperationParser :: Parser Expr
-binaryOperationParser = do
-  e1 <- expressionParser
+operationsParser :: Parser Expr
+operationsParser = do
+  e1 <- exprParser
   spaces
   op <- choice [char '+', char '-', char '*']
   spaces
-  e2 <- expressionParser
+  e2 <- exprParser
   return $ case op of
     '+' -> Add e1 e2
     '-' -> Subtr e1 e2
@@ -77,49 +74,52 @@ conditionParser = choice
   [ try equalityParser
   , try lessThanParser
   , try greaterThanParser
-  , try notParser
-  , try conjunctionParser
-  , disjunctionParser
+  , try ngParser
+  , try cjParser
+  , djParser
   ]
 
 equalityParser :: Parser Condition
 equalityParser = do
-  e1 <- expressionParser
+  e1 <- exprParser
   spaces >> char '=' >> spaces
-  e2 <- expressionParser
+  e2 <- exprParser
   return (Eq e1 e2)
 
 lessThanParser :: Parser Condition
 lessThanParser = do
-  e1 <- expressionParser
+  e1 <- exprParser
   spaces >> char '<' >> spaces
-  e2 <- expressionParser
+  e2 <- exprParser
   return (Lt e1 e2)
 
 greaterThanParser :: Parser Condition
 greaterThanParser = do
-  e1 <- expressionParser
+  e1 <- exprParser
   spaces >> char '>' >> spaces
-  e2 <- expressionParser
+  e2 <- exprParser
   return (Gt e1 e2)
 
-notParser :: Parser Condition
-notParser = do
+ngParser :: Parser Condition
+ngParser = do
   string "not" >> spaces
   c <- conditionParser
   return (Ng c)
 
-conjunctionParser :: Parser Condition
-conjunctionParser = do
+cjParser :: Parser Condition
+cjParser = do
   string "and" >> spaces
   conditions <- sepBy1 conditionParser (spaces >> string "and" >> spaces)
   return (Cj conditions)
 
-disjunctionParser :: Parser Condition
-disjunctionParser = do
+djParser :: Parser Condition
+djParser = do
   string "or" >> spaces
   conditions <- sepBy1 conditionParser (spaces >> string "or" >> spaces)
   return (Dj conditions)
+
+customRead :: String -> Either ParseError Statement
+customRead = parse stmtParser ""
 
 customShow :: Statement -> IO ()
 customShow stmt = customShowIndented stmt 0
@@ -161,7 +161,7 @@ iterateStatements :: [String] -> IO ()
 iterateStatements [] = putStrLn "No more statements."
 iterateStatements (token:rest) = do
   putStrLn $ "Token: " ++ token
-  case readStatement token of
+  case customRead token of
     Left err -> putStrLn $ "Parse error: " ++ show err
     Right statement -> customShow statement
   putStrLn "Press Enter to continue"
