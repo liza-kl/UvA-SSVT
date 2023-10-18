@@ -7,6 +7,8 @@ import Lecture6
 import Text.Parsec
 import Text.Parsec.String (Parser)
 import Data.Char (isSpace)
+import Data.List.Split
+import System.IO
 
 -- Time Spent: 90 minutes
 
@@ -122,6 +124,7 @@ disjunctionParser = do
 customShow :: Statement -> IO ()
 customShow stmt = customShowIndented stmt 0
 
+-- mostly adds some indentation to prettify the printing
 customShowIndented :: Statement -> Int -> IO ()
 customShowIndented (Ass var expr) indentLevel =
     putStrLn $ replicate indentLevel '\t' ++ "Ass " ++ show var ++ " " ++ show expr
@@ -143,7 +146,25 @@ customShowIndented (While cond stmt) indentLevel = do
 main :: IO ()
 -- main = customShow fib
 main = do
-  let statementStr = "x = 5; if x = 5 then y = 10 else y = 20"
-  case readStatement statementStr of
+  let statementStr = "x = 2; y = 3"
+  let statements = splitStatements statementStr
+  iterateStatements statements
+
+-- tokenize statements string based on semicolon delimeter
+splitStatements :: String -> [String]
+splitStatements input = splitOn ";" input
+
+-- parse each statement
+-- for some reason, it is stuck after the first parsed statement
+-- but we do not focus a lot on that, since the task is to parse only one statement.
+iterateStatements :: [String] -> IO ()
+iterateStatements [] = putStrLn "No more statements."
+iterateStatements (token:rest) = do
+  putStrLn $ "Token: " ++ token
+  case readStatement token of
     Left err -> putStrLn $ "Parse error: " ++ show err
-    Right statement -> print statement
+    Right statement -> customShow statement
+  putStrLn "Press Enter to continue"
+  _ <- hFlush stdout  
+  _ <- getLine
+  iterateStatements rest
