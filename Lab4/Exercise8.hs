@@ -8,6 +8,8 @@ import Text.Parsec
 import Text.Parsec.String (Parser)
 import Data.Char (isSpace)
 
+-- Time Spent: 90 minutes
+
 readStatement :: String -> Either ParseError Statement
 readStatement = parse statementParser ""
 
@@ -137,10 +139,6 @@ customShowIndented (While cond stmt) indentLevel = do
     putStrLn $ replicate indentLevel '\t' ++ "While (" ++ show cond ++ ") {"
     customShowIndented stmt (indentLevel + 1)
     putStrLn $ replicate indentLevel '\t' ++ "}"
-
-trimWhitespace :: String -> String
-trimWhitespace = f . f
-   where f = reverse . dropWhile isSpace
 
 main :: IO ()
 -- main = customShow fib

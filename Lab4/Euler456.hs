@@ -8,7 +8,10 @@ import qualified Data.Set as Set
 
 -- Time spent: 120 min
 -- The program works but for large numbers such as 2,000,000 it is not performant at all
--- so it takes a lot of time to get a result
+-- so it takes a lot of time to get a result. This is expected because the complexity is O(n ^ k).
+-- For combinations we have: (k is the size of the subset, in our case k = 3 and n = 200000)
+-- n! / ((n - k)! k!) = ((n - k + 1) (n - k + 2) (n - k + 3) ... n ) / k! 
+-- = (n ^ k + O(n ^ (k - 1))) / k!
 
 -- x function
 x :: Integer -> Integer
