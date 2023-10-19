@@ -18,14 +18,35 @@ on f that are in accordance with the new specification may be too severe
 4. If q′is weaker that q, does it follow that {p} f {q′} still holds? 
 **Yes**, weakening the postcondition preserves truth of the Hoare assertion.
 
-1.1. Which of the following are correct Hoare statements, state how you find out.
-    - First, check for counterexample. One counter example means invalidity.
-    - Always make a screenshot of the https://www.wolframalpha.com/ plot to show
-    invalidity (yields extra points)
+## Which of the following are correct Hoare statements, state how you find out.
+
+> - Always make a screenshot of the https://www.wolframalpha.com/ plot to show
+> invalidity (yields full points) (Although, it might not always help)
+
+1. Check for **counterexample**. One counter example means invalidity.
+2. Calculate the weakest precondition 
+2.1 If you get a _weaker_ precondition then the one given → the Triple is invalid.
+2.2. If you get a _stronger_ precondition then the one fiven -> the triple is valid
+(2.3) For more points and the discussion later on state the [Rules regarding correctness](#rules-regarding-correctness)
+
+## Discuss weakest preconditions and, respectively, strongest postconditions, yielding corresponding correct Hoare statements
+> Again https://www.wolframalpha.com/ to the rescue, make a screenshot with the bounds
+1. Calculate strongest postcondition
+
+## Consider the (correct) Hoare statement, which valid postcondition is stronger?
+> Be careful, this is a trap. Probably can be stronger, depending on the A
+> regarding the function. 
+1. To get a better feeling , try to set 1 for A and plot it in  https://www.wolframalpha.com/
+> Example  
+> {λx 7 → x > 0}{λx  → x^2 − Ax}{...}
+> λx → x ≥ 9 or λx  → x < A + 3? 
+
+
+## Properties of odds and evens
 
 
 
-## Finding Weakest Precondition (Ex. 6 in Workshop)
+## Finding Weakest Precondition 
 1. Find the **input** domain for a function so that the output domain (the postcondition essentially)
 is given. 
 2. You substitute the "x" in the postcondition with the function definition. Then you need to simplify it, and this is

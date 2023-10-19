@@ -1,5 +1,6 @@
+-- Open Markdown Fullpage: Ctrl + Shift + V
+-- Open Markdown Preview: Ctrl + K + V
 ## Useful Definitions
-
 
 ## Exercise "Discuss whether the following model is ioco or not
 - According to Tretman Definition 8 
@@ -42,18 +43,30 @@ each suspension trace below the after state(s)
 - What can cause the after function to return
 multiple possible states? Motivate your answer
 
+- Multiple 
+- If it is an output no quiescence is possible 
+- Multiple inputs can be tracaes to one output if IO enabled 
+- delta can lead 
+
 27-10-2021
 - Discuss whether the following model and implementation for such a 
 system are in an ioco relationship
 - List the shortest four straces. Motivate your answer.
+- {}
+- {∂}
+- {∂, ?coin}
+- {∂, ?button}
+
 - What does it mean for a model and impleentation to be input-output conformant? Moti-
 vate your answer
+- Definition 8 in Tretman
 - Write a function hasUnreachableStates :: LTS -> Bool that checks whether each state is
 reachable from the initial state. You may use
 IOLTS instead of LTS as well
 
 22-02-2020
 - What does a quiescent state indicate?
+
 
 23-01-2020
 - Consider the LTS’s given in Fig. 1. How many traces does each of these models have?
@@ -63,3 +76,4 @@ IOLTS instead of LTS as well
 24-10-2019
 - If two models have equivalent traces, to what extent does that entail that the models are the
 same? Motivate your answer
+- Same Trace but different states in the end 

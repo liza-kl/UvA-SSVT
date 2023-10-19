@@ -24,3 +24,8 @@ the program version that includes only the committed changes (post-commit versio
 
 ## When should we use mutation coverage and when should we use code coverage as measures of
 test suite effectiveness?
+
+## Relevant Mutants 
+There are different types of mutants. They are as follows:
+
+Survived Mutants: As we have mentioned, these are the mutants that are still alive after running test data through the original and mutated variants of the source code. These must be killed. They are also known as live mutants.
