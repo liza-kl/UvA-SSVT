@@ -14,6 +14,14 @@ setToRelation xs = [(x, y) | x <- xs, y <- xs, x /= y]
 composeRelations :: Eq a => Rel a -> Rel a -> Rel a
 composeRelations r s = [(a, b) | (a, c) <- r, (c, b) <- s]
 
+composeNTimes r n
+    | n <= 0    = []
+    | n == 1    = r
+    | otherwise = composeRelations r (composeNTimes r (n - 1))
+  where
+    composeRelations :: Eq a => Rel a -> Rel a -> Rel a
+    composeRelations r1 r2 = [(a, b) | (a, c) <- r1, (c, b) <- r2]
+    
 
 inverse :: Rel a -> Rel a
 inverse = map (\ (x,y) -> (y,x))
