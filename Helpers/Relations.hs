@@ -1,7 +1,7 @@
 module Relations where
 
 import Data.List
-import Math
+-- import Math
 
 type Rel a = [(a,a)]
 
@@ -57,7 +57,7 @@ containedIn xs ys = all (\ x -> x `elem` ys) xs
 
 relationToSet :: Ord a => Rel a -> [a]
 relationToSet [] = []
-relationToSet ((x,y):ps) = sort(nub s)
+relationToSet ((x,y):ps) = sort (nub s)
   where s = x : y : relationToSet ps
 
 relationProperties :: Ord a => [(String, Rel a -> Bool)]
@@ -85,3 +85,6 @@ largerThanProperties = getRelationProperties (makeRelation [-10..10] (\x y -> x 
 
 smallestEquivalence :: Ord a => Rel a -> Rel a -> Rel a
 smallestEquivalence rel1 rel2 = transitiveClosure (symmetricClosure (unionR (reflexiveClosure rel1) (reflexiveClosure rel2)))
+
+diagonalRelation :: Ord a => [a] -> Rel a
+diagonalRelation = map (\ x -> (x, x))
