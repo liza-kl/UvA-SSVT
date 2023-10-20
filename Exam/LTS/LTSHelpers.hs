@@ -91,19 +91,3 @@ findTaus [] _ = []
 findTaus  ((s1, label, s2) : transitions) stat
     | label == "tau" && s1 `elem` stat = s2 : findTaus transitions stat
     | otherwise                       = findTaus transitions stat
-
-
-nextTransitions':: [LabeledTransition]->State->[(State,Label)]
-nextTransitions' lt q0 =  [(s',l) | (s,l,s')<- lt , s == q0]
-
-findfollowingtransitions':: [LabeledTransition] -> [State] -> [Label] -> [([State],[Label])]
-findfollowingtransitions' lt st ls = [(s:st,ls++[l])| (s,l)<-nextTransitions' lt (head st)]
-
-traces':: [LabeledTransition] -> [([State],[Label])]-> [([State],[Label])]
-traces' lt [] = []
-traces' lt pairs = pairs ++ traces' lt next
-    where next = concatMap (uncurry $ findfollowingtransitions' lt) pairs
-
-traces :: LTS -> [Trace] -- [[Label]]
-traces (q, l, lt, q0) = nub $ map snd (traces' lt [([q0],[])])
-

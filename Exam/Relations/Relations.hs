@@ -1,9 +1,19 @@
 module Relations where
-
 import Data.List
-import Math
+import qualified Data.Set as Set 
 
-type Rel a = [(a,a)]
+type Rel a = [(a, a)] -- A Relation is a tuple of a type
+
+relationToSet :: Ord a => Rel a -> Set.Set (a, a)
+relationToSet [] = Set.empty
+relationToSet ((x, y):ps) = Set.insert (x, y) (relationToSet ps)
+
+setToRelation :: Ord a => [a] -> Rel a
+setToRelation xs = [(x, y) | x <- xs, y <- xs, x /= y]
+
+composeRelations :: Eq a => Rel a -> Rel a -> Rel a
+composeRelations r s = [(a, b) | (a, c) <- r, (c, b) <- s]
+
 
 inverse :: Rel a -> Rel a
 inverse = map (\ (x,y) -> (y,x))
@@ -20,7 +30,7 @@ fp :: Ord a => (a -> a) -> a -> a
 fp f = until (\ x -> x == f x) f
 
 transitiveClosure :: Ord a => Rel a -> Rel a
-transitiveClosure r = fp (\ s -> (sort.nub) (s ++ (s @@ s))) r
+transitiveClosure = fp (\ s -> (sort.nub) (s ++ (s @@ s)))
 
 isReflexive :: Ord a => Rel a -> Bool
 isReflexive r = all (\(x,y) -> (x,x) `elem` r && (y,y) `elem` r) r
@@ -43,16 +53,16 @@ isTransitive r = containedIn (r @@ r) r
 isLinear :: Ord a => Rel a -> Bool
 isLinear r = all (\(x,y) -> x == y || (x,y) `elem` r || (y,x) `elem` r)  ss
   where
-    s = relationToSet r
+    s = relationToList r
     ss = nub [(x,y) | x <- s, y <- s]
 
 containedIn :: Ord a => [a] -> [a] -> Bool
 containedIn xs ys = all (\ x -> x `elem` ys) xs
 
-relationToSet :: Ord a => Rel a -> [a]
-relationToSet [] = []
-relationToSet ((x,y):ps) = sort(nub s)
-  where s = x : y : relationToSet ps
+relationToList :: Ord a => Rel a -> [a]
+relationToList [] = []
+relationToList ((x,y):ps) = sort (nub s)
+  where s = x : y : relationToList ps
 
 relationProperties :: Ord a => [(String, Rel a -> Bool)]
 relationProperties = [
@@ -63,7 +73,7 @@ relationProperties = [
                         ("symmetric", isSymmetric),
                         ("transitive", isTransitive),
                         ("linear", isLinear)
-                      ]
+                    ]
 
 getRelationProperties :: Ord a => Rel a -> [String]
 getRelationProperties r = filter (/= "") l
