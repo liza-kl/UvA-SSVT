@@ -8,6 +8,12 @@ type Rel a = [(a,a)]
 inverse :: Rel a -> Rel a
 inverse = map (\ (x,y) -> (y,x))
 
+unionR :: Rel a -> Rel a -> Rel a
+unionR r1 r2 = r1 ++ r2
+
+reflexiveClosure :: Eq a => Rel a -> Rel a
+reflexiveClosure r = r ++ [(x, x) | x <- nub (concatMap (\(a, b) -> [a, b]) r)]
+
 symmetricClosure :: Ord a => Rel a -> Rel a
 symmetricClosure r = sort ( nub (r ++ inverse r) )
 
@@ -77,3 +83,5 @@ largerThanRelation = makeRelation [-10..10] (<)
 
 largerThanProperties = getRelationProperties (makeRelation [-10..10] (\x y -> x > y))
 
+smallestEquivalence :: Ord a => Rel a -> Rel a -> Rel a
+smallestEquivalence rel1 rel2 = transitiveClosure (symmetricClosure (unionR (reflexiveClosure rel1) (reflexiveClosure rel2)))
