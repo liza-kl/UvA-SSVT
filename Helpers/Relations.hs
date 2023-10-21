@@ -1,6 +1,7 @@
 module Relations where
 
 import Data.List
+import Test.QuickCheck
 -- import Math
 
 type Rel a = [(a,a)]
@@ -88,3 +89,38 @@ smallestEquivalence rel1 rel2 = transitiveClosure (symmetricClosure (unionR (ref
 
 diagonalRelation :: Ord a => [a] -> Rel a
 diagonalRelation = map (\ x -> (x, x))
+
+
+genElement :: Gen (Int, Int)
+genElement = do
+    x <- arbitrary
+    y <- arbitrary
+    return (x, y)
+
+-- Random relation generator without any properties.
+generateRandomIntRelation :: Gen (Rel Int)
+generateRandomIntRelation = do
+    elements <- listOf1 genElement
+    return $ nub [(x, y) | (x, y) <- elements]
+
+-- xnor logic gate
+xnor :: Bool -> Bool -> Bool
+xnor True False = False
+xnor False True = False
+xnor _ _ = True
+
+-- If stronger one is true, then weaker one should always be true. (In this case if antisymmetric -> irreflexive)
+-- Also if the weaker one is false the stronger one should be false as well. (Represented by xnor relation.)
+-- But it can also be the case that the stronger one is false but the weaker one is true, which is represented by the second part.
+-- With those three properties we can test whether one logical relation property is stronger than another using random relations.
+prop_exampleStrongerPropertyCheck :: Rel Int -> Bool
+prop_exampleStrongerPropertyCheck rel = (isIrreflexive rel `xnor` isAntisymmetric rel) || (isIrreflexive rel `xnor` not (isAntisymmetric rel))
+
+-- We could also do this the other way around in the way of, if the weaker one is true the stronger one can be false as well.
+-- But since we could have 0 to all of the relations fitting this causality with an unknown result this is badly testable, but still the case.
+
+-- QuickCheck test to verify which relation property is stronger or weaker.
+main :: IO()
+main =
+    do
+        quickCheck $ forAll generateRandomIntRelation prop_exampleStrongerPropertyCheck
