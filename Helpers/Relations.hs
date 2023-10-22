@@ -109,6 +109,22 @@ xnor True False = False
 xnor False True = False
 xnor _ _ = True
 
+-- Define a type for relations (pairs of elements).
+
+-- Function to compute the coreflexive closure of a relation.
+coreflexiveClosure :: Eq a => Rel a -> Rel a
+coreflexiveClosure relation = relation ++ selfPairs
+  where
+    selfPairs = [(x, x) | (x, _) <- relation, x `notElem` map snd relation]
+
+-- Example usage:
+coreflexive :: IO ()
+coreflexive = do
+  let originalRelation = [(1, 2), (2, 3), (4, 4)]
+  let coreflexiveResult = coreflexiveClosure originalRelation
+  print coreflexiveResult
+
+
 -- If stronger one is true, then weaker one should always be true. (In this case if antisymmetric -> irreflexive)
 -- Also if the weaker one is false the stronger one should be false as well. (Represented by xnor relation.)
 -- But it can also be the case that the stronger one is false but the weaker one is true, which is represented by the second part.

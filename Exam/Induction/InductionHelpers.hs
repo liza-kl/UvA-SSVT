@@ -9,3 +9,9 @@ numS 0 = 1 -- Probably the empty set that counts
 numS n = 2^n * numS (n - 1) 
 
 -- 1.) Is the numS implementation correct? Provide an induction proof for your answer.
+
+numR 0 = 1
+numR n = 2^(2*n-2) * numR (n-1)
+
+-- numR' 0 = 1
+numR' n = 2^(n^2-n) 
