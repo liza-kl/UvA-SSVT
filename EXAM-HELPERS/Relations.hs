@@ -1,7 +1,7 @@
 module Relations where
 import Test.QuickCheck
 import Data.List
-
+import GeneratorsLecture
 -- TYPE DEFNITIONS RELATIONS
 type Rel a = [(a,a)]
 -- GENERATORS FOR RELATIONS
@@ -108,6 +108,27 @@ xnor True False = False
 xnor False True = False
 xnor _ _ = True
 
+-- Generator for Relations to satisfy certain props
+
+-- Define a list of possible binary functions
+possibleRel :: [Int -> Int -> Bool]
+possibleRel = [(==), (<=), (>=), (<), (>),  \x y-> y == x + 1] -- You can extend this list as needed
+
+-- Define a generator for a single element of your relation
+genElement :: Gen (Int, Int)
+genElement = do
+    x <- arbitrary
+    y <- arbitrary
+    return (x, y)
+
+-- Define a generator for Rel Int
+genRel :: Gen (Rel Int)
+genRel = do
+    func <- elements possibleRel
+    elements <- listOf1 genElement
+    return $ nub [(x, y) | (x, y) <- elements, func x y] -- Create a unique list which satifies the chosen function 
+
+
 -- Define a type for relations (pairs of elements).
 
 -- Function to compute the coreflexive closure of a relation.
@@ -134,8 +155,32 @@ prop_exampleStrongerPropertyCheck rel = (isIrreflexive rel `xnor` isAntisymmetri
 -- We could also do this the other way around in the way of, if the weaker one is true the stronger one can be false as well.
 -- But since we could have 0 to all of the relations fitting this causality with an unknown result this is badly testable, but still the case.
 
+
+-- I just assume that a stronger relation implies the weaker one. So the stronger should be weaker, but not necessary contain all of the elements
+-- weaker should contain the elements of the stronger one
+-- So just create a closure based on the thing and you should be good
+
+genAntiSymRel :: Gen (Rel Int)
+genAntiSymRel = do
+    genRel `suchThat` isAntisymmetric
+
+isCoreflexive :: Ord a => Rel a -> Bool
+isCoreflexive r = all (\(x,y) -> x == y) r
+
+isQuasireflexive :: Ord a => Rel a -> Bool
+isQuasireflexive r = all (\(x,y) -> (x,x) `elem` r && (y,y) `elem` r) r
+
+isPartialOrder :: Eq a => Rel a -> Bool
+isPartialOrder = isTransitive r && isReflexive r && isAntisymmetric r
+
+isAntitransitive :: Eq a => Rel a -> Bool
+isAntitransitive = not (isTransitive r)
+
+
 -- QuickCheck test to verify which relation property is stronger or weaker.
 main :: IO()
 main =
     do
+        let rel =  [(1, 2), (2, 3), (4, 4)]
         quickCheck $ forAll generateRandomIntRelation prop_exampleStrongerPropertyCheck
+        compar rel isIrreflexive isAntisymmetric 
