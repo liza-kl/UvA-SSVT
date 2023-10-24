@@ -1,7 +1,7 @@
 module MutationTesting where
-    
+
 import qualified Test.QuickCheck as QuickCheck
-import Test.FitSpec 
+import Test.FitSpec
 
 corona1 :: Int -> Int -> Int -> Int -> Int
 corona1 r s x0 t = last.init $ scanl (\a b -> s+r*a) x0 [0..t]
@@ -36,17 +36,17 @@ prop_Consistency r s x0 =  QuickCheck.forAll ( QuickCheck.choose (1, 100)) $ \t 
 -- This is needed, because QuickCheck is not going to generate like 4 numbers for you. 
 quickCheckCorona::   QuickCheck.Gen (Int, Int, Int, Int)
 quickCheckCorona = do
-                          g1 <-   QuickCheck.choose(1,100)
-                          g2 <-   QuickCheck.choose(1,100)
-                          r1 <-   QuickCheck.choose(1,100)
-                          r2 <-   QuickCheck.choose(1,100)
+                          g1 <-   QuickCheck.choose (1,100)
+                          g2 <-   QuickCheck.choose (1,100)
+                          r1 <-   QuickCheck.choose (1,100)
+                          r2 <-   QuickCheck.choose (1,100)
                           return (g1,g2, r1, r2)
 
 quickCheckTriple::   QuickCheck.Gen (Int, Int, Int)
 quickCheckTriple = do
-                          g1 <-   QuickCheck.choose(1,100)
-                          g2 <-   QuickCheck.choose(1,100)
-                          r1 <-   QuickCheck.choose(1,100)
+                          g1 <-   QuickCheck.choose (1,100)
+                          g2 <-   QuickCheck.choose (1,100)
+                          r1 <-   QuickCheck.choose (1,100)
                           return (g1,g2, r1)
 
 
@@ -57,19 +57,24 @@ prop_recurrenceEquation func r s x0 t = (t >= 1 &&t < 2 &&  r >= 1 && r < 2 && s
 
 -- Bring the X_t only on one side and inject only positive numbers, then it's working. 
 prop_rewrittenEquation :: (Int -> Int -> Int -> Int -> Int) -> Int -> Int -> Int -> Int -> Bool
-prop_rewrittenEquation  func r s x0 t =  (t >= 1  &&  r >= 1  && s >= 1  &&  x0 >= 1 ) ==> (func r s x0 (t+1)) == r * (func r s x0 t) - s 
+-- Apparently if you do + s it get's stuck (the correct equation). if it's minus s it works. so damn funny. 
+prop_rewrittenEquation  func r s x0 t =  (t >= 1  &&  r >= 1  && s >= 1  &&  x0 >= 1 ) && ( (r /= s) && (r /= x0) && (r /= t)) ==> (func r s x0 (t+1)) == (r *  (func r s x0 t) + s)
 
-main = 
-    do 
+
+main =
+    do
       QuickCheck.quickCheckResult $  QuickCheck.forAll quickCheckCorona prop_adheresEquation1
       QuickCheck.verboseCheckResult $  prop_Identity
       QuickCheck.verboseCheckResult $  prop_Consistency
       QuickCheck.verboseCheckResult $ prop_Monotonic
-      
+
 properties corona1 =
-  [ property $ prop_rewrittenEquation corona1
+  [ 
+    property $ prop_rewrittenEquation corona1
+
   ]
 
+-- If something is not working, try to play around with the values. 
 testFitSpec = reportWith args { names = ["corona1"]
                      , nMutants = 10
                      , nTests = 10
