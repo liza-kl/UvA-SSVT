@@ -124,13 +124,12 @@ coreflexive = do
   let coreflexiveResult = coreflexiveClosure originalRelation
   print coreflexiveResult
 
-
 -- If stronger one is true, then weaker one should always be true. (In this case if antisymmetric -> irreflexive)
 -- Also if the weaker one is false the stronger one should be false as well. (Represented by xnor relation.)
 -- But it can also be the case that the stronger one is false but the weaker one is true, which is represented by the second part.
 -- With those three properties we can test whether one logical relation property is stronger than another using random relations.
 prop_exampleStrongerPropertyCheck :: Rel Int -> Bool
-prop_exampleStrongerPropertyCheck rel = (isIrreflexive rel `xnor` isAntisymmetric rel) || (isIrreflexive rel `xnor` not (isAntisymmetric rel))
+prop_exampleStrongerPropertyCheck rel = (isIrreflexive rel `xnor` isAntisymmetric rel) || (isIrreflexive rel == False && isAntisymmetric rel == True)
 
 -- We could also do this the other way around in the way of, if the weaker one is true the stronger one can be false as well.
 -- But since we could have 0 to all of the relations fitting this causality with an unknown result this is badly testable, but still the case.
