@@ -124,7 +124,7 @@ coreflexive = do
   let coreflexiveResult = coreflexiveClosure originalRelation
   print coreflexiveResult
 
--- If stronger one is true, then weaker one should always be true. (In this case if antisymmetric -> irreflexive)
+-- If stronger one is true, then weaker one should always be true. (In this case if isIrreflexive -> isAntisymmetric)
 -- Also if the weaker one is false the stronger one should be false as well. (Represented by xnor relation.)
 -- But it can also be the case that the stronger one is false but the weaker one is true, which is represented by the second part.
 -- With those three properties we can test whether one logical relation property is stronger than another using random relations.
